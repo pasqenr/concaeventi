@@ -35,9 +35,6 @@
             <link rel="stylesheet" href="{{ baseUrl }}/assets/css/font-awesome.min.css">
         </noscript>
         <link rel="stylesheet" href="{{ baseUrl }}/assets/css/bulma.min.css">
-        <!--<link rel="stylesheet" href="{#{ baseUrl }#}/assets/css/main.css">-->
-        <!--<link rel="stylesheet" href="{#{ baseUrl }#}/assets/css/font-awesome.min.css" media="none"
-             onload="if(media!='all')media='all'">-->
     </head>
     <body id="{% block bodyId %}{% endblock %}">
         <section class="hero is-primary is-small">
@@ -148,11 +145,11 @@
 
         <script type="text/javascript" async defer>
             /* Defer the loading of font-awesome that slow down the site */
-            link = document.createElement('link')
-            link.setAttribute('rel', 'stylesheet')
-            link.setAttribute('type', 'text/css')
-            link.setAttribute('href', '{{ baseUrl }}/assets/css/font-awesome.min.css')
-            document.getElementsByTagName('head')[0].appendChild(link)
+            link = document.createElement('link');
+            link.setAttribute('rel', 'stylesheet');
+            link.setAttribute('type', 'text/css');
+            link.setAttribute('href', '{{ baseUrl }}/assets/css/font-awesome.min.css');
+            document.getElementsByTagName('head')[0].appendChild(link);
         </script>
 
         {% if config.google_analytics_id is defined and config.google_analytics_id %}
