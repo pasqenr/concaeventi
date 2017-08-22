@@ -2,13 +2,18 @@
 
 namespace App\Controllers;
 
-use Psr\Http\Message\RequestInterface;
-use Psr\Http\Message\ResponseInterface;
 use \App\Helpers\SessionHelper;
+use Slim\Http\Response;
+use Slim\Http\Request;
+use Slim\Router;
 
+/**
+ * @property Router router
+ * @property \PDO db
+ */
 class PanelController extends Controller
 {
-    public function panel(RequestInterface $request, ResponseInterface $response, $args)
+    public function panel(Request $request, Response $response, $args)
     {
         $user = SessionHelper::auth($this, $response, SessionHelper::EDITORE);
 
@@ -16,6 +21,7 @@ class PanelController extends Controller
             return $response->withRedirect($this->router->pathFor('home'));
         }
 
+        /** @noinspection PhpVoidFunctionResultUsedInspection */
         return $this->render($response, 'front/panel.twig', [
             'utente' => $user
         ]);

@@ -2,13 +2,18 @@
 
 namespace App\Controllers;
 
-use Psr\Http\Message\RequestInterface;
-use Psr\Http\Message\ResponseInterface;
 use \App\Helpers\SessionHelper;
+use Slim\Http\Response;
+use Slim\Http\Request;
+use Slim\Router;
 
+/**
+ * @property Router router
+ * @property \PDO db
+ */
 class EventController extends Controller
 {
-    public function showEvents(RequestInterface $request, ResponseInterface $response)
+    public function showEvents(Request $request, Response $response)
     {
         $user = SessionHelper::auth($this, $response, SessionHelper::PUBLISHER);
 
@@ -18,13 +23,14 @@ class EventController extends Controller
 
         $events  = $this->getEvents();
 
+        /** @noinspection PhpVoidFunctionResultUsedInspection */
         return $this->render($response, 'events/events.twig', [
             'utente' => $user,
             'eventi' => $events
         ]);
     }
 
-    public function create(RequestInterface $request, ResponseInterface $response)
+    public function create(Request $request, Response $response)
     {
         $user = SessionHelper::auth($this, $response, SessionHelper::PUBLISHER);
 
@@ -34,13 +40,14 @@ class EventController extends Controller
 
         $associations = $this->getAssociations();
 
+        /** @noinspection PhpVoidFunctionResultUsedInspection */
         return $this->render($response, 'events/create.twig', [
             'utente' => $user,
             'associazioni' => $associations
         ]);
     }
 
-    public function doCreate(RequestInterface $request, ResponseInterface $response)
+    public function doCreate(Request $request, Response $response)
     {
         $user = SessionHelper::auth($this, $response, SessionHelper::EDITORE);
 
@@ -51,14 +58,14 @@ class EventController extends Controller
         $parsedBody = $request->getParsedBody();
         $created = $this->createEvent($user['idUtente'], $parsedBody);
 
-        if ($created === true) {
-            return $response->withRedirect($this->router->pathFor('events'));
-        } else {
+        if ($created === false) {
             return $response->withRedirect($this->router->pathFor('error'));
         }
+
+        return $response->withRedirect($this->router->pathFor('events'));
     }
 
-    public function delete(RequestInterface $request, ResponseInterface $response, $args)
+    public function delete(Request $request, Response $response, $args)
     {
         $user = SessionHelper::auth($this, $response, SessionHelper::DIRETTORE);
 
@@ -69,13 +76,14 @@ class EventController extends Controller
         $eventID = (int)$args['id'];
         $event = $this->getEvent($eventID);
 
+        /** @noinspection PhpVoidFunctionResultUsedInspection */
         return $this->render($response, 'events/delete.twig', [
             'utente' => $user,
             'evento' => $event
         ]);
     }
 
-    public function doDelete(RequestInterface $request, ResponseInterface $response, $args)
+    public function doDelete(Request $request, Response $response, $args)
     {
         $eventID = (int)$args['id'];
         $this->deleteEvent($eventID);
@@ -83,7 +91,7 @@ class EventController extends Controller
         return $response->withRedirect($this->router->pathFor('events'));
     }
 
-    public function edit(RequestInterface $request, ResponseInterface $response, $args)
+    public function edit(Request $request, Response $response, $args)
     {
         $user = SessionHelper::auth($this, $response, SessionHelper::PUBLISHER);
 
@@ -97,6 +105,7 @@ class EventController extends Controller
 
         $eventAssociations = $this->getEventAssociationsIds($event['nomeAssociazione']);
 
+        /** @noinspection PhpVoidFunctionResultUsedInspection */
         return $this->render($response, 'events/edit.twig', [
             'utente' => $user,
             'evento' => $event,
@@ -105,7 +114,7 @@ class EventController extends Controller
         ]);
     }
 
-    public function doEdit(RequestInterface $request, ResponseInterface $response, $args)
+    public function doEdit(Request $request, Response $response, $args)
     {
         $user = SessionHelper::auth($this, $response, SessionHelper::PUBLISHER);
 
@@ -116,20 +125,21 @@ class EventController extends Controller
         $parsedBody = $request->getParsedBody();
         $updated = $this->updateEvent($parsedBody);
 
-        if ($updated === true) {
-            return $response->withRedirect($this->router->pathFor('events'));
-        } else {
+        if ($updated === false) {
             return $response->withRedirect($this->router->pathFor('error'));
         }
+
+        return $response->withRedirect($this->router->pathFor('events'));
     }
 
-    public function showPage(RequestInterface $request, ResponseInterface $response, $args)
+    public function showPage(Request $request, Response $response, $args)
     {
         $user = SessionHelper::auth($this, $response, SessionHelper::ALL);
         $eventID = (int)$args['id'];
         $event   = $this->getEvent($eventID);
         $associations = $this->getEventAssociations($event);
 
+        /** @noinspection PhpVoidFunctionResultUsedInspection */
         return $this->render($response, 'front/page.twig', [
             'utente' => $user,
             'evento' => $event,
@@ -137,7 +147,7 @@ class EventController extends Controller
         ]);
     }
 
-    public function page(RequestInterface $request, ResponseInterface $response, $args)
+    public function page(Request $request, Response $response, $args)
     {
         $user = SessionHelper::auth($this, $response, SessionHelper::EDITORE);
 
@@ -149,6 +159,7 @@ class EventController extends Controller
         $event   = $this->getEvent($eventID);
         $associations = $this->getEventAssociations($event);
 
+        /** @noinspection PhpVoidFunctionResultUsedInspection */
         return $this->render($response, 'events/page.twig', [
             'utente' => $user,
             'evento' => $event,
@@ -156,7 +167,7 @@ class EventController extends Controller
         ]);
     }
 
-    public function doPage(RequestInterface $request, ResponseInterface $response, $args)
+    public function doPage(Request $request, Response $response, $args)
     {
         $user = SessionHelper::auth($this, $response, SessionHelper::EDITORE);
 
@@ -168,10 +179,11 @@ class EventController extends Controller
         $modified = $this->updatePageEvent($args['id'], $parsedBody);
 
         if ($modified === true) {
-            return $response->withRedirect($this->router->pathFor('events'));
-        } else {
             return $response->withRedirect($this->router->pathFor('error'));
+
         }
+
+        return $response->withRedirect($this->router->pathFor('events'));
     }
 
     /**
@@ -182,15 +194,17 @@ class EventController extends Controller
      * @return array  The events merged with the Associtations in the same Event. If the array is empty the function
      *                return an empty array.
      */
-    private function mergeAssociations($events)
+    private function mergeAssociations($events): array
     {
-        if (empty($events))
+        if (empty($events)) {
             return [];
+        }
 
         $eventsWithAssociations = [];
         $old = $events[0];
+        $eventsCount = count($events);
 
-        for ($i = 0, $j = 0; $i < count($events); $i++, $j++) {
+        for ($i = 0, $j = 0; $i < $eventsCount; $i++, $j++) {
             if ($old['idEvento'] === $events[$i]['idEvento'] &&
                 $old['nomeAssociazione'] !== $events[$i]['nomeAssociazione']) {
                 $events[$i]['nomeAssociazione'] .= ', ' . $old['nomeAssociazione'];
@@ -214,9 +228,9 @@ class EventController extends Controller
      *
      * @return array The events.
      */
-    private function getEvents()
+    private function getEvents(): array
     {
-        $sth = $this->db->prepare("
+        $sth = $this->db->query('
             SELECT U.idUtente, A.idAssociazione, E.idEvento, E.titolo, E.immagine, E.descrizione, E.istanteCreazione,
                    E.istanteInizio, E.istanteFine, E.pagina, E.revisionato, A.nomeAssociazione, A.logo,
                    U.nome AS nomeUtente, U.cognome AS cognomeUtente, U.email, U.ruolo
@@ -229,8 +243,7 @@ class EventController extends Controller
             USING (idUtente)
             WHERE DATEDIFF(E.istanteFine, CURRENT_TIMESTAMP) > 0
             ORDER BY E.istanteInizio
-        ");
-        $sth->execute();
+        ');
         $events = $sth->fetchAll();
 
         $events = $this->mergeAssociations($events);
@@ -238,7 +251,12 @@ class EventController extends Controller
         return $events;
     }
 
-    private function createEvent($userID, $data)
+    /**
+     * @param $userID
+     * @param $data
+     * @return bool
+     */
+    private function createEvent($userID, $data): bool
     {
         $id = $userID;
         $titolo = $data['titolo'];
@@ -255,13 +273,13 @@ class EventController extends Controller
             return false;
         }
 
-        if ($revisionato === "on") {
+        if ($revisionato === 'on') {
             $revisionato = 1;
         } else {
             $revisionato = 0;
         }
 
-        $sth = $this->db->prepare("
+        $sth = $this->db->prepare('
             INSERT INTO Evento (
                 idEvento, titolo, immagine, descrizione, istanteCreazione, istanteInizio, istanteFine, 
                 pagina, revisionato, idUtente
@@ -270,7 +288,7 @@ class EventController extends Controller
                 NULL, :titolo, :immagine, :descrizione, CURRENT_TIMESTAMP, :istanteInizio, :istanteFine, :pagina, 
                 :revisionato, :idUtente
             )
-        ");
+        ');
         $sth->bindParam(':titolo', $titolo, \PDO::PARAM_STR);
         $sth->bindParam(':immagine', $immagine, \PDO::PARAM_STR);
         $sth->bindParam(':descrizione', $descrizione, \PDO::PARAM_STR);
@@ -282,8 +300,9 @@ class EventController extends Controller
 
         $good = $sth->execute();
 
-        if (!$good)
+        if (!$good) {
             return false;
+        }
 
         $eventID = $this->getLastEventID();
 
@@ -298,43 +317,43 @@ class EventController extends Controller
         return true;
     }
 
-    private function getAssociations()
+    private function getAssociations(): array
     {
-        $sth = $this->db->prepare("
+        $sth = $this->db->query('
             SELECT A.idAssociazione, A.nomeAssociazione, A.logo
             FROM Associazione A
-        ");
-        $sth->execute();
+        ');
 
         return $sth->fetchAll();
     }
 
-    private function getLastEventID()
+    private function getLastEventID(): int
     {
-        $sth = $this->db->prepare("
+        $sth = $this->db->prepare('
             SELECT E.idEvento
             FROM Evento E
             ORDER BY E.idEvento DESC
             LIMIT 1
-        ");
+        ');
         $good = $sth->execute();
 
-        if (!$good)
+        if (!$good) {
             return -1;
+        }
 
         return (int)$sth->fetch()['idEvento'];
     }
 
-    private function addPropose($eventID, $associationID)
+    private function addPropose($eventID, $associationID): bool
     {
-        $sth = $this->db->prepare("
+        $sth = $this->db->prepare('
             INSERT INTO Proporre (
                 idEvento, idAssociazione
             )
             VALUES (
                 :idEvento, :idAssociazione
             )
-        ");
+        ');
         $sth->bindParam(':idEvento', $eventID, \PDO::PARAM_INT);
         $sth->bindParam(':idAssociazione', $associationID, \PDO::PARAM_INT);
 
@@ -344,14 +363,15 @@ class EventController extends Controller
     /**
      * Get the event identified by the ID.
      *
-     * @param $id int The event identifier.
+     * @param $eventID
      * @return array The events.
+     * @internal param int $id The event identifier.
      */
-    private function getEvent($eventID)
+    private function getEvent($eventID): array
     {
         $id = (int)$eventID;
 
-        $sth = $this->db->prepare("
+        $sth = $this->db->prepare('
             SELECT U.idUtente, A.idAssociazione, E.idEvento, E.titolo, E.immagine, E.descrizione, E.istanteCreazione,
                    E.istanteInizio, E.istanteFine, E.pagina, E.revisionato, A.nomeAssociazione, A.logo,
                    U.nome AS nomeUtente, U.cognome AS cognomeUtente, U.email, U.ruolo
@@ -363,7 +383,7 @@ class EventController extends Controller
             LEFT JOIN Utente U
             USING (idUtente)
             WHERE E.idEvento = :eventID
-        ");
+        ');
         $sth->bindParam(':eventID', $id, \PDO::PARAM_INT);
         $sth->execute();
         $events = $sth->fetchAll();
@@ -373,7 +393,7 @@ class EventController extends Controller
         return $events[0];
     }
 
-    private function deleteEvent($eventID)
+    private function deleteEvent($eventID): bool
     {
         $good = $this->deleteFromProposes($eventID);
 
@@ -381,29 +401,29 @@ class EventController extends Controller
             return false;
         }
 
-        $sth = $this->db->prepare("
+        $sth = $this->db->prepare('
             DELETE
             FROM Evento
             WHERE idEvento = :idEvento
-        ");
+        ');
         $sth->bindParam(':idEvento', $eventID, \PDO::PARAM_INT);
 
         return $sth->execute();
     }
 
-    private function deleteFromProposes($eventID)
+    private function deleteFromProposes($eventID): bool
     {
-        $sth = $this->db->prepare("
+        $sth = $this->db->prepare('
             DELETE
             FROM Proporre
             WHERE idEvento = :idEvento
-        ");
+        ');
         $sth->bindParam(':idEvento', $eventID, \PDO::PARAM_INT);
 
         return $sth->execute();
     }
 
-    private function updateEvent($update)
+    private function updateEvent($update): bool
     {
         $eventID = $update['id'];
         $titolo = $update['titolo'];
@@ -415,19 +435,19 @@ class EventController extends Controller
         $pagina = $update['pagina'];
         $revisionato = $update['revisionato'];
 
-        if ($revisionato === "on") {
+        if ($revisionato === 'on') {
             $revisionato = 1;
         } else {
             $revisionato = 0;
         }
 
-        $sth = $this->db->prepare("
+        $sth = $this->db->prepare('
             UPDATE Evento E 
             SET E.titolo = :titolo, E.immagine = :immagine, E.descrizione = :descrizione, 
                 E.istanteCreazione = :istanteCreazione, E.istanteInizio = :istanteInizio, E.istanteFine = :istanteFine,
                 E.pagina = :pagina, E.revisionato = :revisionato
             WHERE E.idEvento = :idEvento
-        ");
+        ');
         $sth->bindParam(':idEvento', $eventID, \PDO::PARAM_INT);
         $sth->bindParam(':titolo', $titolo, \PDO::PARAM_STR);
         $sth->bindParam(':immagine', $immagine, \PDO::PARAM_STR);
@@ -455,31 +475,31 @@ class EventController extends Controller
         return $good;
     }
 
-    private function deleteOldProposes($eventID)
+    private function deleteOldProposes($eventID): bool
     {
-        $sth = $this->db->prepare("
+        $sth = $this->db->prepare('
             DELETE
             FROM Proporre
             WHERE idEvento = :idEvento
-        ");
+        ');
         $sth->bindParam(':idEvento', $eventID, \PDO::PARAM_INT);
 
         return $sth->execute();
     }
 
-    private function createProposes($eventID, $event)
+    private function createProposes($eventID, $event): bool
     {
         $associationsIds = $event['associazioni'];
 
         foreach ($associationsIds as $associationsID) {
-            $sth = $this->db->prepare("
+            $sth = $this->db->prepare('
                 INSERT INTO Proporre (
                     idEvento, idAssociazione
                 )
                 VALUES (
                     :idEvento, :idAssociazione
                 )
-            ");
+            ');
             $sth->bindParam(':idEvento', $eventID, \PDO::PARAM_INT);
             $sth->bindParam(':idAssociazione', $associationsID, \PDO::PARAM_INT);
             $good = $sth->execute();
@@ -492,40 +512,42 @@ class EventController extends Controller
         return true;
     }
 
-    private function getEventAssociationsIds($ass)
+    private function getEventAssociationsIds($ass): array
     {
         $associationNames = explode(', ', $ass);
         $associations = [];
+        $assCount = count($associationNames);
 
-        foreach ($associationNames as $assName) {
-            $associationID = $this->getAssociationIdByName($assName);
-            array_push($associations, $associationID);
+        for ($i = 0; $i < $assCount; $i++) {
+            $associationID = $this->getAssociationIdByName($associationNames[$i]);
+            $associations[$i] = $associationID;
         }
 
         return $associations;
     }
 
-    private function getAssociationIdByName($assName)
+    private function getAssociationIdByName($assName): string
     {
-        $sth = $this->db->prepare("
+        $sth = $this->db->prepare('
             SELECT A.idAssociazione
             FROM Associazione A
             WHERE A.nomeAssociazione LIKE :nomeAssociazione
             LIMIT 1
-        ");
+        ');
         $sth->bindParam(':nomeAssociazione', $assName, \PDO::PARAM_STR);
         $sth->execute();
 
         return $sth->fetch()['idAssociazione'];
     }
 
-    private function getEventAssociations($event)
+    private function getEventAssociations($event): array
     {
         $associationNames = explode(', ', $event['nomeAssociazione']);
         $associationLogos = explode(', ', $event['logo']);
         $associations = [];
+        $assCount = count($associationNames);
 
-        for ($i = 0; $i < count($associationNames); $i++) {
+        for ($i = 0; $i < $assCount; $i++) {
             $associations[$i]['nome'] = $associationNames[$i];
             $associations[$i]['logo'] = $associationLogos[$i];
         }
@@ -533,16 +555,16 @@ class EventController extends Controller
         return $associations;
     }
 
-    private function updatePageEvent($eventID, $update)
+    private function updatePageEvent($eventID, $update): bool
     {
         $id = (int)$eventID;
         $pagina = $update['pagina'];
 
-        $sth = $this->db->prepare("
+        $sth = $this->db->prepare('
             UPDATE Evento E
             SET E.pagina = :pagina
             WHERE E.idEvento = :eventID
-        ");
+        ');
         $sth->bindParam(':pagina', $pagina, \PDO::PARAM_STR);
         $sth->bindParam(':eventID', $id, \PDO::PARAM_INT);
 

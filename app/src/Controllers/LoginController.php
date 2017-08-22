@@ -2,13 +2,18 @@
 
 namespace App\Controllers;
 
-use Psr\Http\Message\RequestInterface;
-use Psr\Http\Message\ResponseInterface;
 use \App\Helpers\SessionHelper;
+use Slim\Http\Response;
+use Slim\Http\Request;
+use Slim\Router;
 
+/**
+ * @property Router router
+ * @property \PDO db
+ */
 class LoginController extends Controller
 {
-    public function login(RequestInterface $request, ResponseInterface $response)
+    public function login(Request $request, Response $response)
     {
         $session = new \RKA\Session();
         $user    = [];
@@ -17,12 +22,13 @@ class LoginController extends Controller
             return $response->withRedirect($this->router->pathFor('home'));
         }
 
+        /** @noinspection PhpVoidFunctionResultUsedInspection */
         return $this->render($response, 'front/login.twig', [
             'utente' => $user
         ]);
     }
 
-    public function doLogin(RequestInterface $request, ResponseInterface $response)
+    public function doLogin(Request $request, Response $response)
     {
         $session = new \RKA\Session();
 
@@ -30,11 +36,11 @@ class LoginController extends Controller
         $email     = trim($arguments['email']);
         $password  = trim($arguments['password']);
 
-        $sth = $this->db->prepare("
+        $sth = $this->db->prepare('
             SELECT U.idUtente, U.password, U.nome, U.cognome, U.email, U.ruolo
             FROM Utente U
             WHERE U.email LIKE :email
-        ");
+        ');
         $sth->bindParam(':email', $email, \PDO::PARAM_STR);
         $sth->execute();
 
@@ -53,7 +59,7 @@ class LoginController extends Controller
         return $response->withRedirect($this->router->pathFor('home'));
     }
 
-    public function logout(RequestInterface $request, ResponseInterface $response)
+    public function logout(Request $request, Response $response)
     {
         \RKA\Session::destroy();
 

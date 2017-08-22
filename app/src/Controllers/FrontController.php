@@ -2,17 +2,23 @@
 
 namespace App\Controllers;
 
-use Psr\Http\Message\RequestInterface;
-use Psr\Http\Message\ResponseInterface;
 use \App\Helpers\SessionHelper;
+use Slim\Http\Response;
+use Slim\Http\Request;
+use Slim\Router;
 
+/**
+ * @property Router router
+ * @property \PDO db
+ */
 class FrontController extends Controller
 {
-    public function home(RequestInterface $request, ResponseInterface $response)
+    public function home(Request $request, Response $response)
     {
         $user = SessionHelper::auth($this, $response, SessionHelper::ALL);
         $events = $this->getEvents();
 
+        /** @noinspection PhpVoidFunctionResultUsedInspection */
         return $this->render($response, 'front/home.twig', [
             'utente' => $user,
             'eventi' => $events
@@ -27,15 +33,33 @@ class FrontController extends Controller
      * @return array  The events merged with the Associtations in the same Event. If the array is empty the function
      *                return an empty array.
      */
-    private function mergeAssociations($events)
+    private function mergeAssociations($events): array
     {
-        if (empty($events))
+        if (empty($events)) {
             return [];
+        }
 
         $eventsWithAssociations = [];
-        $current = $events[0];
+        $old = $events[0];
 
-        foreach ($events as &$event) {
+        $eventsCount = count($events);
+
+        for ($i = 0, $j = 0; $i < $eventsCount; $i++, $j++) {
+            if ($old['idEvento'] === $events[$i]['idEvento'] &&
+                $old['nomeAssociazione'] !== $events[$i]['nomeAssociazione']) {
+                $events[$i]['nomeAssociazione'] .= ', ' . $old['nomeAssociazione'];
+
+                if ($j !== 0) {
+                    $j--;
+                }
+            }
+
+            $eventsWithAssociations[$j] = $events[$i];
+
+            $old = $events[$i];
+        }
+
+        /*foreach ($events as &$event) {
             if ($current['idEvento'] === $event['idEvento'] && $current['nomeAssociazione'] !== $event['nomeAssociazione']) {
                 $event['nomeAssociazione'] .= ', ' . $current['nomeAssociazione'];
                 array_pop($eventsWithAssociations);
@@ -44,7 +68,7 @@ class FrontController extends Controller
             array_push($eventsWithAssociations, $event);
 
             $current = $event;
-        }
+        }*/
 
         return $eventsWithAssociations;
     }
@@ -54,9 +78,9 @@ class FrontController extends Controller
      *
      * @return array The events.
      */
-    private function getEvents()
+    private function getEvents(): array
     {
-        $sth = $this->db->prepare("
+        $sth = $this->db->query('
             SELECT *
             FROM Evento E
             JOIN Proporre P
@@ -66,24 +90,11 @@ class FrontController extends Controller
             WHERE DATEDIFF(E.istanteFine, CURRENT_TIMESTAMP) > 0
             AND E.revisionato = TRUE
             ORDER BY E.istanteInizio
-        ");
-        $sth->execute();
+        ');
         $events = $sth->fetchAll();
 
         $events = $this->mergeAssociations($events);
 
         return $events;
-    }
-
-    private function auth($response)
-    {
-        $session = new \RKA\Session();
-        $user = [];
-
-        if (SessionHelper::isLogged($session)) {
-            SessionHelper::setSessionArray($session, $user);
-        }
-
-        return $user;
     }
 }
