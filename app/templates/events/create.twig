@@ -1,0 +1,120 @@
+{% extends "layouts/main.twig" %}
+
+{% block bodyId %}creazione-evento{% endblock %}
+{% block metaTitle %}Creazione evento{% endblock %}
+
+{% block content %}
+    <section class="section">
+        <div class="container">
+            <div class="columns">
+                <div class="column"></div>
+                <div class="column is-half">
+                    <form action="{{ path_for('eventsCreate')|e('html_attr') }}" method="post">
+                        <div class="field">
+                            <label class="label">Titolo</label>
+                            <p class="control has-icons-left">
+                                <input class="input" type="text" name="titolo" value="" placeholder="Titolo">
+                                <span class="icon is-small is-left">
+                                    <i class="fa fa-edit"></i>
+                                </span>
+                            </p>
+                        </div>
+
+                        <div class="field">
+                            <label class="label">Immagine</label>
+                            <p class="control has-icons-left">
+                                <input class="input" type="text" name="immagine" value="" placeholder="immagine">
+                                <span class="icon is-small is-left">
+                                    <i class="fa fa-image"></i>
+                                </span>
+                            </p>
+                        </div>
+
+                        <div class="field">
+                            <label class="label">Descrizione</label>
+                            <div class="control">
+                                <textarea name="descrizione" class="textarea" placeholder="Descrizione"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="field">
+                            <label class="label">Data e ora inizio</label>
+                            <p class="control has-icons-left">
+                                <input class="input" type="text" name="istanteInizio" value=""
+                                       placeholder="yyyy-mm-gg hh:mm:ss">
+                                <span class="icon is-small is-left">
+                                    <i class="fa fa-edit"></i>
+                                </span>
+                            </p>
+                        </div>
+
+                        <div class="field">
+                            <label class="label">Data e ora fine</label>
+                            <p class="control has-icons-left">
+                                <input class="input" type="text" name="istanteFine" value=""
+                                       placeholder="yyyy-mm-gg hh:mm:ss">
+                                <span class="icon is-small is-left">
+                                    <i class="fa fa-edit"></i>
+                                </span>
+                            </p>
+                        </div>
+
+                        <div class="field">
+                            <label class="label">Pagina</label>
+                            <p class="control has-icons-left">
+                                <input class="input" type="text" name="pagina" placeholder="/pagina/"
+                                       value="">
+                                <span class="icon is-small is-left">
+                                    <i class="fa fa-edit"></i>
+                                </span>
+                            </p>
+                        </div>
+
+                        <div class="select is-multiple">
+                            <label class="label">
+                                {% if associazioni|length > 1 %}
+                                    Associazioni:
+                                {% else %}
+                                    Associazione:
+                                {% endif %}
+                            </label>
+                            <select multiple size="5" name="associazioni[]">
+                                {% for ass in associazioni %}
+                                    <option value="{{ ass.idAssociazione }}">{{ ass.nomeAssociazione }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        {% if utente.idUtente is defined %}
+                            {% if utente.ruolo == 'Direttore' or utente.ruolo == 'Publisher' %}
+                                <div class="field">
+                                    <div class="control">
+                                        <label class="checkbox">
+                                            <input type="checkbox" name="revisionato">
+                                            Approvato
+                                        </label>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        {% endif %}
+
+                        <div class="field is-grouped">
+                            <div class="control">
+                                <button class="button is-primary">Crea</button>
+                            </div>
+                            <div class="control">
+                                <button class="button is-light">Annulla</button>
+                            </div>
+                        </div>
+
+                        <input type="hidden" name="_method" value="POST">
+                        <input type="hidden" name="{{csrf.keys.name}}" value="{{csrf.name}}">
+                        <input type="hidden" name="{{csrf.keys.value}}" value="{{csrf.value}}">
+                    </form>
+                </div>
+                <div class="column"></div>
+            </div>
+
+        </div>
+    </section>
+{% endblock %}

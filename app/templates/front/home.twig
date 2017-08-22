@@ -1,0 +1,57 @@
+{% extends "layouts/main.twig" %}
+
+{% block bodyId %}home{% endblock %}
+{% block metaTitle %}Home{% endblock %}
+
+{% block content %}
+    <section class="section">
+        {% if eventi|length > 0 %}
+                {% for evento in eventi %}
+                    <div class="box">
+                        <article class="media">
+                            <div class="media-left">
+                                <figure class="image is-64x64">
+                                    {% set eventoImg = 'stemma-concamarise.gif' %}
+
+                                    {% if evento.immagine != '' %}
+                                        {% set eventoImg = evento.immagine %}
+                                    {% endif %}
+
+                                    <img src="{{ baseUrl }}/assets/img/{{ eventoImg }}" alt="Immagine evento {{ evento.idEvento }}">
+                                </figure>
+                            </div>
+                            <div class="media-content">
+                                <div class="content">
+                                    <p>
+                                        <strong>
+                                            <a href="{{ path_for('page', {'id': evento.idEvento })|e('html_attr') }}">
+                                                {{ evento.titolo }}
+                                            </a>
+                                        </strong>.
+                                        Inizio: <small>{{ evento.istanteInizio|date('d/m/Y h:i') }}</small> - Fine: <small>{{ evento.istanteFine|date('d/m/Y h:i') }}</small>
+                                        <br>
+                                        {{ evento.descrizione }}
+                                    </p>
+                                </div>
+                                <nav class="level is-mobile">
+                                    <div class="level-left">
+                                        <p><em>
+                                            {% if ',' in evento.nomeAssociazione %}
+                                                Associazioni:
+                                            {% else %}
+                                                Associazione:
+                                            {% endif %}
+
+                                            {{ evento.nomeAssociazione }}
+                                        </em></p>
+                                    </div>
+                                </nav>
+                            </div>
+                        </article>
+                    </div>
+                {% endfor %}
+        {% else %}
+            <h3><em>Non ci sono eventi programmati.</em></h3>
+        {% endif %}
+    </section>
+{% endblock %}

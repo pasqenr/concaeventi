@@ -1,0 +1,86 @@
+{% extends "layouts/main.twig" %}
+
+{% block bodyId %}modifica-associazione{% endblock %}
+{% block metaTitle %}Modifica associazione{% endblock %}
+
+{% block content %}
+    <section class="section">
+        <div class="container">
+            <div class="columns">
+                <div class="column"></div>
+                <div class="column is-half">
+                    <form action="{{ path_for('associationsEdit', {'id':ass.idAssociazione})|e('html_attr') }}"
+                          method="post">
+                        <div class="field">
+                            <label class="label">Identificatore</label>
+                            <p class="control has-icons-left">
+                                <input class="input" type="text" name="id"
+                                       value="{{ ass.idAssociazione|e('html_attr') }}"
+                                       readonly>
+                                <span class="icon is-small is-left">
+                                    <i class="fa fa-hashtag"></i>
+                                </span>
+                            </p>
+                        </div>
+
+                        <div class="field">
+                            <label class="label">Nome</label>
+                            <p class="control has-icons-left">
+                                <input class="input" type="text" name="nomeAssociazione"
+                                       value="{{ ass.nomeAssociazione }}">
+                                <span class="icon is-small is-left">
+                                    <i class="fa fa-edit"></i>
+                                </span>
+                            </p>
+                        </div>
+
+                        <div class="field">
+                            <label class="label">Logo</label>
+                            <p class="control has-icons-left">
+                                <input class="input" type="text" name="logo" value="{{ ass.logo }}"
+                                       placeholder="logo.jpg">
+                                <span class="icon is-small is-left">
+                                    <i class="fa fa-image"></i>
+                                </span>
+                            </p>
+                        </div>
+
+                        <div class="select is-multiple">
+                            <label class="label">Membri:
+                                <select multiple size="5" name="membri[]">
+                                    {% for membro in membri %}
+                                        <option value="{{ membro.idUtente }}"
+                                                {% for utenteApp in appartenenza %}
+                                                    {% if utenteApp.idUtente == membro.idUtente %}
+                                                        selected
+                                                    {% endif %}
+                                                {% endfor %}
+                                        >
+                                            {{ membro.nome }} {{ membro.cognome }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </label>
+                        </div>
+
+                        <div class="is-small">&nbsp;</div>
+
+                        <div class="field is-grouped">
+                            <div class="control">
+                                <button class="button is-primary">Modifica</button>
+                            </div>
+                            <div class="control">
+                                <button class="button is-light">Annulla</button>
+                            </div>
+                        </div>
+
+                        <input type="hidden" name="_method" value="UPDATE">
+                        <input type="hidden" name="{{csrf.keys.name}}" value="{{csrf.name}}">
+                        <input type="hidden" name="{{csrf.keys.value}}" value="{{csrf.value}}">
+                    </form>
+                </div>
+                <div class="column"></div>
+            </div>
+        </div>
+    </section>
+{% endblock %}

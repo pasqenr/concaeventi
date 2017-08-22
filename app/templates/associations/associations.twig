@@ -1,0 +1,72 @@
+{% extends "layouts/main.twig" %}
+
+{% block bodyId %}associazioni{% endblock %}
+{% block metaTitle %}Associazioni{% endblock %}
+
+{% block content %}
+    <section class="section">
+        <div class="nav-left">
+            <a class="button is-primary" href="{{ path_for('associationsCreate')|e('html_attr') }}">
+                Aggiungi associazione
+            </a>
+        </div>
+        <div class="is-small">&nbsp;</div>
+
+        {% if associazioni|length > 0 %}
+            {% for ass in associazioni %}
+                <div class="box">
+                    <article class="media">
+                        {% if ass.logo != '' %}
+                            <div class="media-left">
+                                <figure class="image is-64x64">
+                                    <img src="{{ baseUrl }}/assets/img/logos/{{ ass.logo }}"
+                                         alt="Logo {{ ass.nomeAssociazione }}">
+                                </figure>
+                            </div>
+                        {% endif %}
+                        <div class="media-content">
+                            <div class="content">
+                                <p>
+                                    <strong>Nome associazione: </strong> {{ ass.nomeAssociazione }}.
+                                </p>
+                            </div>
+                            <div class="is-small">
+                                <div class="">
+                                    <p>
+                                        <strong>
+                                            {% if ',' in ass.nomeUtente %}
+                                                Membri:
+                                            {% else %}
+                                                Membro:
+                                            {% endif %}
+                                        </strong>
+                                        <em>
+                                            {% if ass.nomeUtente != '' %}
+                                                {{ ass.nomeUtente }}
+                                            {% else %}
+                                                <em>Non ci sono membri.</em>
+                                            {% endif %}
+                                        </em>
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="is-small">&nbsp;</div>
+                            <div class="is-small">
+                                <a class="button"
+                                   href="{{ path_for('associationsEdit', {'id':ass.idAssociazione})|e('html_attr') }}">
+                                    Modifica
+                                </a>
+                                <a class="button is-danger"
+                                   href="{{ path_for('associationsDelete', {'id':ass.idAssociazione})|e('html_attr') }}">
+                                    Elimina
+                                </a>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            {% endfor %}
+        {% else %}
+            <h3><em>Non ci sono associazioni.</em></h3>
+        {% endif %}
+    </section>
+{% endblock %}

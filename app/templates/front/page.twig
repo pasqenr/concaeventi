@@ -1,0 +1,55 @@
+{% extends "layouts/main.twig" %}
+
+{% block bodyId %}pagina{% endblock %}
+{% block metaTitle %}Evento {{ evento.titolo }}{% endblock %}
+
+{% block content %}
+    <section class="section">
+        <div class="container">
+            <div class="columns">
+                <div class="column"></div>
+                <div class="column is-three-quarters">
+                    <div class="container">
+                        <h1 class="title">{{ evento.titolo }}</h1>
+                    </div>
+                    <div class="is-small">&nbsp;</div>
+                    <div class="container">
+                        <p>{{ evento.descrizione }}</p>
+                    </div>
+                    <div class="is-small">&nbsp;</div>
+                    <div class="container">
+                        <p><strong>Inizio: </strong>{{ evento.istanteInizio|date('d/m/Y h:i') }}</p>
+                        <p><strong>Fine: </strong>{{ evento.istanteFine|date('d/m/Y h:i') }}</p>
+                    </div>
+
+                    {% if evento.pagina != '' %}
+                        <div class="is-small">&nbsp;</div>
+                        <div class="container">
+                            {{ evento.pagina|raw }}
+                        </div>
+                    {% else %}
+
+                    {% endif %}
+
+                    <div class="is-small">&nbsp;</div>
+                    <p><strong>Associazioni:</strong></p>
+                    <div class="container is-flex">
+                        {% for associazione in associazioni %}
+                            <div class="column">
+                                {{ associazione.nome }}
+                            </div>
+                            {% if associazione.logo != '' %}
+                                <div class="column">
+                                    <img src="{{ baseUrl }}/assets/img/logos/{{ associazione.logo }}"
+                                         alt="Logo associazione {{ associazione.nome }}">
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="column"></div>
+            </div>
+
+        </div>
+    </section>
+{% endblock %}

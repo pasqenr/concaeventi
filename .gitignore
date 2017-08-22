@@ -1,0 +1,33 @@
+# User-specific stuff:
+.idea/**/workspace.xml
+.idea/**/tasks.xml
+.idea/dictionaries
+
+# Sensitive or high-churn files:
+.idea/**/dataSources/
+.idea/**/dataSources.ids
+.idea/**/dataSources.xml
+.idea/**/dataSources.local.xml
+.idea/**/sqlDataSources.xml
+.idea/**/dynamic.xml
+.idea/**/uiDesigner.xml
+
+## File-based project format:
+*.iws
+.gitattributes
+
+# Configs files
+config.sh
+configs/
+
+# PHP fixer
+php-cs-fixer.phar
+.php_cs.cache
+
+# Database file
+*.sql
+
+# Cache & log
+var/cache/config/development.json
+var/cache/twig/*
+var/log/php-*

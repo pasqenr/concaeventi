@@ -1,0 +1,54 @@
+{% extends "layouts/main.twig" %}
+
+{% block bodyId %}edit-page{% endblock %}
+{% block metaTitle %}Modfica pagina{% endblock %}
+
+{% block content %}
+    <section class="section">
+        <div class="container">
+            <div class="columns">
+                <div class="column"></div>
+                <div class="column is-three-quarters">
+                    <form action="{{ path_for('eventsPage', {'id': evento.idEvento })|e('html_attr') }}" method="post">
+                        <h1 class="title">{{ evento.titolo }}</h1>
+                            <h3 class="subtitle">
+                                {{ evento.descrizione }}
+                            </h3>
+                        <p>
+                            <strong>Inizio: </strong> {{ evento.istanteInizio|date('d/m/Y h:i') }}
+                        </p>
+                        <p>
+                            <strong>Fine: </strong> {{ evento.istanteFine|date('d/m/Y h:i') }}
+                        </p>
+
+                        <div class="is-small">&nbsp;</div>
+
+                        <div class="control">
+                            <label class="label">
+                                Pagina
+                                <textarea name="pagina" class="textarea">{{ evento.pagina|trim }}</textarea>
+                            </label>
+                        </div>
+
+                        <div class="is-small">&nbsp;</div>
+
+                        <div class="field is-grouped">
+                            <div class="control">
+                                <button class="button is-primary">Modifica</button>
+                            </div>
+                            <div class="control">
+                                <button class="button is-light">Annulla</button>
+                            </div>
+                        </div>
+
+                        <input type="hidden" name="_method" value="POST">
+                        <input type="hidden" name="{{csrf.keys.name}}" value="{{csrf.name}}">
+                        <input type="hidden" name="{{csrf.keys.value}}" value="{{csrf.value}}">
+                    </form>
+                </div>
+                <div class="column"></div>
+            </div>
+
+        </div>
+    </section>
+{% endblock %}

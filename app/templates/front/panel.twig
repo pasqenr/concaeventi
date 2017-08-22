@@ -1,0 +1,29 @@
+{% extends "layouts/main.twig" %}
+
+{% block bodyId %}pannello{% endblock %}
+{% block metaTitle %}Pannello amministrativo{% endblock %}
+
+{% block content %}
+    <section class="section">
+        <div class="container">
+            <div class="columns">
+                <div class="column"></div>
+                <div class="column is-three-quarters">
+                    <div class="container">
+                        <section class="is-small">
+                            <h1 class="title">Pannello di gestione</h1>
+                        </section>
+                    </div>
+                    <div class="column">
+                        <a href="{{ path_for('events')|e('html_attr') }}" class="button">Gestione eventi</a>
+                    </div>
+                    <div class="column">
+                        <a href="{{ path_for('associations')|e('html_attr') }}" class="button">Gestione associazioni</a>
+                    </div>
+                    </div>
+                </div>
+                <div class="column"></div>
+            </div>
+        </div>
+    </section>
+{% endblock %}

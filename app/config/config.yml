@@ -1,0 +1,195 @@
+# ######################################################################
+# # COMMON DEFAULTS                                                    #
+# ######################################################################
+
+# ----------------------------------------------------------------------
+# | PHP                                                                |
+# ----------------------------------------------------------------------
+
+PHP: &PHP
+    log_errors                  : true
+    display_errors              : true          # false
+    display_startup_errors      : true          # false
+    default_timezone            : 'Europe/Rome'
+
+# ----------------------------------------------------------------------
+# | Session (needed for Flash messages or CSRF protection)             |
+# ----------------------------------------------------------------------
+
+Session: &Session
+    enable                      : true         # false
+    name                        : 'ConcaEventi'
+    lifetime                    : 0
+    path                        : '/'
+    domain                      : ''
+    secure                      : false
+    httponly                    : true
+    cache_limiter               : 'nocache'
+
+# ----------------------------------------------------------------------
+# | Slim                                                               |
+# ----------------------------------------------------------------------
+
+Slim: &Slim
+    displayErrorDetails         : true
+
+# ----------------------------------------------------------------------
+# | Security                                                           |
+# ----------------------------------------------------------------------
+
+Security: &Security
+    enable_csrf_token_persistence: true       # false
+
+# ----------------------------------------------------------------------
+# | Monolog                                                            |
+# ----------------------------------------------------------------------
+
+Monolog: &Monolog
+    loggerName                  : 'ConcaEventi'
+    StreamHandler: &StreamHandler
+        enable                  : true
+        logLevel                : DEBUG
+    NativeMailerHandler: &NativeMailerHandler
+        enable                  : true
+        logLevel                : ERROR
+        to                      : 'YOUR_MAIL@mail.com'
+        subject                 : 'Error'
+        from                    : { 'SITE_MAIL@mail.com': 'Conca Eventi' }
+    SwiftMailerHandler: &SwiftMailerHandler
+        enable                  : false
+        logLevel                : ERROR
+        to                      : 'YOUR_MAIL@mail.com'
+        subject                 : 'Error'
+        from                    : { 'SITE_MAIL@mail.com': 'Conca Eventi' }
+
+# ----------------------------------------------------------------------
+# | Twig                                                               |
+# ----------------------------------------------------------------------
+
+# http://twig.sensiolabs.org/doc/api.html
+
+Twig: &Twig
+    debug                       : true
+    cache                       : true
+    auto_reload                 : true
+    strict_variables            : true
+
+# ----------------------------------------------------------------------
+# | Swift Mailer                                                       |
+# ----------------------------------------------------------------------
+
+# http://swiftmailer.org/docs/sending.html
+
+SwiftMailer: &SwiftMailer
+    # smtp, sendmail, false
+    transport                   : smtp
+    auth_mode                   : ''
+    username                    : ''
+    password                    : ''
+    host                        : ''
+    port                        : ''
+    encryption                  : ''
+    command                     : null
+
+# ----------------------------------------------------------------------
+# | Application                                                        |
+# ----------------------------------------------------------------------
+
+App: &App
+    language_code               : 'it'
+
+    metas:
+        title                   : 'Conca Eventi'
+        title_separator         : ' - '
+        description             : "Visualizza tutti gli eventi che si tengono a Concamarise (VR)"
+
+    # false or Google Analytics ID 'UA-XXXXX-Y'
+    google_analytics_id         : false
+
+# ----------------------------------------------------------------------
+# | Database                                                           |
+# ----------------------------------------------------------------------
+
+db: &db
+    host                        : "localhost"
+    user                        : "YOUR_DB_USERNAME"
+    pass                        : "YOUR_DB_PASSWORD"
+    dbname                      : "YOUR_DATABASE"
+
+# ######################################################################
+# # ENVIRONMENT SPECIFIC                                               #
+# ######################################################################
+
+# ----------------------------------------------------------------------
+# | Development                                                        |
+# ----------------------------------------------------------------------
+
+development:
+    PHP:
+        <<: *PHP
+        display_errors          : true
+        display_startup_errors  : true
+
+    Session:
+        <<: *Session
+
+    Slim:
+        <<: *Slim
+        displayErrorDetails     : true
+
+    Security:
+        <<: *Security
+
+    Monolog:
+        <<: *Monolog
+
+    Twig:
+        <<: *Twig
+        debug                   : true
+
+    SwiftMailer:
+        <<: *SwiftMailer
+
+    db:
+        <<: *db
+
+    App:
+        <<: *App
+
+# ----------------------------------------------------------------------
+# | Production                                                         |
+# ----------------------------------------------------------------------
+
+production:
+    PHP:
+        <<: *PHP
+
+    Session:
+        <<: *Session
+
+    Slim:
+        <<: *Slim
+
+    Security:
+        <<: *Security
+
+    Monolog:
+        <<: *Monolog
+        StreamHandler:
+            <<: *StreamHandler
+            logLevel            : WARNING
+        SwiftMailerHandler:
+            <<: *SwiftMailerHandler
+            enable              : true
+
+    Twig:
+        <<: *Twig
+
+    SwiftMailer:
+        <<: *SwiftMailer
+
+    db:
+        <<: *db
+
+    App:
+        <<: *App

@@ -1,0 +1,92 @@
+{% extends "layouts/main.twig" %}
+
+{% block bodyId %}eventi{% endblock %}
+{% block metaTitle %}Eventi{% endblock %}
+
+{% block content %}
+    <section class="section">
+        <div class="nav-left">
+            <a class="button is-primary" href="{{ path_for('eventsCreate')|e('html_attr') }}">
+                Crea evento
+            </a>
+        </div>
+        <div class="is-small">&nbsp;</div>
+
+        {% if eventi|length > 0 %}
+            {% for evento in eventi %}
+                <div class="box">
+                    <article class="media">
+                        <div class="media-left">
+                            <figure class="image is-64x64">
+                                {% set eventoImg = 'stemma-concamarise.gif' %}
+
+                                {% if evento.immagine != '' %}
+                                    {% set eventoImg = evento.immagine %}
+                                {% endif %}
+
+                                <img src="{{ baseUrl }}/assets/img/{{ eventoImg }}" alt="Immagine evento {{ evento.idEvento }}">
+                            </figure>
+                        </div>
+                        <div class="media-content">
+                            <div class="content">
+                                <p>
+                                    <strong>{{ evento.titolo }}</strong>. Inizio: <small>{{ evento.istanteInizio|date('d/m/Y h:i') }}</small> - Fine: <small>{{ evento.istanteFine|date('d/m/Y h:i') }}</small>
+                                    <br>
+                                    {{ evento.descrizione }}
+                                </p>
+                            </div>
+                            <div class="is-small">
+                                <div class="">
+                                    <p>
+                                        <strong>
+                                            {% if ',' in evento.nomeAssociazione %}
+                                                Associazioni:
+                                            {% else %}
+                                                Associazione:
+                                            {% endif %}
+                                        </strong>
+                                        <em>
+                                            {{ evento.nomeAssociazione }}
+                                        </em>
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="is-small">
+                                <p><strong>Creatore:</strong>
+                                    <em>
+                                        {{ evento.nomeUtente }} {{  evento.cognomeUtente }} ({{ evento.ruolo }}) - ID: {{ evento.idEvento }}
+                                    </em>
+                                </p>
+                            </div>
+                            <div class="is-small">
+                                <p><strong>Approvato:</strong>
+                                    <em>
+                                        {% if evento.revisionato == 1 %}
+                                            <span class="tag is-success">Sì</span>
+                                        {% else %}
+                                            <span class="tag is-danger">No</span>
+                                        {% endif %}
+                                    </em>
+                                </p>
+                            </div>
+                            <span class="is-small">&nbsp;</span>
+                            <div class="is-small">
+                                <a class="button" href="{{ path_for('eventsEdit', {'id': evento.idEvento })|e('html_attr') }}">
+                                    Modifica
+                                </a>
+                                <a class="button" href="{{ path_for('eventsPage', {'id': evento.idEvento })|e('html_attr') }}">
+                                    Pagina
+                                </a>
+                                <a class="button is-danger" href="{{ path_for('eventsDelete', {'id': evento.idEvento })|e('html_attr') }}">
+                                    Elimina
+                                </a>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            {% endfor %}
+        {% else %}
+            <h3><em>Non ci sono eventi programmati.</em></h3>
+        {% endif %}
+    </section>
+{% endblock %}

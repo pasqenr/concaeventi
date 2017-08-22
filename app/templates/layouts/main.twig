@@ -1,0 +1,152 @@
+<!doctype html>
+<html class="no-js"{% if config.language_code is defined and config.language_code %} lang="{{ config.language_code|e('html_attr') }}"{% endif %}>
+    <head>
+        <meta charset="utf-8">
+
+        {# page title #}
+
+        {% set title = '' %}
+
+        {% if block('metaTitle') is defined %}
+            {% set title = block('metaTitle') %}
+        {% endif %}
+
+        {% if config.metas.title is defined and config.metas.title %}
+            {% if title and config.metas.title_separator is defined and config.metas.title_separator %}
+                {% set title = title ~ config.metas.title_separator %}
+            {% endif %}
+
+            {% set title = title ~ config.metas.title %}
+        {% endif %}
+
+        <title>{{ title }}</title>
+
+        {# meta tags #}
+
+        {% for key, value in config.metas %}
+            {% if value and key not in ['title', 'title_separator'] %}
+        <meta name="{{ key|e('html_attr') }}" content="{{ value|e('html_attr') }}">
+            {% endif %}
+        {% endfor %}
+
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <noscript>
+            <link rel="stylesheet" href="{{ baseUrl }}/assets/css/font-awesome.min.css">
+            <link rel="stylesheet" href="{{ baseUrl }}/assets/css/bulma.min.css">
+        </noscript>
+        <!--<link rel="stylesheet" href="{#{ baseUrl }#}/assets/css/main.css">-->
+        <!--<link rel="stylesheet" href="{#{ baseUrl }#}/assets/css/font-awesome.min.css" media="none"
+             onload="if(media!='all')media='all'">-->
+    </head>
+    <body id="{% block bodyId %}{% endblock %}">
+        <section class="hero is-primary is-small">
+        {% block headerTop %}
+            <div class="hero-head">
+                <header class="nav">
+                    <div class="container">
+                        <div class="nav-left">
+                            <a class="nav-item" href="{{ path_for('home')|e('html_attr') }}">
+                                <i class="fa fa-home"></i>
+                                <span class="nav-item">Home</span>
+                            </a>
+                            {% if utente.idUtente is defined %}
+                                {% if utente.ruolo == 'Direttore'
+                                    or utente.ruolo == 'Publisher'
+                                    or utente.ruolo == 'Editore' %}
+                                    <a class="nav-item" href="{{ path_for('panel')|e('html_attr') }}">
+                                        <i class="fa fa-book"></i>
+                                        <span class="nav-item">Pannello</span>
+                                    </a>
+                                {% endif %}
+                            {% endif %}
+                        </div>
+                        <div class="nav-right">
+                            {% if utente.idUtente is defined %}
+                                <a class="nav-item" href="{{ path_for('logout')|e('html_attr') }}">
+                                    <i class="fa fa-sign-out"></i>
+                                    <span class="nav-item">Logout</span>
+                                </a>
+                            {% else %}
+                                <a class="nav-item" href="{{ path_for('login')|e('html_attr') }}">
+                                    <i class="fa fa-sign-in"></i>
+                                    <span class="nav-item">Login</span>
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <span class="nav-toggle">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </span>
+                </header>
+            </div>
+        {% endblock %}
+
+        {% block headerMiddle %}
+            <div class="hero-body">
+                <div class="container has-text-centered">
+                    <h1 class="title">
+                        Concamarise Eventi
+                    </h1>
+                </div>
+            </div>
+        {% endblock %}
+
+        {% block headerBottom %}
+            <div class="hero-foot">
+                <div class="container">
+                    <div class="nav-right">
+                        <span>
+                            <p>
+                                {% if utente.idUtente is defined %}
+                                    Loggato come <strong>{{ utente.nome }} {{ utente.cognome }}</strong>
+                                    <span class="icon is-small">
+                                    {% if utente.ruolo == 'Direttore' %}
+                                        <i class="fa fa-user-circle-o"></i>
+                                    {% elseif utente.ruolo == 'Publisher' %}
+                                        <i class="fa fa-user-plus"></i>
+                                    {% else %}
+                                        <i class="fa fa-user"></i>
+                                    {% endif %}
+                                </span>
+                                {% else %}
+                                    Effettua il <strong><a href="{{ path_for('login')|e('html_attr') }}">login</a>
+                                    </strong> per entrare.
+                                {% endif %}
+                            </p>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        {% endblock %}
+        </section>
+
+        {% block content %}{% endblock %}
+
+        <!--<script src="{#{ baseUrl }#}/assets/js/main.js" async></script>-->
+
+        <script type="text/javascript" async defer>
+            var link = document.createElement('link')
+            link.setAttribute('rel', 'stylesheet')
+            link.setAttribute('type', 'text/css')
+            link.setAttribute('href', '{{ baseUrl }}/assets/css/bulma.min.css')
+            document.getElementsByTagName('head')[0].appendChild(link)
+
+            link = document.createElement('link')
+            link.setAttribute('rel', 'stylesheet')
+            link.setAttribute('type', 'text/css')
+            link.setAttribute('href', '{{ baseUrl }}/assets/css/font-awesome.min.css')
+            document.getElementsByTagName('head')[0].appendChild(link)
+        </script>
+
+        {% if config.google_analytics_id is defined and config.google_analytics_id %}
+        <script>
+            window.ga=function(){ga.q.push(arguments)};ga.q=[];ga.l=+new Date;
+            ga('create','{{ config.google_analytics_id }}','auto');ga('send','pageview')
+        </script>
+        <script src="https://www.google-analytics.com/analytics.js" async defer></script>
+        {% endif %}
+    </body>
+</html>

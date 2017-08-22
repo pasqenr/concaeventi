@@ -1,0 +1,40 @@
+{% extends "layouts/main.twig" %}
+
+{% block bodyId %}elimina-evento{% endblock %}
+{% block metaTitle %}Elimina evento{% endblock %}
+
+{% block content %}
+    <section class="section">
+        <div class="container">
+            <div class="columns">
+                <div class="column"></div>
+                <div class="column is-half">
+                    <form action="{{ path_for('eventsDelete', {'id' : evento.idEvento})|e('html_attr') }}" method="post">
+                        <p>
+                            Vuoi eliminare definitivamente l'evento
+                            <strong>{{ evento.titolo }} (#{{ evento.idEvento }})</strong>?
+                        </p>
+
+                        <div class="is-small">&nbsp;</div>
+
+                        <div class="field is-grouped">
+                            <div class="control">
+                                <button class="button is-danger">Elimina</button>
+                            </div>
+                            <div class="control">
+                                <button class="button">Annulla</button>
+                            </div>
+                        </div>
+
+                        <input type="hidden" name="idEvento" value="{{ evento.idEvento }}">
+
+                        <input type="hidden" name="_method" value="DELETE">
+                        <input type="hidden" name="{{csrf.keys.name}}" value="{{csrf.name}}">
+                        <input type="hidden" name="{{csrf.keys.value}}" value="{{csrf.value}}">
+                    </form>
+                </div>
+                <div class="column"></div>
+            </div>
+        </div>
+    </section>
+{% endblock %}

@@ -1,0 +1,158 @@
+{% extends "layouts/main.twig" %}
+
+{% block bodyId %}modifica-evento{% endblock %}
+{% block metaTitle %}Modifica evento{% endblock %}
+
+{% block content %}
+    <section class="section">
+        <div class="container">
+            <div class="columns">
+                <div class="column"></div>
+                <div class="column is-half">
+                    <form action="{{ path_for('eventsEdit', {'id': evento.idEvento })|e('html_attr') }}" method="post">
+                        <div class="field">
+                            <label class="label">Identificatore</label>
+                            <p class="control has-icons-left">
+                                <input class="input" type="text" name="id" value="{{ evento.idEvento|e('html_attr') }}"
+                                       readonly>
+                                <span class="icon is-small is-left">
+                                    <i class="fa fa-hashtag"></i>
+                                </span>
+                            </p>
+                        </div>
+
+                        <div class="field">
+                            <label class="label">Titolo</label>
+                            <p class="control has-icons-left">
+                                <input class="input" type="text" name="titolo"
+                                       value="{{ evento.titolo|e('html_attr') }}">
+                                <span class="icon is-small is-left">
+                                    <i class="fa fa-edit"></i>
+                                </span>
+                            </p>
+                        </div>
+
+                        <div class="field">
+                            <label class="label">Immagine</label>
+                            <p class="control has-icons-left">
+                                <input class="input" type="text" name="immagine"
+                                       value="{{ evento.immagine|e('html_attr') }}">
+                                <span class="icon is-small is-left">
+                                    <i class="fa fa-edit"></i>
+                                </span>
+                            </p>
+                        </div>
+
+                        <div class="field">
+                            <label class="label">Descrizione</label>
+                            <div class="control">
+                                <textarea name="descrizione" class="textarea">{{ evento.descrizione|trim }}</textarea>
+                            </div>
+                        </div>
+
+                        <div class="field">
+                            <label class="label">Data e ora creazione</label>
+                            <p class="control has-icons-left">
+                                <input class="input" type="text" name="istanteCreazione"
+                                       value="{{ evento.istanteCreazione|e('html_attr') }}"
+                                       readonly>
+                                <span class="icon is-small is-left">
+                                    <i class="fa fa-edit"></i>
+                                </span>
+                            </p>
+                        </div>
+
+                        <div class="field">
+                            <label class="label">Data e ora inizio</label>
+                            <p class="control has-icons-left">
+                                <input class="input" type="text" name="istanteInizio"
+                                       value="{{ evento.istanteInizio|e('html_attr') }}">
+                                <span class="icon is-small is-left">
+                                    <i class="fa fa-edit"></i>
+                                </span>
+                            </p>
+                        </div>
+
+                        <div class="field">
+                            <label class="label">Data e ora fine</label>
+                            <p class="control has-icons-left">
+                                <input class="input" type="text" name="istanteFine"
+                                       value="{{ evento.istanteFine|e('html_attr') }}">
+                                <span class="icon is-small is-left">
+                                    <i class="fa fa-edit"></i>
+                                </span>
+                            </p>
+                        </div>
+
+                        <div class="field">
+                            <label class="label">Pagina</label>
+                            <p class="control has-icons-left">
+                                <input class="input" type="text" name="pagina" placeholder="/pagina/"
+                                       value="{{ evento.pagina|e('html_attr') }}">
+                                <span class="icon is-small is-left">
+                                    <i class="fa fa-edit"></i>
+                                </span>
+                            </p>
+                        </div>
+
+                        {% if utente.ruolo == 'Direttore' or utente.ruolo == 'Publisher' %}
+                            <div class="field">
+                                <div class="control">
+                                    <label class="checkbox">
+                                        <input type="checkbox" name="revisionato"
+                                                {% if evento.revisionato == 1 %}
+                                                    checked
+                                                {% endif %}
+                                        >
+                                        Approvato
+                                    </label>
+                                </div>
+                            </div>
+                        {% endif %}
+
+                        <div class="field">
+                            <p>
+                                <strong>Scritto da:</strong> {{ evento.nomeUtente }} {{  evento.cognomeUtente }}
+                                ({{ evento.ruolo }}, #{{ evento.idUtente }})
+                            </p>
+                        </div>
+
+                        <div class="select is-multiple">
+                            <label class="label">Associazioni</label>
+                            <select multiple size="5" name="associazioni[]">
+                                {% for ass in associazioni %}
+                                    <option value="{{ ass.idAssociazione }}"
+                                        {% for assId in associazioniEvento %}
+                                            {% if assId == ass.idAssociazione %}
+                                                selected
+                                            {% endif %}
+                                        {% endfor %}
+                                    >
+                                        {{ ass.nomeAssociazione }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="is-small">&nbsp;</div>
+
+                        <div class="field is-grouped">
+                            <div class="control">
+                                <button class="button is-primary">Modifica</button>
+                            </div>
+                            <div class="control">
+                                <button class="button is-light">Annulla</button>
+                            </div>
+                        </div>
+
+                        <input type="hidden" name="_method" value="UPDATE">
+                        <input type="hidden" name="{{csrf.keys.name}}" value="{{csrf.name}}">
+                        <input type="hidden" name="{{csrf.keys.value}}" value="{{csrf.value}}">
+                    </form>
+                </div>
+                <div class="column"></div>
+            </div>
+
+        </div>
+    </section>
+{% endblock %}
