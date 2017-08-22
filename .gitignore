@@ -31,3 +31,6 @@ php-cs-fixer.phar
 var/cache/config/development.json
 var/cache/twig/*
 var/log/php-*
+
+# NPM modules
+node_modules
