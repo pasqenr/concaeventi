@@ -21,10 +21,10 @@ $app->get('/logout/', 'App\Controllers\LoginController:logout')
 $app->get('/panel/', 'App\Controllers\PanelController:panel')
     ->setName('panel');
 
-$app->get('/page/{id}', 'App\Controllers\PageController:showPage')
+$app->get('/page/{id}', 'App\Controllers\EventController:showPage')
     ->setName('page');
 
-$app->get('/events/', 'App\Controllers\EventController:events')
+$app->get('/events/', 'App\Controllers\EventController:showEvents')
     ->setName('events');
 
 $app->get('/associations/', 'App\Controllers\AssociationController:showAll')
@@ -58,35 +58,35 @@ $app->post('/associations/delete/{id}', 'App\Controllers\AssociationController:d
 
 /* Events */
 
-$app->get('/events/edit/{id}', 'App\Controllers\EditEventController:edit')
+$app->get('/events/edit/{id}', 'App\Controllers\EventController:edit')
     ->setName('eventsEdit')
     ->add($container->get('csrf'));
 
-$app->post('/events/edit/{id}', 'App\Controllers\EditEventController:doEdit')
+$app->post('/events/edit/{id}', 'App\Controllers\EventController:doEdit')
     ->setName('eventsDoEdit')
     ->add($container->get('csrf'));
 
-$app->get('/events/create/', 'App\Controllers\CreateEventController:create')
+$app->get('/events/create/', 'App\Controllers\EventController:create')
     ->setName('eventsCreate')
     ->add($container->get('csrf'));
 
-$app->post('/events/create/', 'App\Controllers\CreateEventController:doCreate')
+$app->post('/events/create/', 'App\Controllers\EventController:doCreate')
     ->setName('eventsDoCreate')
     ->add($container->get('csrf'));
 
-$app->get('/events/delete/{id}', 'App\Controllers\DeleteEventController:delete')
+$app->get('/events/delete/{id}', 'App\Controllers\EventController:delete')
     ->setName('eventsDelete')
     ->add($container->get('csrf'));
 
-$app->post('/events/delete/{id}', 'App\Controllers\DeleteEventController:doDelete')
+$app->post('/events/delete/{id}', 'App\Controllers\EventController:doDelete')
     ->setName('eventsDoDelete')
     ->add($container->get('csrf'));
 
-$app->get('/events/page/{id}', 'App\Controllers\PageEventController:page')
+$app->get('/events/page/{id}', 'App\Controllers\EventController:page')
     ->setName('eventsPage')
     ->add($container->get('csrf'));
 
-$app->post('/events/page/{id}', 'App\Controllers\PageEventController:doPage')
+$app->post('/events/page/{id}', 'App\Controllers\EventController:doPage')
     ->setName('eventsDoPage')
     ->add($container->get('csrf'));
 
