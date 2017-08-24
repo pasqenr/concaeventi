@@ -1,11 +1,18 @@
 <?php
 
+use \App\Helpers\SessionHelper;
+
 $app->get('/', 'App\Controllers\FrontController:home')
     ->setName('home');
 
 $app->get('/error/', function ($request, $response, $args) {
-    return $this->render($response, 'events/error.twig');
-});
+        $user = SessionHelper::auth($this, $response);
+
+        return $this->view->render($response, 'errors/error.twig', [
+            'utente' => $user
+        ]);
+    })
+    ->setName('error');
 
 $app->get('/login/', 'App\Controllers\LoginController:login')
     ->setName('login')
