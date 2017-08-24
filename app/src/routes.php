@@ -23,6 +23,15 @@ $app->get('/not-found/', function ($request, $response, $args) {
     })
     ->setName('not-found');
 
+$app->get('/auth-error/', function ($request, $response, $args) {
+    $user = SessionHelper::auth($this, $response);
+
+    return $this->view->render($response, 'errors/auth-error.twig', [
+        'utente' => $user
+    ]);
+})
+    ->setName('auth-error');
+
 $app->get('/login/', 'App\Controllers\LoginController:login')
     ->setName('login')
     ->add($container->get('csrf'));
