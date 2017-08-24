@@ -76,6 +76,10 @@ class EventController extends Controller
         $eventID = (int)$args['id'];
         $event = $this->getEvent($eventID);
 
+        if (empty($event)) {
+            return $response->withRedirect($this->router->pathFor('not-found'));
+        }
+
         /** @noinspection PhpVoidFunctionResultUsedInspection */
         return $this->render($response, 'events/delete.twig', [
             'utente' => $user,
@@ -107,6 +111,11 @@ class EventController extends Controller
 
         $eventID = (int)$args['id'];
         $event   = $this->getEvent($eventID);
+
+        if (empty($event)) {
+            return $response->withRedirect($this->router->pathFor('not-found'));
+        }
+
         $associations = $this->getAssociations();
 
         $eventAssociations = $this->getEventAssociationsIds($event['nomeAssociazione']);
@@ -145,6 +154,10 @@ class EventController extends Controller
         $event   = $this->getEvent($eventID);
         $associations = $this->getEventAssociations($event);
 
+        if (empty($event)) {
+            return $response->withRedirect($this->router->pathFor('not-found'));
+        }
+
         /** @noinspection PhpVoidFunctionResultUsedInspection */
         return $this->render($response, 'front/page.twig', [
             'utente' => $user,
@@ -164,6 +177,10 @@ class EventController extends Controller
         $eventID = (int)$args['id'];
         $event   = $this->getEvent($eventID);
         $associations = $this->getEventAssociations($event);
+
+        if (empty($event)) {
+            return $response->withRedirect($this->router->pathFor('not-found'));
+        }
 
         /** @noinspection PhpVoidFunctionResultUsedInspection */
         return $this->render($response, 'events/page.twig', [
@@ -393,6 +410,10 @@ class EventController extends Controller
         $sth->bindParam(':eventID', $id, \PDO::PARAM_INT);
         $sth->execute();
         $events = $sth->fetchAll();
+
+        if (empty($events)) {
+            return [];
+        }
 
         $events = $this->mergeAssociations($events);
 
