@@ -59,17 +59,6 @@ class FrontController extends Controller
             $old = $events[$i];
         }
 
-        /*foreach ($events as &$event) {
-            if ($current['idEvento'] === $event['idEvento'] && $current['nomeAssociazione'] !== $event['nomeAssociazione']) {
-                $event['nomeAssociazione'] .= ', ' . $current['nomeAssociazione'];
-                array_pop($eventsWithAssociations);
-            }
-
-            array_push($eventsWithAssociations, $event);
-
-            $current = $event;
-        }*/
-
         return $eventsWithAssociations;
     }
 
