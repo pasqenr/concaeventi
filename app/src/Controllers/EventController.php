@@ -15,10 +15,10 @@ class EventController extends Controller
 {
     public function showEvents(Request $request, Response $response)
     {
-        $user = SessionHelper::auth($this, $response, SessionHelper::PUBLISHER);
+        $user = SessionHelper::auth($this, $response, SessionHelper::EDITORE);
 
         if (empty($user)) {
-            return $response->withRedirect($this->router->pathFor('home'));
+            return $response->withRedirect($this->router->pathFor('error'));
         }
 
         $events  = $this->getEvents();
@@ -35,7 +35,7 @@ class EventController extends Controller
         $user = SessionHelper::auth($this, $response, SessionHelper::PUBLISHER);
 
         if (empty($user)) {
-            return $response->withRedirect($this->router->pathFor('home'));
+            return $response->withRedirect($this->router->pathFor('error'));
         }
 
         $associations = $this->getAssociations();
@@ -70,7 +70,7 @@ class EventController extends Controller
         $user = SessionHelper::auth($this, $response, SessionHelper::DIRETTORE);
 
         if (empty($user)) {
-            return $response->withRedirect($this->router->pathFor('home'));
+            return $response->withRedirect($this->router->pathFor('error'));
         }
 
         $eventID = (int)$args['id'];
@@ -85,6 +85,12 @@ class EventController extends Controller
 
     public function doDelete(Request $request, Response $response, $args)
     {
+        $user = SessionHelper::auth($this, $response, SessionHelper::DIRETTORE);
+
+        if (empty($user)) {
+            return $response->withRedirect($this->router->pathFor('error'));
+        }
+
         $eventID = (int)$args['id'];
         $this->deleteEvent($eventID);
 
@@ -96,7 +102,7 @@ class EventController extends Controller
         $user = SessionHelper::auth($this, $response, SessionHelper::PUBLISHER);
 
         if (empty($user)) {
-            return $response->withRedirect($this->router->pathFor('home'));
+            return $response->withRedirect($this->router->pathFor('error'));
         }
 
         $eventID = (int)$args['id'];
@@ -119,7 +125,7 @@ class EventController extends Controller
         $user = SessionHelper::auth($this, $response, SessionHelper::PUBLISHER);
 
         if (empty($user)) {
-            return $response->withRedirect($this->router->pathFor('home'));
+            return $response->withRedirect($this->router->pathFor('error'));
         }
 
         $parsedBody = $request->getParsedBody();
@@ -172,13 +178,13 @@ class EventController extends Controller
         $user = SessionHelper::auth($this, $response, SessionHelper::EDITORE);
 
         if (empty($user)) {
-            return $response->withRedirect($this->router->pathFor('events'));
+            return $response->withRedirect($this->router->pathFor('error'));
         }
 
         $parsedBody = $request->getParsedBody();
         $modified = $this->updatePageEvent($args['id'], $parsedBody);
 
-        if ($modified === true) {
+        if ($modified === false) {
             return $response->withRedirect($this->router->pathFor('error'));
 
         }
