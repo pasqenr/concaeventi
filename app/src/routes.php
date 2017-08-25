@@ -55,6 +55,9 @@ $app->get('/events/', 'App\Controllers\EventController:showEvents')
 $app->get('/associations/', 'App\Controllers\AssociationController:showAll')
     ->setName('associations');
 
+$app->get('/sponsors/', 'App\Controllers\SponsorController:showAll')
+    ->setName('sponsors');
+
 /* Associations */
 
 $app->get('/associations/create', 'App\Controllers\AssociationController:create')
@@ -113,6 +116,32 @@ $app->get('/events/page/{id}', 'App\Controllers\EventController:page')
 
 $app->post('/events/page/{id}', 'App\Controllers\EventController:doPage')
     ->setName('eventsDoPage')
+    ->add($container->get('csrf'));
+
+/* Sponsors */
+
+$app->get('/sponsors/create', 'App\Controllers\SponsorController:create')
+    ->setName('sponsorsCreate')
+    ->add($container->get('csrf'));
+
+$app->post('/sponsors/create', 'App\Controllers\SponsorController:doCreate')
+    ->setName('sponsorsDoCreate')
+    ->add($container->get('csrf'));
+
+$app->get('/sponsors/edit/{id}', 'App\Controllers\SponsorController:edit')
+    ->setName('sponsorsEdit')
+    ->add($container->get('csrf'));
+
+$app->post('/sponsors/edit/{id}', 'App\Controllers\SponsorController:doEdit')
+    ->setName('sponsorsDoEdit')
+    ->add($container->get('csrf'));
+
+$app->get('/sponsors/delete/{id}', 'App\Controllers\SponsorController:delete')
+    ->setName('sponsorsDelete')
+    ->add($container->get('csrf'));
+
+$app->post('/sponsors/delete/{id}', 'App\Controllers\SponsorController:doDelete')
+    ->setName('sponsorsDoDelete')
     ->add($container->get('csrf'));
 
 // Page not found handler

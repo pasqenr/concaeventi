@@ -60,10 +60,10 @@ class AssociationController extends Controller
         $created = $this->createAssociation($parsedBody);
 
         if ($created === false) {
-            return $response->withRedirect($this->router->pathFor('associations'));
+            return $response->withRedirect($this->router->pathFor('error'));
         }
 
-        return $response->withRedirect($this->router->pathFor('error'));
+        return $response->withRedirect($this->router->pathFor('associations'));
     }
 
     public function edit(Request $request, Response $response, $args)
