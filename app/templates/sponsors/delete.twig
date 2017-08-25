@@ -1,0 +1,39 @@
+{% extends "layouts/main.twig" %}
+
+{% block bodyId %}elimina-sponsor{% endblock %}
+{% block metaTitle %}Elimina sponsor{% endblock %}
+
+{% block content %}
+    <section class="section">
+        <div class="container">
+            <div class="columns">
+                <div class="column"></div>
+                <div class="column is-half">
+                    <form action="{{ path_for('sponsorsDelete', {'id':sponsor.idSponsor})|e('html_attr') }}"
+                          method="post">
+                        <p>
+                            Vuoi eliminare definitivamente lo sponsor
+                            <strong>{{ sponsor.nome }} (#{{ sponsor.idSponsor }})</strong>?
+                        </p>
+
+                        <div class="is-small">&nbsp;</div>
+
+                        <div class="field is-grouped">
+                            <div class="control">
+                                <button class="button is-danger">Elimina</button>
+                            </div>
+                            <div class="control">
+                                <p class="button is-light" onclick="goBack();">Annulla</p>
+                            </div>
+                        </div>
+
+                        <input type="hidden" name="_method" value="DELETE">
+                        <input type="hidden" name="{{csrf.keys.name}}" value="{{csrf.name}}">
+                        <input type="hidden" name="{{csrf.keys.value}}" value="{{csrf.value}}">
+                    </form>
+                </div>
+                <div class="column"></div>
+            </div>
+        </div>
+    </section>
+{% endblock %}

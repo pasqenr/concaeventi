@@ -64,24 +64,20 @@ class SponsorController extends Controller
 
     public function edit(Request $request, Response $response, $args)
     {
-        /*$user = SessionHelper::auth($this, $response, SessionHelper::DIRETTORE);
+        $user = SessionHelper::auth($this, $response, SessionHelper::DIRETTORE);
 
         if (empty($user)) {
             return $response->withRedirect($this->router->pathFor('error'));
         }
 
-        $associationID = $args['id'];
-        $association = $this->getSponsor($sponsorID);
-        $members = $this->getAllMembers();
-        $belongs = $this->getBelongsByAssociation($associationID);*/
+        $sponsorID = $args['id'];
+        $sponsor = $this->getSponsor($sponsorID);
 
         /** @noinspection PhpVoidFunctionResultUsedInspection */
-        /*return $this->render($response, 'associations/edit.twig', [
+        return $this->render($response, 'sponsors/edit.twig', [
             'utente' => $user,
-            'ass' => $association,
-            'membri' => $members,
-            'appartenenza' => $belongs
-        ]);*/
+            'sponsor' => $sponsor
+        ]);
     }
 
     public function doEdit(Request $request, Response $response, $args)
@@ -92,34 +88,34 @@ class SponsorController extends Controller
             return $response->withRedirect($this->router->pathFor('error'));
         }
 
-        /*$associationID = $args['id'];
+        $associationID = $args['id'];
         $parsedBody = $request->getParsedBody();
-        $updated = $this->updateAssociation($associationID, $parsedBody);
+        $updated = $this->updateSponsor($associationID, $parsedBody);
 
         if ($updated === false) {
             return $response->withRedirect($this->router->pathFor('error'));
 
         }
 
-        return $response->withRedirect($this->router->pathFor('associations'));*/
+        return $response->withRedirect($this->router->pathFor('sponsors'));
     }
 
     public function delete(Request $request, Response $response, $args)
     {
         $user = SessionHelper::auth($this, $response, SessionHelper::DIRETTORE);
 
-        /*if (empty($user)) {
+        if (empty($user)) {
             return $response->withRedirect($this->router->pathFor('error'));
         }
 
-        $associationID = $args['id'];
-        $association = $this->getAssociation($associationID);*/
+        $sponsorID = $args['id'];
+        $sponsor = $this->getSponsor($sponsorID);
 
         /** @noinspection PhpVoidFunctionResultUsedInspection */
-        /*return $this->render($response, 'associations/delete.twig', [
+        return $this->render($response, 'sponsors/delete.twig', [
             'utente' => $user,
-            'ass' => $association
-        ]);*/
+            'sponsor' => $sponsor
+        ]);
     }
 
     public function doDelete(Request $request, Response $response, $args)
@@ -130,47 +126,18 @@ class SponsorController extends Controller
             return $response->withRedirect($this->router->pathFor('error'));
         }
 
-        /*$eventID = (int)$args['id'];
+        $eventID = (int)$args['id'];
         $this->deleteAssociation($eventID);
 
-        return $response->withRedirect($this->router->pathFor('associations'));*/
-    }
-
-    private function mergeSponsors($sponsors): array
-    {
-        if (empty($sponsors)) {
-            return [];
-        }
-
-        $associationsWithMergedNames = [];
-        $old = $sponsors[0];
-        $assCount = count($sponsors);
-
-        for ($i = 0, $j = 0; $i < $assCount; $i++, $j++) {
-            if ($old['idAssociazione'] === $sponsors[$i]['idAssociazione'] &&
-                $old['nomeUtente'] !== $sponsors[$i]['nomeUtente']) {
-                $sponsors[$i]['nomeUtente'] .= ', ' . $old['nomeUtente'];
-
-                if ($j !== 0) {
-                    $j--;
-                }
-            }
-
-            $associationsWithMergedNames[$j] = $sponsors[$i];
-
-            $old = $sponsors[$i];
-        }
-
-        return $associationsWithMergedNames;
+        return $response->withRedirect($this->router->pathFor('sponsors'));
     }
 
     private function getSponsors(): array
     {
-        $sth = $this->db->prepare('
+        $sth = $this->db->query('
             SELECT S.idSponsor, S.nome, S.logo
             FROM Sponsor S
         ');
-        $sth->execute();
 
         return $sth->fetchAll();
     }
@@ -188,7 +155,7 @@ class SponsorController extends Controller
         return $sth->fetch();
     }
 
-    private function createSponsor($data)
+    private function createSponsor($data): bool
     {
         $nomeSponsor = $data['nome'];
         $logo = $data['logo'];
@@ -202,6 +169,35 @@ class SponsorController extends Controller
         ');
         $sth->bindParam(':nome', $nomeSponsor, \PDO::PARAM_STR);
         $sth->bindParam(':logo', $logo, \PDO::PARAM_STR);
+
+        return $sth->execute();
+    }
+
+    private function updateSponsor($sponsorID, $data): bool
+    {
+        $sponsorName = $data['nome'];
+        $logo = $data['logo'];
+
+        $sth = $this->db->prepare('
+            UPDATE Sponsor S
+            SET S.nome = :nome, S.logo = :logo
+            WHERE S.idSponsor = :idSponsor
+        ');
+        $sth->bindParam(':nome', $sponsorName, \PDO::PARAM_STR);
+        $sth->bindParam(':logo', $logo, \PDO::PARAM_STR);
+        $sth->bindParam(':idSponsor', $sponsorID, \PDO::PARAM_INT);
+
+        return $sth->execute();
+    }
+
+    private function deleteAssociation($sponsorID): bool
+    {
+        $sth = $this->db->prepare('
+            DELETE
+            FROM Sponsor
+            WHERE idSponsor = :idSponsor
+        ');
+        $sth->bindParam(':idSponsor', $sponsorID, \PDO::PARAM_INT);
 
         return $sth->execute();
     }

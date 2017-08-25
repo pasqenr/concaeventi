@@ -1,0 +1,67 @@
+{% extends "layouts/main.twig" %}
+
+{% block bodyId %}modifica-sponsor{% endblock %}
+{% block metaTitle %}Modifica sponsor{% endblock %}
+
+{% block content %}
+    <section class="section">
+        <div class="container">
+            <div class="columns">
+                <div class="column"></div>
+                <div class="column is-half">
+                    <form action="{{ path_for('sponsorsEdit', {'id':sponsor.idSponsor})|e('html_attr') }}"
+                          method="post">
+                        <div class="field">
+                            <label class="label">Identificatore</label>
+                            <p class="control has-icons-left">
+                                <input class="input" type="text" name="id"
+                                       value="{{ sponsor.idSponsor|e('html_attr') }}"
+                                       readonly>
+                                <span class="icon is-small is-left">
+                                    <i class="fa fa-hashtag"></i>
+                                </span>
+                            </p>
+                        </div>
+
+                        <div class="field">
+                            <label class="label">Nome</label>
+                            <p class="control has-icons-left">
+                                <input class="input" type="text" name="nome"
+                                       value="{{ sponsor.nome }}">
+                                <span class="icon is-small is-left">
+                                    <i class="fa fa-edit"></i>
+                                </span>
+                            </p>
+                        </div>
+
+                        <div class="field">
+                            <label class="label">Logo</label>
+                            <p class="control has-icons-left">
+                                <input class="input" type="text" name="logo" value="{{ sponsor.logo }}"
+                                       placeholder="logo.jpg">
+                                <span class="icon is-small is-left">
+                                    <i class="fa fa-image"></i>
+                                </span>
+                            </p>
+                        </div>
+
+                        <div class="is-small">&nbsp;</div>
+                        <div class="field is-grouped">
+                            <div class="control">
+                                <button class="button is-primary">Modifica</button>
+                            </div>
+                            <div class="control">
+                                <p class="button is-light" onclick="goBack();">Annulla</p>
+                            </div>
+                        </div>
+
+                        <input type="hidden" name="_method" value="UPDATE">
+                        <input type="hidden" name="{{csrf.keys.name}}" value="{{csrf.name}}">
+                        <input type="hidden" name="{{csrf.keys.value}}" value="{{csrf.value}}">
+                    </form>
+                </div>
+                <div class="column"></div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
