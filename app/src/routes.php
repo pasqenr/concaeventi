@@ -157,19 +157,19 @@ $app->post('/funding/create', 'App\Controllers\FundingController:doCreate')
     ->setName('fundingDoCreate')
     ->add($container->get('csrf'));
 
-$app->get('/funding/edit/{eventID}{sponsorID}', 'App\Controllers\FundingController:edit')
+$app->get('/funding/edit/{eventID},{sponsorID}', 'App\Controllers\FundingController:edit')
     ->setName('fundingEdit')
     ->add($container->get('csrf'));
 
-$app->post('/funding/edit/{eventID}{sponsorID}', 'App\Controllers\FundingController:doEdit')
+$app->post('/funding/edit/{eventID},{sponsorID}', 'App\Controllers\FundingController:doEdit')
     ->setName('fundingDoEdit')
     ->add($container->get('csrf'));
 
-$app->get('/funding/delete/{eventID}{sponsorID}', 'App\Controllers\FundingController:delete')
+$app->get('/funding/delete/{eventID},{sponsorID}', 'App\Controllers\FundingController:delete')
     ->setName('fundingDelete')
     ->add($container->get('csrf'));
 
-$app->post('/funding/delete/{eventID}{sponsorID}', 'App\Controllers\FundingController:doDelete')
+$app->post('/funding/delete/{eventID},{sponsorID}', 'App\Controllers\FundingController:doDelete')
     ->setName('fundingDoDelete')
     ->add($container->get('csrf'));
 
