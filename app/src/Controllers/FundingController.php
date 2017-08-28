@@ -264,8 +264,6 @@ class FundingController extends Controller
 
     private function moveFundingInEvents($fundings): array
     {
-        //$eventsWithFundings['finanziamento'] = [];
-
         if ($fundings === []) {
             return [];
         }
