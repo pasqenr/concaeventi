@@ -1,0 +1,50 @@
+{% extends "layouts/main.twig" %}
+
+{% block bodyId %}finanziamento{% endblock %}
+{% block metaTitle %}Finanziamento{% endblock %}
+
+{% block content %}
+    <section class="section">
+        <div class="nav-left">
+            <a class="button is-primary" href="{{ path_for('fundingCreate')|e('html_attr') }}">
+                Aggiungi finanziamento
+            </a>
+        </div>
+        <div class="is-small">&nbsp;</div>
+        {% if sponsors.finanziamento|length > 0 %}
+            {% for sp in sponsors %}
+                <section class="section">
+                    <div class="container">
+                        <h1 class="title">{{ sp.nomeSponsor }}</h1>
+                        {% if sp.finanziamento|length > 0 %}
+                            <ul>
+                                {% for f in sp.finanziamento %}
+                                    <li>
+                                        Data: {{ f.dataFinanziamento|date('d/m/Y h:i') }}
+                                        {% if f.importo is defined %}
+                                            , Importo: {{ f.importo }} €
+                                        {% endif %}
+                                        <a class="button is-small"
+                                           href="{{ path_for('fundingEdit',
+                                           {'eventID':f.idEvento, 'sponsorID':f.idSponsor})|e('html_attr') }}">
+                                            Modifica
+                                        </a>
+                                        <a class="button is-danger is-small"
+                                           href="{{ path_for('fundingDelete',
+                                           {'eventID':f.idEvento, 'sponsorID':f.idSponsor})|e('html_attr') }}">
+                                            Elimina
+                                        </a>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p><small>Nessun evento finanziato.</small></p>
+                        {% endif %}
+                    </div>
+                </section>
+            {% endfor %}
+        {% else %}
+            <h3><em>Non ci sono sponsor.</em></h3>
+        {% endif %}
+    </section>
+{% endblock %}

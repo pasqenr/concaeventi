@@ -58,6 +58,9 @@ $app->get('/associations/', 'App\Controllers\AssociationController:showAll')
 $app->get('/sponsors/', 'App\Controllers\SponsorController:showAll')
     ->setName('sponsors');
 
+$app->get('/funding/', 'App\Controllers\FundingController:showAll')
+    ->setName('fundings');
+
 /* Associations */
 
 $app->get('/associations/create', 'App\Controllers\AssociationController:create')
@@ -142,6 +145,32 @@ $app->get('/sponsors/delete/{id}', 'App\Controllers\SponsorController:delete')
 
 $app->post('/sponsors/delete/{id}', 'App\Controllers\SponsorController:doDelete')
     ->setName('sponsorsDoDelete')
+    ->add($container->get('csrf'));
+
+/* Funding */
+
+$app->get('/funding/create', 'App\Controllers\FundingController:create')
+    ->setName('fundingCreate')
+    ->add($container->get('csrf'));
+
+$app->post('/funding/create', 'App\Controllers\FundingController:doCreate')
+    ->setName('fundingDoCreate')
+    ->add($container->get('csrf'));
+
+$app->get('/funding/edit/{eventID}{sponsorID}', 'App\Controllers\FundingController:edit')
+    ->setName('fundingEdit')
+    ->add($container->get('csrf'));
+
+$app->post('/funding/edit/{eventID}{sponsorID}', 'App\Controllers\FundingController:doEdit')
+    ->setName('fundingDoEdit')
+    ->add($container->get('csrf'));
+
+$app->get('/funding/delete/{eventID}{sponsorID}', 'App\Controllers\FundingController:delete')
+    ->setName('fundingDelete')
+    ->add($container->get('csrf'));
+
+$app->post('/funding/delete/{eventID}{sponsorID}', 'App\Controllers\FundingController:doDelete')
+    ->setName('fundingDoDelete')
     ->add($container->get('csrf'));
 
 // Page not found handler
