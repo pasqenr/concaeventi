@@ -5,46 +5,77 @@
 
 {% block content %}
     <section class="section">
-        <div class="nav-left">
-            <a class="button is-primary" href="{{ path_for('fundingCreate')|e('html_attr') }}">
-                Aggiungi finanziamento
-            </a>
-        </div>
-        <div class="is-small">&nbsp;</div>
-        {% if sponsors.finanziamento|length > 0 %}
-            {% for sp in sponsors %}
-                <section class="section">
-                    <div class="container">
-                        <h1 class="title">{{ sp.nomeSponsor }}</h1>
-                        {% if sp.finanziamento|length > 0 %}
-                            <ul>
-                                {% for f in sp.finanziamento %}
-                                    <li>
-                                        Data: {{ f.dataFinanziamento|date('d/m/Y h:i') }}
-                                        {% if f.importo is defined %}
-                                            , Importo: {{ f.importo }} €
-                                        {% endif %}
+        <div class="columns">
+            <div class="column"></div>
+            <div class="column is-two-thirds">
+                <a class="button is-primary" href="{{ path_for('fundingCreate')|e('html_attr') }}">
+                    Aggiungi finanziamento
+                </a>
+
+                <div class="is-small">&nbsp;</div>
+
+                <table class="table is-fullwidth">
+                    <thead>
+                    <tr>
+                        <th>Evento</th>
+                        <th>Sponsor</th>
+                        <th><span class="nav-right">Importo (€)</span></th>
+                        <th>Data</th>
+                        <th></th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% if eventi|length > 0 %}
+                        {% for e in eventi %}
+                            {% for f in e.finanziamento %}
+                                <tr>
+                                    {% if loop.first %}
+                                        <td>{{ e.titolo }}</td>
+                                    {% else %}
+                                        <td></td>
+                                    {% endif %}
+                                    <td>
+                                        {{ f.nomeSponsor }}
+                                    </td>
+                                    <td>
+                                        <span class="nav-right">
+                                            {% if f.importo is defined %}
+                                                {{ f.importo }}
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {{ f.dataFinanziamento|date('d/m/Y') }}
+                                    </td>
+                                    <td>
                                         <a class="button is-small"
                                            href="{{ path_for('fundingEdit',
-                                           {'eventID':f.idEvento, 'sponsorID':f.idSponsor})|e('html_attr') }}">
+                                           {'eventID':e.idEvento, 'sponsorID':f.idSponsor})|e('html_attr') }}">
                                             Modifica
                                         </a>
+                                    </td>
+                                    <td>
                                         <a class="button is-danger is-small"
                                            href="{{ path_for('fundingDelete',
-                                           {'eventID':f.idEvento, 'sponsorID':f.idSponsor})|e('html_attr') }}">
+                                           {'eventID':e.idEvento, 'sponsorID':f.idSponsor})|e('html_attr') }}">
                                             Elimina
                                         </a>
-                                    </li>
-                                {% endfor %}
-                            </ul>
-                        {% else %}
-                            <p><small>Nessun evento finanziato.</small></p>
-                        {% endif %}
-                    </div>
-                </section>
-            {% endfor %}
-        {% else %}
-            <h3><em>Non ci sono sponsor.</em></h3>
-        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="4"><em>Non ci sono eventi finanziati.</em></td>
+                        </tr>
+                    {% endif %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="column"></div>
+        </div>
     </section>
 {% endblock %}
