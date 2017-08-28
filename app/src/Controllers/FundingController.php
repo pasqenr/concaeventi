@@ -22,12 +22,12 @@ class FundingController extends Controller
             return $response->withRedirect($this->router->pathFor('auth-error'));
         }
 
-        $sponsors = $this->getFundings();
+        $eventsWithFunding = $this->getEventsWithFunding();
 
         /** @noinspection PhpVoidFunctionResultUsedInspection */
         return $this->render($response, 'funding/fundings.twig', [
             'utente' => $user,
-            'sponsors' => $sponsors
+            'eventi' => $eventsWithFunding
         ]);
     }
 
@@ -138,10 +138,10 @@ class FundingController extends Controller
         return $response->withRedirect($this->router->pathFor('sponsors'));
     }
 
-    private function getFundings(): array
+    private function getEventsWithFunding(): array
     {
         $sth = $this->db->query('
-            SELECT F.importo, F.idSponsor, F.idEvento, S.nome AS nomeSponsor, S.logo, E.titolo
+            SELECT F.idSponsor, F.idEvento, F.importo, F.dataFinanziamento, S.nome AS nomeSponsor, S.logo, E.titolo
             FROM Finanziamento F
             JOIN Sponsor S
             USING (idSponsor)
@@ -151,7 +151,12 @@ class FundingController extends Controller
         ');
 
         $fundings = $sth->fetchAll();
-        $fundings['finanziamento'] = [];
+
+        if ($fundings === []) {
+            return [];
+        }
+
+        $fundings = $this->moveFundingInEvents($fundings);
 
         return $fundings;
     }
@@ -175,7 +180,7 @@ class FundingController extends Controller
         $eventID = $data['idEvento'];
         $amount = $data['importo'];
 
-        if ($amount !== "") {
+        if ($amount !== '') {
             $amount = str_replace(',', '.', $amount);
 
             $sth = $this->db->prepare('
@@ -255,5 +260,58 @@ class FundingController extends Controller
         ');
 
         return $sth->fetchAll();
+    }
+
+    private function moveFundingInEvents($fundings): array
+    {
+        //$eventsWithFundings['finanziamento'] = [];
+
+        if ($fundings === []) {
+            return [];
+        }
+
+        $fundingsCount = count($fundings);
+        $old = $fundings[0];
+        $eventsWithFundings[0]['idEvento'] = $fundings[0]['idEvento'];
+        $eventsWithFundings[0]['titolo'] = $fundings[0]['titolo'];
+        $eventsWithFundings[0]['finanziamento'][0]['idSponsor'] = $fundings[0]['idSponsor'];
+        $eventsWithFundings[0]['finanziamento'][0]['nomeSponsor'] = $fundings[0]['nomeSponsor'];
+        $eventsWithFundings[0]['finanziamento'][0]['logo'] = $fundings[0]['logo'];
+        $eventsWithFundings[0]['finanziamento'][0]['importo'] = $fundings[0]['importo'];
+        $eventsWithFundings[0]['finanziamento'][0]['dataFinanziamento'] = $fundings[0]['dataFinanziamento'];
+
+        if ($fundingsCount === 1) {
+            return $eventsWithFundings;
+        }
+
+        for ($i = 1, $j = 0; $i !== $fundingsCount; $i++) {
+            if ($fundings[$i]['idEvento'] !== $old['idEvento']) {
+                $eventsWithFundings[$i]['idEvento'] = $fundings[$i]['idEvento'];
+                $eventsWithFundings[$i]['titolo']   = $fundings[$i]['titolo'];
+            }
+
+            if ($fundings[$i]['idEvento']  === $old['idEvento'] &&
+                $fundings[$i]['idSponsor'] !== $old['idSponsor']) {
+                $j++;
+                $eventsWithFundings[$i - $j]['finanziamento'][$j]['idSponsor']         = $fundings[$i]['idSponsor'];
+                $eventsWithFundings[$i - $j]['finanziamento'][$j]['nomeSponsor']       = $fundings[$i]['nomeSponsor'];
+                $eventsWithFundings[$i - $j]['finanziamento'][$j]['logo']              = $fundings[$i]['logo'];
+                $eventsWithFundings[$i - $j]['finanziamento'][$j]['importo']           = $fundings[$i]['importo'];
+                $eventsWithFundings[$i - $j]['finanziamento'][$j]['dataFinanziamento'] = $fundings[$i]['dataFinanziamento'];
+            }
+
+            if ($j === 0 && $fundings[$i]['idEvento'] !== $old['idEvento']) {
+                $eventsWithFundings[$i]['finanziamento'][$j]['idSponsor']         = $fundings[$i]['idSponsor'];
+                $eventsWithFundings[$i]['finanziamento'][$j]['nomeSponsor']       = $fundings[$i]['nomeSponsor'];
+                $eventsWithFundings[$i]['finanziamento'][$j]['logo']              = $fundings[$i]['logo'];
+                $eventsWithFundings[$i]['finanziamento'][$j]['importo']           = $fundings[$i]['importo'];
+                $eventsWithFundings[$i]['finanziamento'][$j]['dataFinanziamento'] = $fundings[$i]['dataFinanziamento'];
+            }
+
+
+            $old = $fundings[$i];
+        }
+
+        return $eventsWithFundings;
     }
 }
