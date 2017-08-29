@@ -35,11 +35,11 @@
                             </div>
                             <div class="content is-clearfix">
                                 <div class="tags has-addons">
-                                    <span class="tag">Disponibile</span>
+                                    <span class="tag">Stato</span>
                                     {% if date().format('Ymdhi') > evento.istanteFine|date('Ymdhi') %}
-                                        <a class="tag is-danger">No</a>
+                                        <a class="tag is-danger">Concluso</a>
                                     {% else %}
-                                        <a class="tag is-success">Sì</a>
+                                        <a class="tag is-success">Disponibile</a>
                                     {% endif %}
                                 </div>
                             </div>
