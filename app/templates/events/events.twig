@@ -35,7 +35,7 @@
                                     {{ evento.descrizione }}
                                 </p>
                             </div>
-                            <div class="is-small">
+                            <div class="content">
                                 <div class="">
                                     <p>
                                         <strong>
@@ -51,25 +51,23 @@
                                     </p>
                                 </div>
                             </div>
-                            <div class="is-small">
+                            <div class="content">
                                 <p><strong>Creatore:</strong>
                                     <em>
                                         {{ evento.nomeUtente }} {{  evento.cognomeUtente }} ({{ evento.ruolo }}) - ID: {{ evento.idEvento }}
                                     </em>
                                 </p>
                             </div>
-                            <div class="is-small">
-                                <p><strong>Approvato:</strong>
-                                    <em>
-                                        {% if evento.revisionato == 1 %}
-                                            <span class="tag is-success">Sì</span>
-                                        {% else %}
-                                            <span class="tag is-danger">No</span>
-                                        {% endif %}
-                                    </em>
-                                </p>
+                            <div class="content">
+                                <div class="tags has-addons">
+                                    <span class="tag">Approvato</span>
+                                    {% if evento.revisionato == 1 %}
+                                        <a class="tag is-success">Sì</a>
+                                    {% else %}
+                                        <a class="tag is-danger">No</a>
+                                    {% endif %}
+                                </div>
                             </div>
-                            <span class="is-small">&nbsp;</span>
                             <div class="is-small">
                                 <a class="button" href="{{ path_for('eventsEdit', {'id': evento.idEvento })|e('html_attr') }}">
                                     Modifica
