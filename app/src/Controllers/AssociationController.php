@@ -233,9 +233,17 @@ class AssociationController extends Controller
 
     private function createAssociation($data): bool
     {
-        $nomeAssociazione = $data['nomeAssociazione'];
+        $associationName = $data['nomeAssociazione'];
         $logo = $data['logo'];
-        $membri = $data['membri'];
+        $members = $data['membri'];
+
+        if ($associationName === '' || empty($members)) {
+            $this->setErrorMessage(
+                'createAssociation(): PDOException, check errorInfo.',
+                'Creazione associazione: un campo obbligatorio non è stato compilato.');
+
+            return false;
+        }
 
         $sth = $this->db->prepare('
             INSERT INTO Associazione (
@@ -244,7 +252,7 @@ class AssociationController extends Controller
               NULL, :nomeAssociazione, :logo
             )
         ');
-        $sth->bindParam(':nomeAssociazione', $nomeAssociazione, \PDO::PARAM_STR);
+        $sth->bindParam(':nomeAssociazione', $associationName, \PDO::PARAM_STR);
         $sth->bindParam(':logo', $logo, \PDO::PARAM_STR);
 
         try {
@@ -266,7 +274,7 @@ class AssociationController extends Controller
             return false;
         }
 
-        foreach ($membri as $membro) {
+        foreach ($members as $membro) {
             try {
                 $this->addBelong($associationID, $membro);
             } catch (\PDOException $e) {
