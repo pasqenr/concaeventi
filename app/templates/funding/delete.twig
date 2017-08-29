@@ -1,7 +1,7 @@
 {% extends "layouts/main.twig" %}
 
-{% block bodyId %}elimina-sponsor{% endblock %}
-{% block metaTitle %}Elimina sponsor{% endblock %}
+{% block bodyId %}elimina-finanziamento{% endblock %}
+{% block metaTitle %}Elimina finanziamento{% endblock %}
 
 {% block content %}
     <section class="section">
@@ -9,11 +9,24 @@
             <div class="columns">
                 <div class="column"></div>
                 <div class="column is-half">
-                    <form action="{{ path_for('sponsorsDelete', {'id':sponsor.idSponsor})|e('html_attr') }}"
+                    <form action="{{ path_for('fundingDelete',
+                        {'eventID':funding.idEvento, 'sponsorID':funding.idSponsor})|e('html_attr') }}"
                           method="post">
                         <p>
-                            Vuoi eliminare definitivamente lo sponsor
-                            <strong>{{ sponsor.nome }} (#{{ sponsor.idSponsor }})</strong>?
+                            Evento: <strong>{{ funding.titolo }} (#{{ funding.idEvento }})</strong>
+                        </p>
+                        <p>
+                            Sponsor: <strong>{{ funding.nome }} (#{{ funding.idSponsor }})</strong>
+                        </p>
+                        <p>
+                            Importo: <strong>{{ funding.importo }} €</strong>
+                        </p>
+                        <p>
+                            Data: <strong>{{ funding.dataFinanziamento|date('d/m/Y') }}</strong>
+                        </p>
+                        <p>
+                            Vuoi eliminare definitivamente il finanziamento?
+
                         </p>
 
                         <div class="is-small">&nbsp;</div>

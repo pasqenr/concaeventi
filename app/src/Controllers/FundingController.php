@@ -134,10 +134,11 @@ class FundingController extends Controller
             return $response->withRedirect($this->router->pathFor('auth-error'));
         }
 
-        $eventID = (int)$args['id'];
-        $this->deleteFunding($eventID);
+        $eventID = $args['eventID'];
+        $sponsorID = $args['sponsorID'];
+        $this->deleteFunding($eventID, $sponsorID);
 
-        return $response->withRedirect($this->router->pathFor('sponsors'));
+        return $response->withRedirect($this->router->pathFor('fundings'));
     }
 
     private function getEventsWithFunding(): array
@@ -234,14 +235,16 @@ class FundingController extends Controller
         return $sth->execute();
     }
 
-    private function deleteFunding($fundingID): bool
+    private function deleteFunding($eventID, $sponsorID): bool
     {
         $sth = $this->db->prepare('
             DELETE
-            FROM Sponsor
-            WHERE idSponsor = :idSponsor
+            FROM Finanziamento
+            WHERE idEvento = :idEvento
+              AND idSponsor = :idSponsor
         ');
-        $sth->bindParam(':idSponsor', $fundingID, \PDO::PARAM_INT);
+        $sth->bindParam(':idEvento', $eventID, \PDO::PARAM_INT);
+        $sth->bindParam(':idSponsor', $sponsorID, \PDO::PARAM_INT);
 
         return $sth->execute();
     }
