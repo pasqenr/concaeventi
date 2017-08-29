@@ -11,6 +11,11 @@
                 <div class="column is-half">
                     <h1 class="title">Errore</h1>
                     <h3 class="subtitle">È avvenuto un errore.</h3>
+                    {% if err.message is defined %}
+                        <div class="content">
+                            <pre>{{ err.message }}</pre>
+                        </div>
+                    {% endif %}
                     <a href="{{ path_for('home')|e('html_attr') }}">Torna all'homepage</a>
                 </div>
                 <div class="column"></div>
