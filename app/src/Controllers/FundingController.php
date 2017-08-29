@@ -76,8 +76,9 @@ class FundingController extends Controller
             return $response->withRedirect($this->router->pathFor('auth-error'));
         }
 
-        $fundingID = $args['id'];
-        $funding = $this->getFunding($fundingID);
+        $eventID = $args['eventID'];
+        $sponsorID = $args['sponsorID'];
+        $funding = $this->getFunding($eventID, $sponsorID);
 
         /** @noinspection PhpVoidFunctionResultUsedInspection */
         return $this->render($response, 'funding/edit.twig', [
@@ -94,16 +95,16 @@ class FundingController extends Controller
             return $response->withRedirect($this->router->pathFor('auth-error'));
         }
 
-        $associationID = $args['id'];
+        $eventID = $args['eventID'];
+        $sponsorID = $args['sponsorID'];
         $parsedBody = $request->getParsedBody();
-        $updated = $this->updateFunding($associationID, $parsedBody);
+        $updated = $this->updateFunding($eventID, $sponsorID, $parsedBody);
 
         if ($updated === false) {
             return $response->withRedirect($this->router->pathFor('error'));
-
         }
 
-        return $response->withRedirect($this->router->pathFor('sponsors'));
+        return $response->withRedirect($this->router->pathFor('fundings'));
     }
 
     public function delete(Request $request, Response $response, $args)
@@ -114,8 +115,9 @@ class FundingController extends Controller
             return $response->withRedirect($this->router->pathFor('auth-error'));
         }
 
-        $fundingID = $args['id'];
-        $funding = $this->getFunding($fundingID);
+        $eventID = $args['eventID'];
+        $sponsorID = $args['sponsorID'];
+        $funding = $this->getFunding($eventID, $sponsorID);
 
         /** @noinspection PhpVoidFunctionResultUsedInspection */
         return $this->render($response, 'funding/delete.twig', [
@@ -161,14 +163,20 @@ class FundingController extends Controller
         return $fundings;
     }
 
-    private function getFunding($fundingID): array
+    private function getFunding($eventID, $sponsorID): array
     {
         $sth = $this->db->prepare('
-            SELECT S.idSponsor, S.nome, S.logo
-            FROM Sponsor S
-            WHERE S.idSponsor = :idSponsor
+            SELECT F.idEvento, F.idSponsor, F.importo, F.dataFinanziamento, E.titolo, S.nome
+            FROM Finanziamento F
+            JOIN Evento E
+            ON (F.idEvento)
+            JOIN Sponsor S
+            ON (F.idSponsor)
+            WHERE F.idEvento = :idEvento
+              AND F.idSponsor = :idSponsor
         ');
-        $sth->bindParam(':idSponsor', $fundingID, \PDO::PARAM_INT);
+        $sth->bindParam(':idEvento', $eventID, \PDO::PARAM_INT);
+        $sth->bindParam(':idSponsor', $sponsorID, \PDO::PARAM_INT);
         $sth->execute();
 
         return $sth->fetch();
@@ -207,19 +215,21 @@ class FundingController extends Controller
         return $sth->execute();
     }
 
-    private function updateFunding($fundingID, $data): bool
+    private function updateFunding($eventID, $sponsorID, $data): bool
     {
-        $fundingName = $data['nome'];
-        $logo = $data['logo'];
+        $amount = $data['importo'];
+
+        $amount = str_replace(',', '.', $amount);
 
         $sth = $this->db->prepare('
-            UPDATE Sponsor S
-            SET S.nome = :nome, S.logo = :logo
-            WHERE S.idSponsor = :idSponsor
+            UPDATE Finanziamento F
+            SET F.importo = :importo
+            WHERE F.idEvento = :idEvento
+              AND F.idSponsor = :idSponsor
         ');
-        $sth->bindParam(':nome', $fundingName, \PDO::PARAM_STR);
-        $sth->bindParam(':logo', $logo, \PDO::PARAM_STR);
-        $sth->bindParam(':idSponsor', $fundingID, \PDO::PARAM_INT);
+        $sth->bindParam(':importo', $amount, \PDO::PARAM_STR);
+        $sth->bindParam(':idEvento', $eventID, \PDO::PARAM_INT);
+        $sth->bindParam(':idSponsor', $sponsorID, \PDO::PARAM_INT);
 
         return $sth->execute();
     }
