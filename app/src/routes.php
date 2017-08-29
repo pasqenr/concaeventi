@@ -61,6 +61,9 @@ $app->get('/sponsors/', 'App\Controllers\SponsorController:showAll')
 $app->get('/funding/', 'App\Controllers\FundingController:showAll')
     ->setName('fundings');
 
+$app->get('/history/', 'App\Controllers\FrontController:history')
+    ->setName('history');
+
 /* Associations */
 
 $app->get('/associations/create', 'App\Controllers\AssociationController:create')

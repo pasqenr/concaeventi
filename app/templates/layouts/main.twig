@@ -57,6 +57,10 @@
                                     </a>
                                 {% endif %}
                             {% endif %}
+                            <a class="nav-item" href="{{ path_for('history')|e('html_attr') }}">
+                                <i class="fa fa-home"></i>
+                                <span class="nav-item">Storico</span>
+                            </a>
                         </div>
                         <div class="nav-right">
                             {% if utente.idUtente is defined %}
