@@ -27,8 +27,10 @@
                                             <a href="{{ path_for('page', {'id': evento.idEvento })|e('html_attr') }}">
                                                 {{ evento.titolo }}
                                             </a>
-                                        </strong>.
-                                        Inizio: <small>{{ evento.istanteInizio|date('d/m/Y h:i') }}</small> - Fine: <small>{{ evento.istanteFine|date('d/m/Y h:i') }}</small>
+                                        </strong>
+                                        -
+                                        Inizio: <small>{{ evento.istanteInizio|date('d/m/Y h:i') }}</small>
+                                        - Fine: <small>{{ evento.istanteFine|date('d/m/Y h:i') }}</small>
                                         <br>
                                         {{ evento.descrizione }}
                                     </p>
