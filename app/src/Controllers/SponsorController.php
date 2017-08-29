@@ -49,14 +49,18 @@ class SponsorController extends Controller
         $user = SessionHelper::auth($this, $response, SessionHelper::DIRETTORE);
 
         if (empty($user)) {
-            return $response->withRedirect($this->router->pathFor('error'));
+            return $response->withRedirect($this->router->pathFor('auth-error'));
         }
 
         $parsedBody = $request->getParsedBody();
         $created = $this->createSponsor($parsedBody);
 
         if ($created === false) {
-            return $response->withRedirect($this->router->pathFor('error'));
+            /** @noinspection PhpVoidFunctionResultUsedInspection */
+            return $this->render($response, 'errors/error.twig', [
+                'utente' => $user,
+                'err' => $this->getErrorMessage()
+            ]);
         }
 
         return $response->withRedirect($this->router->pathFor('sponsors'));
@@ -67,11 +71,22 @@ class SponsorController extends Controller
         $user = SessionHelper::auth($this, $response, SessionHelper::DIRETTORE);
 
         if (empty($user)) {
-            return $response->withRedirect($this->router->pathFor('error'));
+            return $response->withRedirect($this->router->pathFor('auth-error'));
         }
 
         $sponsorID = $args['id'];
-        $sponsor = $this->getSponsor($sponsorID);
+        try {
+            $sponsor = $this->getSponsor($sponsorID);
+        } catch (\PDOException $e) {
+            $this->setErrorMessage('edit()->getSponsor(): PDOException, check errorInfo.',
+                'Modifica evento: errore nell\'elaborazione dei dati.');
+
+            /** @noinspection PhpVoidFunctionResultUsedInspection */
+            return $this->render($response, 'errors/error.twig', [
+                'utente' => $user,
+                'err' => $this->getErrorMessage()
+            ]);
+        }
 
         /** @noinspection PhpVoidFunctionResultUsedInspection */
         return $this->render($response, 'sponsors/edit.twig', [
@@ -85,7 +100,7 @@ class SponsorController extends Controller
         $user = SessionHelper::auth($this, $response, SessionHelper::DIRETTORE);
 
         if (empty($user)) {
-            return $response->withRedirect($this->router->pathFor('error'));
+            return $response->withRedirect($this->router->pathFor('auth-error'));
         }
 
         $associationID = $args['id'];
@@ -93,8 +108,11 @@ class SponsorController extends Controller
         $updated = $this->updateSponsor($associationID, $parsedBody);
 
         if ($updated === false) {
-            return $response->withRedirect($this->router->pathFor('error'));
-
+            /** @noinspection PhpVoidFunctionResultUsedInspection */
+            return $this->render($response, 'errors/error.twig', [
+                'utente' => $user,
+                'err' => $this->getErrorMessage()
+            ]);
         }
 
         return $response->withRedirect($this->router->pathFor('sponsors'));
@@ -109,7 +127,18 @@ class SponsorController extends Controller
         }
 
         $sponsorID = $args['id'];
-        $sponsor = $this->getSponsor($sponsorID);
+        try {
+            $sponsor = $this->getSponsor($sponsorID);
+        } catch (\PDOException $e) {
+            $this->setErrorMessage('delete()->getSponsor(): PDOException, check errorInfo.',
+                'Modifica evento: errore nell\'elaborazione dei dati.');
+
+            /** @noinspection PhpVoidFunctionResultUsedInspection */
+            return $this->render($response, 'errors/error.twig', [
+                'utente' => $user,
+                'err' => $this->getErrorMessage()
+            ]);
+        }
 
         /** @noinspection PhpVoidFunctionResultUsedInspection */
         return $this->render($response, 'sponsors/delete.twig', [
@@ -127,7 +156,11 @@ class SponsorController extends Controller
         }
 
         $eventID = (int)$args['id'];
-        $this->deleteAssociation($eventID);
+        try {
+            $this->deleteSponsor($eventID);
+        } catch (\PDOException $e) {
+
+        }
 
         return $response->withRedirect($this->router->pathFor('sponsors'));
     }
@@ -157,8 +190,15 @@ class SponsorController extends Controller
 
     private function createSponsor($data): bool
     {
-        $nomeSponsor = $data['nome'];
+        $sponsorName = $data['nome'];
         $logo = $data['logo'];
+
+        if ($sponsorName === '') {
+            $this->setErrorMessage('createSponsor(): Empty field.',
+                'Creazione sponsor: un campo obbligatorio non è stato compilato.');
+
+            return false;
+        }
 
         $sth = $this->db->prepare('
             INSERT INTO Sponsor (
@@ -167,16 +207,32 @@ class SponsorController extends Controller
               NULL, :nome, :logo
             )
         ');
-        $sth->bindParam(':nome', $nomeSponsor, \PDO::PARAM_STR);
+        $sth->bindParam(':nome', $sponsorName, \PDO::PARAM_STR);
         $sth->bindParam(':logo', $logo, \PDO::PARAM_STR);
 
-        return $sth->execute();
+        try {
+            $sth->execute();
+        } catch (\PDOException $e) {
+            $this->setErrorMessage('createSponsor(): PDOException, check errorInfo.',
+                'Creazione sponsor: errore nell\'elaborazione dei dati.');
+
+            return false;
+        }
+
+        return true;
     }
 
     private function updateSponsor($sponsorID, $data): bool
     {
         $sponsorName = $data['nome'];
         $logo = $data['logo'];
+
+        if ($sponsorName === '') {
+            $this->setErrorMessage('createSponsor(): Empty field.',
+                'Modifica sponsor: un campo obbligatorio non è stato compilato.');
+
+            return false;
+        }
 
         $sth = $this->db->prepare('
             UPDATE Sponsor S
@@ -187,10 +243,19 @@ class SponsorController extends Controller
         $sth->bindParam(':logo', $logo, \PDO::PARAM_STR);
         $sth->bindParam(':idSponsor', $sponsorID, \PDO::PARAM_INT);
 
-        return $sth->execute();
+        try {
+            $sth->execute();
+        } catch (\PDOException $e) {
+            $this->setErrorMessage('updateSponsor(): PDOException, check errorInfo.',
+                'Modifica evento: errore nell\'elaborazione dei dati.');
+
+            return false;
+        }
+
+        return true;
     }
 
-    private function deleteAssociation($sponsorID): bool
+    private function deleteSponsor($sponsorID): bool
     {
         $sth = $this->db->prepare('
             DELETE
@@ -199,6 +264,15 @@ class SponsorController extends Controller
         ');
         $sth->bindParam(':idSponsor', $sponsorID, \PDO::PARAM_INT);
 
-        return $sth->execute();
+        try {
+            $sth->execute();
+        } catch (\PDOException $e) {
+            $this->setErrorMessage('deleteSponsor(): PDOException, check errorInfo.',
+                'Eliminazione evento: errore nell\'elaborazione dei dati.');
+
+            return false;
+        }
+
+        return true;
     }
 }
