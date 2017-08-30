@@ -62,7 +62,11 @@ class FundingController extends Controller
         $created = $this->createFunding($parsedBody);
 
         if ($created === false) {
-            return $response->withRedirect($this->router->pathFor('error'));
+            /** @noinspection PhpVoidFunctionResultUsedInspection */
+            return $this->render($response, 'errors/error.twig', [
+                'utente' => $user,
+                'err' => $this->getErrorMessage()
+            ]);
         }
 
         return $response->withRedirect($this->router->pathFor('fundings'));
@@ -78,7 +82,19 @@ class FundingController extends Controller
 
         $eventID = $args['eventID'];
         $sponsorID = $args['sponsorID'];
-        $funding = $this->getFunding($eventID, $sponsorID);
+
+        try {
+            $funding = $this->getFunding($eventID, $sponsorID);
+        } catch (\PDOException $e) {
+            $this->setErrorMessage('edit()->getFunding(): PDOException, check errorInfo.',
+                'Modifica evento: errore nell\'elaborazione dei dati.');
+
+            /** @noinspection PhpVoidFunctionResultUsedInspection */
+            return $this->render($response, 'errors/error.twig', [
+                'utente' => $user,
+                'err' => $this->getErrorMessage()
+            ]);
+        }
 
         /** @noinspection PhpVoidFunctionResultUsedInspection */
         return $this->render($response, 'funding/edit.twig', [
@@ -101,7 +117,14 @@ class FundingController extends Controller
         $updated = $this->updateFunding($eventID, $sponsorID, $parsedBody);
 
         if ($updated === false) {
-            return $response->withRedirect($this->router->pathFor('error'));
+            $this->setErrorMessage('doEdit()->updateFunding(): PDOException, check errorInfo.',
+                'Modifica evento: errore nell\'elaborazione dei dati.');
+
+            /** @noinspection PhpVoidFunctionResultUsedInspection */
+            return $this->render($response, 'errors/error.twig', [
+                'utente' => $user,
+                'err' => $this->getErrorMessage()
+            ]);
         }
 
         return $response->withRedirect($this->router->pathFor('fundings'));
@@ -117,7 +140,19 @@ class FundingController extends Controller
 
         $eventID = $args['eventID'];
         $sponsorID = $args['sponsorID'];
-        $funding = $this->getFunding($eventID, $sponsorID);
+
+        try {
+            $funding = $this->getFunding($eventID, $sponsorID);
+        } catch (\PDOException $e) {
+            $this->setErrorMessage('delete()->getFunding(): PDOException, check errorInfo.',
+                'Modifica evento: errore nell\'elaborazione dei dati.');
+
+            /** @noinspection PhpVoidFunctionResultUsedInspection */
+            return $this->render($response, 'errors/error.twig', [
+                'utente' => $user,
+                'err' => $this->getErrorMessage()
+            ]);
+        }
 
         /** @noinspection PhpVoidFunctionResultUsedInspection */
         return $this->render($response, 'funding/delete.twig', [
@@ -136,7 +171,15 @@ class FundingController extends Controller
 
         $eventID = $args['eventID'];
         $sponsorID = $args['sponsorID'];
-        $this->deleteFunding($eventID, $sponsorID);
+        try {
+            $this->deleteFunding($eventID, $sponsorID);
+        } catch (\PDOException $e) {
+            /** @noinspection PhpVoidFunctionResultUsedInspection */
+            return $this->render($response, 'errors/error.twig', [
+                'utente' => $user,
+                'err' => $this->getErrorMessage()
+            ]);
+        }
 
         return $response->withRedirect($this->router->pathFor('fundings'));
     }
@@ -178,7 +221,12 @@ class FundingController extends Controller
         ');
         $sth->bindParam(':idEvento', $eventID, \PDO::PARAM_INT);
         $sth->bindParam(':idSponsor', $sponsorID, \PDO::PARAM_INT);
-        $sth->execute();
+
+        try {
+            $sth->execute();
+        } catch (\PDOException $e) {
+            throw $e;
+        }
 
         return $sth->fetch();
     }
@@ -189,8 +237,17 @@ class FundingController extends Controller
         $eventID = $data['idEvento'];
         $amount = $data['importo'];
 
+        $amount_pattern = '[0-9]{1,6}.[0-9]{1,2}';
+
         if ($amount !== '') {
             $amount = str_replace(',', '.', $amount);
+
+            if (!preg_match($amount_pattern, $amount)) {
+                $this->setErrorMessage('createFunding(): Wrong amount format.',
+                    'Creazione finanziamento: formato valuta errato.');
+
+                return false;
+            }
 
             $sth = $this->db->prepare('
                 INSERT INTO Finanziamento (
@@ -213,7 +270,16 @@ class FundingController extends Controller
         $sth->bindParam(':idSponsor', $sponsorID, \PDO::PARAM_INT);
         $sth->bindParam(':idEvento', $eventID, \PDO::PARAM_INT);
 
-        return $sth->execute();
+        try {
+            $sth->execute();
+        } catch (\PDOException $e) {
+            $this->setErrorMessage('createFunding(): PDOException, check errorInfo.',
+                'Creazione finanziamento: errore nell\'elaborazione dei dati.');
+
+            return false;
+        }
+
+        return true;
     }
 
     private function updateFunding($eventID, $sponsorID, $data): bool
@@ -221,6 +287,14 @@ class FundingController extends Controller
         $amount = $data['importo'];
 
         $amount = str_replace(',', '.', $amount);
+        $amount_pattern = '[0-9]{1,6}.[0-9]{1,2}';
+
+        if (!preg_match($amount_pattern, $amount)) {
+            $this->setErrorMessage('updateFunding(): Wrong amount format.',
+                'Creazione finanziamento: formato valuta errato.');
+
+            return false;
+        }
 
         $sth = $this->db->prepare('
             UPDATE Finanziamento F
@@ -232,7 +306,16 @@ class FundingController extends Controller
         $sth->bindParam(':idEvento', $eventID, \PDO::PARAM_INT);
         $sth->bindParam(':idSponsor', $sponsorID, \PDO::PARAM_INT);
 
-        return $sth->execute();
+        try {
+            $sth->execute();
+        } catch (\PDOException $e) {
+            $this->setErrorMessage('updateFunding(): PDOException, check errorInfo.',
+                'Creazione finanziamento: errore nell\'elaborazione dei dati.');
+
+            return false;
+        }
+
+        return true;
     }
 
     private function deleteFunding($eventID, $sponsorID): bool
@@ -246,7 +329,16 @@ class FundingController extends Controller
         $sth->bindParam(':idEvento', $eventID, \PDO::PARAM_INT);
         $sth->bindParam(':idSponsor', $sponsorID, \PDO::PARAM_INT);
 
-        return $sth->execute();
+        try {
+            $sth->execute();
+        } catch (\PDOException $e) {
+            $this->setErrorMessage('deleteFunding(): PDOException, check errorInfo.',
+                'Creazione finanziamento: errore nell\'elaborazione dei dati.');
+
+            return false;
+        }
+
+        return true;
     }
 
     /**
