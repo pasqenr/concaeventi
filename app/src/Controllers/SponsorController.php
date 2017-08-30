@@ -18,7 +18,7 @@ class SponsorController extends Controller
         $user = SessionHelper::auth($this, $response, SessionHelper::DIRETTORE);
 
         if (empty($user)) {
-            return $response->withRedirect($this->router->pathFor('error'));
+            return $response->withRedirect($this->router->pathFor('auth-error'));
         }
 
         $sponsors = $this->getSponsors();
@@ -35,7 +35,7 @@ class SponsorController extends Controller
         $user = SessionHelper::auth($this, $response, SessionHelper::DIRETTORE);
 
         if (empty($user)) {
-            return $response->withRedirect($this->router->pathFor('error'));
+            return $response->withRedirect($this->router->pathFor('auth-error'));
         }
 
         /** @noinspection PhpVoidFunctionResultUsedInspection */
@@ -123,7 +123,7 @@ class SponsorController extends Controller
         $user = SessionHelper::auth($this, $response, SessionHelper::DIRETTORE);
 
         if (empty($user)) {
-            return $response->withRedirect($this->router->pathFor('error'));
+            return $response->withRedirect($this->router->pathFor('auth-error'));
         }
 
         $sponsorID = $args['id'];
@@ -152,7 +152,7 @@ class SponsorController extends Controller
         $user = SessionHelper::auth($this, $response, SessionHelper::DIRETTORE);
 
         if (empty($user)) {
-            return $response->withRedirect($this->router->pathFor('error'));
+            return $response->withRedirect($this->router->pathFor('auth-error'));
         }
 
         $eventID = (int)$args['id'];

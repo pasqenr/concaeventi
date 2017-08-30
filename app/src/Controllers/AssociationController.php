@@ -18,7 +18,7 @@ class AssociationController extends Controller
         $user = SessionHelper::auth($this, $response, SessionHelper::PUBLISHER);
 
         if (empty($user)) {
-            return $response->withRedirect($this->router->pathFor('error'));
+            return $response->withRedirect($this->router->pathFor('auth-error'));
         }
 
         $associations = $this->getAssociations();
@@ -36,7 +36,7 @@ class AssociationController extends Controller
         $user = SessionHelper::auth($this, $response, SessionHelper::PUBLISHER);
 
         if (empty($user)) {
-            return $response->withRedirect($this->router->pathFor('error'));
+            return $response->withRedirect($this->router->pathFor('auth-error'));
         }
 
         $members = $this->getAllMembers();
@@ -53,7 +53,7 @@ class AssociationController extends Controller
         $user = SessionHelper::auth($this, $response, SessionHelper::PUBLISHER);
 
         if (empty($user)) {
-            return $response->withRedirect($this->router->pathFor('error'));
+            return $response->withRedirect($this->router->pathFor('auth-error'));
         }
 
         $parsedBody = $request->getParsedBody();
@@ -75,7 +75,7 @@ class AssociationController extends Controller
         $user = SessionHelper::auth($this, $response, SessionHelper::PUBLISHER);
 
         if (empty($user)) {
-            return $response->withRedirect($this->router->pathFor('error'));
+            return $response->withRedirect($this->router->pathFor('auth-error'));
         }
 
         $associationID = $args['id'];
@@ -109,7 +109,7 @@ class AssociationController extends Controller
         $user = SessionHelper::auth($this, $response, SessionHelper::PUBLISHER);
 
         if (empty($user)) {
-            return $response->withRedirect($this->router->pathFor('error'));
+            return $response->withRedirect($this->router->pathFor('auth-error'));
         }
 
         $associationID = $args['id'];
@@ -132,7 +132,7 @@ class AssociationController extends Controller
         $user = SessionHelper::auth($this, $response, SessionHelper::DIRETTORE);
 
         if (empty($user)) {
-            return $response->withRedirect($this->router->pathFor('error'));
+            return $response->withRedirect($this->router->pathFor('auth-error'));
         }
 
         $associationID = $args['id'];
@@ -161,7 +161,7 @@ class AssociationController extends Controller
         $user = SessionHelper::auth($this, $response, SessionHelper::DIRETTORE);
 
         if (empty($user)) {
-            return $response->withRedirect($this->router->pathFor('error'));
+            return $response->withRedirect($this->router->pathFor('auth-error'));
         }
 
         $eventID = (int)$args['id'];

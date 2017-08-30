@@ -234,7 +234,7 @@ class EventController extends Controller
         $user = SessionHelper::auth($this, $response, SessionHelper::EDITORE);
 
         if (empty($user)) {
-            return $response->withRedirect($this->router->pathFor('events'));
+            return $response->withRedirect($this->router->pathFor('auth-error'));
         }
 
         $eventID = (int)$args['id'];

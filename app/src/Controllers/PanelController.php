@@ -18,7 +18,7 @@ class PanelController extends Controller
         $user = SessionHelper::auth($this, $response, SessionHelper::EDITORE);
 
         if (empty($user)) {
-            return $response->withRedirect($this->router->pathFor('error'));
+            return $response->withRedirect($this->router->pathFor('auth-error'));
         }
 
         /** @noinspection PhpVoidFunctionResultUsedInspection */
