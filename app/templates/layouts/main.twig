@@ -48,14 +48,10 @@
                                 <span class="nav-item">Home</span>
                             </a>
                             {% if utente.idUtente is defined %}
-                                {% if utente.ruolo == 'Direttore'
-                                    or utente.ruolo == 'Publisher'
-                                    or utente.ruolo == 'Editore' %}
-                                    <a class="nav-item" href="{{ path_for('panel')|e('html_attr') }}">
-                                        <i class="fa fa-book"></i>
-                                        <span class="nav-item">Pannello</span>
-                                    </a>
-                                {% endif %}
+                                <a class="nav-item" href="{{ path_for('panel')|e('html_attr') }}">
+                                    <i class="fa fa-book"></i>
+                                    <span class="nav-item">Pannello</span>
+                                </a>
                             {% endif %}
                             <a class="nav-item" href="{{ path_for('history')|e('html_attr') }}">
                                 <i class="fa fa-university"></i>
@@ -104,7 +100,9 @@
                                 {% if utente.idUtente is defined %}
                                     Loggato come <strong>{{ utente.nome }} {{ utente.cognome }}</strong>
                                     <span class="icon is-small">
-                                    {% if utente.ruolo == 'Direttore' %}
+                                    {% if utente.ruolo == 'Amministratore' %}
+                                        <i class="fa fa-id-card"></i>
+                                    {% elseif utente.ruolo == 'Direttore' %}
                                         <i class="fa fa-user-circle-o"></i>
                                     {% elseif utente.ruolo == 'Publisher' %}
                                         <i class="fa fa-user-plus"></i>
