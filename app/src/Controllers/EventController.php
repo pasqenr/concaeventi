@@ -333,8 +333,8 @@ class EventController extends Controller
     {
         $sth = $this->db->query('
             SELECT U.idUtente, A.idAssociazione, E.idEvento, E.titolo, E.immagine, E.descrizione, E.istanteCreazione,
-                   E.istanteInizio, E.istanteFine, E.pagina, E.revisionato, A.nomeAssociazione, A.logo,
-                   U.nome AS nomeUtente, U.cognome AS cognomeUtente, U.email, U.ruolo
+                   E.istanteInizio, E.istanteFine, E.pagina, E.revisionato, A2.nomeAssociazione AS nomeAssPrimaria,
+                   A.nomeAssociazione, A.logo, U.nome AS nomeUtente, U.cognome AS cognomeUtente, U.email, U.ruolo
             FROM Evento E
             LEFT JOIN Proporre P
             USING (idEvento)
@@ -342,10 +342,18 @@ class EventController extends Controller
             USING (idAssociazione)
             LEFT JOIN Utente U
             USING (idUtente)
+            LEFT JOIN Associazione A2
+            ON (E.idAssPrimaria = A2.idAssociazione)
             WHERE DATEDIFF(E.istanteFine, CURRENT_TIMESTAMP) > 0
             ORDER BY E.istanteInizio
         ');
-        $events = $sth->fetchAll();
+        try {
+            $events = $sth->fetchAll();
+        } catch (\PDOException $e) {
+            $this->setErrorMessage('getEvents(): PDOException, check errorInfo.',
+                'Recupero eventi: errore nell\'elaborazione dei dati.');
+            throw $e;
+        }
 
         $events = $this->mergeAssociations($events);
 
@@ -359,7 +367,7 @@ class EventController extends Controller
      */
     private function createEvent($userID, $data): bool
     {
-        $id = $userID;
+        $idUtente = $userID;
         $titolo = $data['titolo'];
         $immagine = $data['immagine'];
         $descrizione = $data['descrizione'];
@@ -368,10 +376,12 @@ class EventController extends Controller
         $pagina = $data['pagina'];
         $revisionato = $data['revisionato'];
         $associazioni = $data['associazioni'];
+        $idAssPrimaria = $data['assPrimaria'];
 
         $date_pattern = '^\d{4}-\d{2}-\d{2} (\d{2}(:\d{2}(:\d{2})?)?)?$^';
 
-        if ($titolo === '' || $descrizione === '' || $istanteInizio === '' || $istanteFine === '') {
+        if ($titolo === '' || $descrizione === '' || $istanteInizio === '' || $istanteFine === '' ||
+            $associazioni === '' || $idAssPrimaria === '') {
             $this->setErrorMessage('createEvent(): Empty field.',
                 'Creazione evento: un campo obbligatorio non è stato compilato.');
 
@@ -394,11 +404,11 @@ class EventController extends Controller
         $sth = $this->db->prepare('
             INSERT INTO Evento (
                 idEvento, titolo, immagine, descrizione, istanteCreazione, istanteInizio, istanteFine, 
-                pagina, revisionato, idUtente
+                pagina, revisionato, idUtente, idAssPrimaria
             )
             VALUES (
                 NULL, :titolo, :immagine, :descrizione, CURRENT_TIMESTAMP, :istanteInizio, :istanteFine, :pagina, 
-                :revisionato, :idUtente
+                :revisionato, :idUtente, :idAssPrimaria
             )
         ');
         $sth->bindParam(':titolo', $titolo, \PDO::PARAM_STR);
@@ -408,7 +418,8 @@ class EventController extends Controller
         $sth->bindParam(':istanteFine', $istanteFine, \PDO::PARAM_STR);
         $sth->bindParam(':pagina', $pagina, \PDO::PARAM_STR);
         $sth->bindParam(':revisionato', $revisionato, \PDO::PARAM_INT);
-        $sth->bindParam(':idUtente', $id, \PDO::PARAM_INT);
+        $sth->bindParam(':idUtente', $idUtente, \PDO::PARAM_INT);
+        $sth->bindParam(':idAssPrimaria', $idAssPrimaria, \PDO::PARAM_INT);
 
         try {
             $sth->execute();
@@ -505,8 +516,9 @@ class EventController extends Controller
 
         $sth = $this->db->prepare('
             SELECT U.idUtente, A.idAssociazione, E.idEvento, E.titolo, E.immagine, E.descrizione, E.istanteCreazione,
-                   E.istanteInizio, E.istanteFine, E.pagina, E.revisionato, A.nomeAssociazione, A.logo,
-                   U.nome AS nomeUtente, U.cognome AS cognomeUtente, U.email, U.ruolo
+                   E.istanteInizio, E.istanteFine, E.pagina, E.revisionato, A2.nomeAssociazione AS nomeAssPrimaria, 
+                   A2.idAssociazione AS idAssPrimaria, A.nomeAssociazione, A.logo, U.nome AS nomeUtente, 
+                   U.cognome AS cognomeUtente, U.email, U.ruolo
             FROM Evento E
             LEFT JOIN Proporre P
             USING (idEvento)
@@ -514,6 +526,8 @@ class EventController extends Controller
             USING (idAssociazione)
             LEFT JOIN Utente U
             USING (idUtente)
+            LEFT JOIN Associazione A2
+            ON (E.idAssPrimaria = A2.idAssociazione)
             WHERE E.idEvento = :eventID
         ');
         $sth->bindParam(':eventID', $id, \PDO::PARAM_INT);

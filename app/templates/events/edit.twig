@@ -95,21 +95,6 @@
                             </p>
                         </div>
 
-                        {% if utente.ruolo == 'Direttore' or utente.ruolo == 'Publisher' %}
-                            <div class="field">
-                                <div class="control">
-                                    <label class="checkbox">
-                                        <input type="checkbox" name="revisionato"
-                                                {% if evento.revisionato == 1 %}
-                                                    checked
-                                                {% endif %}
-                                        >
-                                        Approvato
-                                    </label>
-                                </div>
-                            </div>
-                        {% endif %}
-
                         <div class="field">
                             <p>
                                 <strong>Scritto da:</strong> {{ evento.nomeUtente }} {{  evento.cognomeUtente }}
@@ -133,6 +118,41 @@
                                 {% endfor %}
                             </select>
                         </div>
+
+                        <div class="is-small">&nbsp;</div>
+
+                        <label class="label">Associazione primaria</label>
+                        <div class="select">
+                            <select name="assPrimaria">
+                                {% for ass in associazioni %}
+                                    <option value="{{ ass.idAssociazione }}"
+                                            {% if ass.idAssociazione == evento.idAssPrimaria %}
+                                                selected
+                                            {% endif %}
+                                    >
+                                        {{ ass.nomeAssociazione }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="is-small">&nbsp;</div>
+
+                        {% if utente.ruolo == 'Amministratore' or
+                        utente.ruolo == 'Direttore' or utente.ruolo == 'Publisher' %}
+                            <div class="field">
+                                <div class="control">
+                                    <label class="checkbox">
+                                        <input type="checkbox" name="revisionato"
+                                                {% if evento.revisionato == 1 %}
+                                                    checked
+                                                {% endif %}
+                                        >
+                                        Approvato
+                                    </label>
+                                </div>
+                            </div>
+                        {% endif %}
 
                         <div class="is-small">&nbsp;</div>
 
