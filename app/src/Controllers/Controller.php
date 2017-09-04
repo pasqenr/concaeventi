@@ -18,7 +18,7 @@ class Controller
     private $err = [
         'message' => '',
         'debugMessage' => '',
-        'code' => -1
+        'errorInfo' => ''
     ];
 
     /**
@@ -52,11 +52,21 @@ class Controller
         return $this->container->get($name);
     }
 
-    public function setErrorMessage($debugMessage = '', $message = '', $code = -1)
+    public function __set($name, $value)
+    {
+
+    }
+
+    public function __isset($name)
+    {
+
+    }
+
+    public function setErrorMessage($debugMessage = '', $message = '', $errorInfo)
     {
         $this->err['message'] = $message;
         $this->err['debugMessage'] = $debugMessage;
-        $this->err['code'] = $code;
+        $this->err['errorInfo'] = $errorInfo[2];
     }
 
     public function getErrorMessage()
