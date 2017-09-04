@@ -86,8 +86,8 @@ class FundingController extends Controller
         try {
             $funding = $this->getFunding($eventID, $sponsorID);
         } catch (\PDOException $e) {
-            $this->setErrorMessage('edit()->getFunding(): PDOException, check errorInfo.',
-                'Modifica evento: errore nell\'elaborazione dei dati.');
+            $this->setErrorMessage('PDOException, check errorInfo.',
+                'Impossibile trovare il finanziamento.');
 
             /** @noinspection PhpVoidFunctionResultUsedInspection */
             return $this->render($response, 'errors/error.twig', [
@@ -117,8 +117,8 @@ class FundingController extends Controller
         $updated = $this->updateFunding($eventID, $sponsorID, $parsedBody);
 
         if ($updated === false) {
-            $this->setErrorMessage('doEdit()->updateFunding(): PDOException, check errorInfo.',
-                'Modifica evento: errore nell\'elaborazione dei dati.');
+            $this->setErrorMessage('PDOException, check errorInfo.',
+                'Impossibile modificare il finanziamento.');
 
             /** @noinspection PhpVoidFunctionResultUsedInspection */
             return $this->render($response, 'errors/error.twig', [
@@ -144,8 +144,8 @@ class FundingController extends Controller
         try {
             $funding = $this->getFunding($eventID, $sponsorID);
         } catch (\PDOException $e) {
-            $this->setErrorMessage('delete()->getFunding(): PDOException, check errorInfo.',
-                'Modifica evento: errore nell\'elaborazione dei dati.');
+            $this->setErrorMessage('PDOException, check errorInfo.',
+                'Impossibile trovare il finanziamento.');
 
             /** @noinspection PhpVoidFunctionResultUsedInspection */
             return $this->render($response, 'errors/error.twig', [
@@ -243,8 +243,8 @@ class FundingController extends Controller
             $amount = str_replace(',', '.', $amount);
 
             if (!preg_match($amount_pattern, $amount)) {
-                $this->setErrorMessage('createFunding(): Wrong amount format.',
-                    'Creazione finanziamento: formato valuta errato.');
+                $this->setErrorMessage('Wrong amount format.',
+                    'Formato valuta errato.');
 
                 return false;
             }
@@ -273,7 +273,7 @@ class FundingController extends Controller
         try {
             $sth->execute();
         } catch (\PDOException $e) {
-            $this->setErrorMessage('createFunding(): PDOException, check errorInfo.',
+            $this->setErrorMessage('PDOException, check errorInfo.',
                 'Creazione finanziamento: errore nell\'elaborazione dei dati.');
 
             return false;
@@ -290,8 +290,8 @@ class FundingController extends Controller
         $amount_pattern = '[0-9]{1,6}.[0-9]{1,2}';
 
         if (!preg_match($amount_pattern, $amount)) {
-            $this->setErrorMessage('updateFunding(): Wrong amount format.',
-                'Creazione finanziamento: formato valuta errato.');
+            $this->setErrorMessage('Wrong amount format.',
+                'Formato valuta errato.');
 
             return false;
         }
@@ -309,8 +309,8 @@ class FundingController extends Controller
         try {
             $sth->execute();
         } catch (\PDOException $e) {
-            $this->setErrorMessage('updateFunding(): PDOException, check errorInfo.',
-                'Creazione finanziamento: errore nell\'elaborazione dei dati.');
+            $this->setErrorMessage('PDOException, check errorInfo.',
+                'Impossibile modificare il finanziamento.');
 
             return false;
         }
@@ -332,8 +332,8 @@ class FundingController extends Controller
         try {
             $sth->execute();
         } catch (\PDOException $e) {
-            $this->setErrorMessage('deleteFunding(): PDOException, check errorInfo.',
-                'Creazione finanziamento: errore nell\'elaborazione dei dati.');
+            $this->setErrorMessage('PDOException, check errorInfo.',
+                'Impossibile eliminare il finanziamento.');
 
             return false;
         }

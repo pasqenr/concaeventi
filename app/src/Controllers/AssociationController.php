@@ -85,8 +85,8 @@ class AssociationController extends Controller
             $members = $this->getAllMembers();
             $belongs = $this->getBelongsByAssociation($associationID);
         } catch (\PDOException $e) {
-            $this->setErrorMessage('edit()->_(): PDOException, check errorInfo.',
-                'Modifica associazione: errore nell\'elaborazione dei dati.');
+            $this->setErrorMessage('PDOException, check errorInfo.',
+                'Errore nell\'elaborazione dei dati.');
 
             /** @noinspection PhpVoidFunctionResultUsedInspection */
             return $this->render($response, 'errors/error.twig', [
@@ -139,8 +139,8 @@ class AssociationController extends Controller
         try {
             $association = $this->getAssociation($associationID);
         } catch (\PDOException $e) {
-            $this->setErrorMessage('delete()->getAssociation(): PDOException, check errorInfo.',
-                'Modifica associazione: errore nell\'elaborazione dei dati.');
+            $this->setErrorMessage('PDOException, check errorInfo.',
+                'Errore nell\'elaborazione dei dati.');
 
             /** @noinspection PhpVoidFunctionResultUsedInspection */
             return $this->render($response, 'errors/error.twig', [
@@ -239,11 +239,13 @@ class AssociationController extends Controller
 
         if ($associationName === '' || empty($members)) {
             $this->setErrorMessage(
-                'createAssociation(): PDOException, check errorInfo.',
-                'Creazione associazione: un campo obbligatorio non è stato compilato.');
+                'PDOException, check errorInfo.',
+                'Un campo obbligatorio non è stato inserito.');
 
             return false;
         }
+
+        $this->db->beginTransaction();
 
         $sth = $this->db->prepare('
             INSERT INTO Associazione (
@@ -258,8 +260,11 @@ class AssociationController extends Controller
         try {
             $sth->execute();
         } catch (\PDOException $e) {
-            $this->setErrorMessage('createAssociation(): PDOException, check errorInfo.',
-                'Creazione associazione: errore nell\'elaborazione dei dati.');
+            $this->setErrorMessage('PDOException, check errorInfo.',
+                'Impossibile creare l\'associazione.',
+                $this->db->errorInfo());
+
+            $this->db->rollBack();
 
             return false;
         }
@@ -268,8 +273,10 @@ class AssociationController extends Controller
             $associationID = $this->getLastAssociationID();
         } catch (\PDOException $e) {
             $this->setErrorMessage(
-                'createAssociation()->getLastAssociationID(): PDOException, check errorInfo.',
-                'Creazione associazione: errore nell\'elaborazione dei dati.');
+                'PDOException, check errorInfo.',
+                'Impossibile recupeare l\'ultima associazione.');
+
+            $this->db->rollBack();
 
             return false;
         }
@@ -279,12 +286,16 @@ class AssociationController extends Controller
                 $this->addBelong($associationID, $membro);
             } catch (\PDOException $e) {
                 $this->setErrorMessage(
-                    'createAssociation()->addBelong(): PDOException, check errorInfo.',
-                    'Creazione associazione: errore nell\'elaborazione dei dati.');
+                    'PDOException, check errorInfo.',
+                    'Impossibile inserire un membro nell\'associazione.');
+
+                $this->db->rollBack();
 
                 return false;
             }
         }
+
+        $this->db->commit();
 
         return true;
     }
@@ -373,11 +384,13 @@ class AssociationController extends Controller
 
         if ($associationName === '' || empty($members)) {
             $this->setErrorMessage(
-                'updateAssociation(): PDOException, check errorInfo.',
-                'Modifica associazione: un campo obbligatorio non è stato compilato.');
+                'PDOException, check errorInfo.',
+                'Un campo obbligatorio non è stato inserito.');
 
             return false;
         }
+
+        $this->db->beginTransaction();
 
         $sth = $this->db->prepare('
             UPDATE Associazione A
@@ -392,8 +405,11 @@ class AssociationController extends Controller
             $sth->execute();
         } catch (\PDOException $e) {
             $this->setErrorMessage(
-                'updateAssociation(): PDOException, check errorInfo.',
-                'Modifica associazione: errore nell\'elaborazione dei dati.');
+                'PDOException, check errorInfo.',
+                'Impossibile modificare l\'evento.',
+                $this->db->errorInfo());
+
+            $this->db->rollBack();
 
             return false;
         }
@@ -402,8 +418,10 @@ class AssociationController extends Controller
             $this->deleteOldBelongs($associationID);
         } catch (\PDOException $e) {
             $this->setErrorMessage(
-                'updateAssociation()->deleteOldBelongs(): PDOException, check errorInfo.',
-                'Modifica associazione: errore nell\'elaborazione dei dati.');
+                'PDOException, check errorInfo.',
+                'Impossibile modificare le precedenti appartenenze.');
+
+            $this->db->rollBack();
 
             return false;
         }
@@ -412,11 +430,15 @@ class AssociationController extends Controller
             $this->createBelongs($associationID, $members);
         } catch (\PDOException $e) {
             $this->setErrorMessage(
-                'updateAssociation()->createBelongs(): PDOException, check errorInfo.',
-                'Modifica associazione: errore nell\'elaborazione dei dati.');
+                'PDOException, check errorInfo.',
+                'Impossibile modificare le precedenti appartenenze.');
+
+            $this->db->rollBack();
 
             return false;
         }
+
+        $this->db->commit();
 
         return true;
     }
@@ -441,6 +463,8 @@ class AssociationController extends Controller
 
     private function createBelongs($associationID, $members): bool
     {
+        $res = false;
+
         foreach ($members as $member => $memberID) {
             $sth = $this->db->prepare('
                 INSERT INTO Appartiene (
@@ -454,20 +478,24 @@ class AssociationController extends Controller
             $sth->bindParam(':idAssociazione', $associationID, \PDO::PARAM_INT);
 
             try {
-                $sth->execute();
+                $res = $sth->execute();
             } catch (\PDOException $e) {
                 throw $e;
             }
         }
 
-        return true;
+        return $res;
     }
 
     private function deleteAssociation($associationID): bool
     {
+        $this->db->beginTransaction();
+
         try {
-            $this->deleteFromBelongs($associationID);
+            $res = $this->deleteFromBelongs($associationID);
         } catch (\PDOException $e) {
+            $this->db->rollBack();
+
             throw $e;
         }
 
@@ -479,10 +507,21 @@ class AssociationController extends Controller
         $sth->bindParam(':idAssociazione', $associationID, \PDO::PARAM_INT);
 
         try {
-            $sth->execute();
+            $res &= $sth->execute();
         } catch (\PDOException $e) {
+            $this->setErrorMessage(
+                'PDOException, check errorInfo.',
+                'Errore nell\'eliminazione dell\'associazione.',
+                $sth->errorInfo());
+
+            $this->db->rollBack();
+
             throw $e;
         }
+
+        $this->db->commit();
+
+        return $res;
     }
 
     private function deleteFromBelongs($associationID): bool
@@ -495,9 +534,16 @@ class AssociationController extends Controller
         $sth->bindParam(':idAssociazione', $associationID, \PDO::PARAM_INT);
 
         try {
-            $sth->execute();
+            $res = $sth->execute();
         } catch (\PDOException $e) {
+            $this->setErrorMessage(
+                'PDOException, check errorInfo.',
+                'Errore nell\'eliminazione dei membri appartenenti all\'associazione.',
+                $sth->errorInfo());
+
             throw $e;
         }
+
+        return $res;
     }
 }

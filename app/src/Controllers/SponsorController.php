@@ -78,8 +78,8 @@ class SponsorController extends Controller
         try {
             $sponsor = $this->getSponsor($sponsorID);
         } catch (\PDOException $e) {
-            $this->setErrorMessage('edit()->getSponsor(): PDOException, check errorInfo.',
-                'Modifica evento: errore nell\'elaborazione dei dati.');
+            $this->setErrorMessage('PDOException, check errorInfo.',
+                'Impossibile trovare lo sponsor.');
 
             /** @noinspection PhpVoidFunctionResultUsedInspection */
             return $this->render($response, 'errors/error.twig', [
@@ -130,8 +130,8 @@ class SponsorController extends Controller
         try {
             $sponsor = $this->getSponsor($sponsorID);
         } catch (\PDOException $e) {
-            $this->setErrorMessage('delete()->getSponsor(): PDOException, check errorInfo.',
-                'Modifica evento: errore nell\'elaborazione dei dati.');
+            $this->setErrorMessage('PDOException, check errorInfo.',
+                'Impossibile trovare lo sponsor.');
 
             /** @noinspection PhpVoidFunctionResultUsedInspection */
             return $this->render($response, 'errors/error.twig', [
@@ -194,8 +194,8 @@ class SponsorController extends Controller
         $logo = $data['logo'];
 
         if ($sponsorName === '') {
-            $this->setErrorMessage('createSponsor(): Empty field.',
-                'Creazione sponsor: un campo obbligatorio non è stato compilato.');
+            $this->setErrorMessage('Empty field.',
+                'Un campo obbligatorio non è stato inserito.');
 
             return false;
         }
@@ -213,8 +213,8 @@ class SponsorController extends Controller
         try {
             $sth->execute();
         } catch (\PDOException $e) {
-            $this->setErrorMessage('createSponsor(): PDOException, check errorInfo.',
-                'Creazione sponsor: errore nell\'elaborazione dei dati.');
+            $this->setErrorMessage('PDOException, check errorInfo.',
+                'Impossibile creare lo sponsor.');
 
             return false;
         }
@@ -228,8 +228,8 @@ class SponsorController extends Controller
         $logo = $data['logo'];
 
         if ($sponsorName === '') {
-            $this->setErrorMessage('createSponsor(): Empty field.',
-                'Modifica sponsor: un campo obbligatorio non è stato compilato.');
+            $this->setErrorMessage('Empty field.',
+                'Un campo obbligatorio non è stato compilato.');
 
             return false;
         }
@@ -246,8 +246,8 @@ class SponsorController extends Controller
         try {
             $sth->execute();
         } catch (\PDOException $e) {
-            $this->setErrorMessage('updateSponsor(): PDOException, check errorInfo.',
-                'Modifica evento: errore nell\'elaborazione dei dati.');
+            $this->setErrorMessage('PDOException, check errorInfo.',
+                'Impossibile modificare lo sponsor.');
 
             return false;
         }
@@ -267,8 +267,8 @@ class SponsorController extends Controller
         try {
             $sth->execute();
         } catch (\PDOException $e) {
-            $this->setErrorMessage('deleteSponsor(): PDOException, check errorInfo.',
-                'Eliminazione evento: errore nell\'elaborazione dei dati.');
+            $this->setErrorMessage('PDOException, check errorInfo.',
+                'Impossibile eliminare lo sponsor.');
 
             return false;
         }

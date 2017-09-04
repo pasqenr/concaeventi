@@ -90,8 +90,8 @@ class EventController extends Controller
         try {
             $event = $this->getEvent($eventID);
         } catch (\PDOException $e) {
-            $this->setErrorMessage('delete()->getEvent(): PDOException, check errorInfo.',
-                'Eliminazione evento: errore nell\'elaborazione dei dati.');
+            $this->setErrorMessage('PDOException, check errorInfo.',
+                'Impossibile trovare l\'evento.');
 
             /** @noinspection PhpVoidFunctionResultUsedInspection */
             return $this->render($response, 'errors/error.twig', [
@@ -120,7 +120,15 @@ class EventController extends Controller
         }
 
         $eventID = (int)$args['id'];
-        $this->deleteEvent($eventID);
+        $deleted = $this->deleteEvent($eventID);
+
+        if ($deleted === false) {
+            /** @noinspection PhpVoidFunctionResultUsedInspection */
+            return $this->render($response, 'errors/error.twig', [
+                'utente' => $user,
+                'err' => $this->getErrorMessage()
+            ]);
+        }
 
         return $response->withRedirect($this->router->pathFor('events'));
     }
@@ -137,8 +145,8 @@ class EventController extends Controller
         try {
             $event = $this->getEvent($eventID);
         } catch (\PDOException $e) {
-            $this->setErrorMessage('showPage()->getEvent(): PDOException, check errorInfo.',
-                'Eliminazione evento: errore nell\'elaborazione dei dati.');
+            $this->setErrorMessage('PDOException, check errorInfo.',
+                'Impossibile trovare l\'evento.');
 
             /** @noinspection PhpVoidFunctionResultUsedInspection */
             return $this->render($response, 'errors/error.twig', [
@@ -156,8 +164,8 @@ class EventController extends Controller
         try {
             $eventAssociations = $this->getEventAssociationsIds($event['nomeAssociazione']);
         } catch (\PDOException $e) {
-            $this->setErrorMessage('showPage()->getEvent(): PDOException, check errorInfo.',
-                'Eliminazione evento: errore nell\'elaborazione dei dati.');
+            $this->setErrorMessage('PDOException, check errorInfo.',
+                'Impossibile trovare le associazioni.');
 
             /** @noinspection PhpVoidFunctionResultUsedInspection */
             return $this->render($response, 'errors/error.twig', [
@@ -205,8 +213,8 @@ class EventController extends Controller
         try {
             $event = $this->getEvent($eventID);
         } catch (\PDOException $e) {
-            $this->setErrorMessage('showPage()->getEvent(): PDOException, check errorInfo.',
-                'Eliminazione evento: errore nell\'elaborazione dei dati.');
+            $this->setErrorMessage('PDOException, check errorInfo.',
+                'Impossibile trovare l\'evento.');
 
             /** @noinspection PhpVoidFunctionResultUsedInspection */
             return $this->render($response, 'errors/error.twig', [
@@ -242,8 +250,8 @@ class EventController extends Controller
         try {
             $event = $this->getEvent($eventID);
         } catch (\PDOException $e) {
-            $this->setErrorMessage('showPage()->getEvent(): PDOException, check errorInfo.',
-                'Eliminazione evento: errore nell\'elaborazione dei dati.');
+            $this->setErrorMessage('PDOException, check errorInfo.',
+                'Impossibile trovare l\'evento.');
 
             /** @noinspection PhpVoidFunctionResultUsedInspection */
             return $this->render($response, 'errors/error.twig', [
@@ -351,7 +359,9 @@ class EventController extends Controller
             $events = $sth->fetchAll();
         } catch (\PDOException $e) {
             $this->setErrorMessage('getEvents(): PDOException, check errorInfo.',
-                'Recupero eventi: errore nell\'elaborazione dei dati.');
+                'Recupero eventi: errore nell\'elaborazione dei dati.',
+                $this->db->errorInfo());
+
             throw $e;
         }
 
@@ -401,6 +411,8 @@ class EventController extends Controller
             $revisionato = 0;
         }
 
+        $this->db->beginTransaction();
+
         $sth = $this->db->prepare('
             INSERT INTO Evento (
                 idEvento, titolo, immagine, descrizione, istanteCreazione, istanteInizio, istanteFine, 
@@ -424,8 +436,11 @@ class EventController extends Controller
         try {
             $sth->execute();
         } catch (\PDOException $e) {
-            $this->setErrorMessage('createEvent(): PDOException, check errorInfo.',
-                'Creazione evento: errore nell\'elaborazione dei dati.');
+            $this->setErrorMessage('PDOException, check errorInfo.',
+                'Impossibile creare l\'evento.',
+                $this->db->errorInfo());
+
+            $this->db->rollBack();
 
             return false;
         }
@@ -433,8 +448,10 @@ class EventController extends Controller
         try {
             $eventID = $this->getLastEventID();
         } catch (\PDOException $e) {
-            $this->setErrorMessage('createEvent()->getLastEventID(): PDOException, check errorInfo.',
-                'Creazione evento: errore nell\'elaborazione dei dati.');
+            $this->setErrorMessage('PDOException, check errorInfo.',
+                'Impossibile recupeare l\'ultimo evento.');
+
+            $this->db->rollBack();
 
             return false;
         }
@@ -443,12 +460,15 @@ class EventController extends Controller
             try {
                 $this->addPropose($eventID, $ass);
             } catch (\PDOException $e) {
-                $this->setErrorMessage('createEvent()->getLastEventID(): PDOException, check errorInfo.',
-                    'Creazione evento: errore nell\'elaborazione dei dati.');
+                $this->setErrorMessage('PDOException, check errorInfo.',
+                    'Impossibile associare le associazioni.');
+
+                $this->db->rollBack();
 
                 return false;
             }
         }
+        $this->db->commit();
 
         return true;
     }
@@ -551,11 +571,15 @@ class EventController extends Controller
 
     private function deleteEvent($eventID): bool
     {
+        $this->db->beginTransaction();
+
         try {
             $this->deleteFromProposes($eventID);
         } catch (\PDOException $e) {
-            $this->setErrorMessage('deleteEvent()->deleteFromProposes(): PDOException, check errorInfo.',
-                'Eliminazione evento: errore nell\'elaborazione dei dati.');
+            $this->setErrorMessage('PDOException, check errorInfo.',
+                'Impossibile eliminare le associazioni collegate all\'evento.');
+
+            $this->db->rollBack();
 
             return false;
         }
@@ -570,17 +594,23 @@ class EventController extends Controller
         try {
             $sth->execute();
         } catch (\PDOException $e) {
-            $this->setErrorMessage('deleteEvent(): PDOException, check errorInfo.',
-                'Eliminazione evento: errore nell\'elaborazione dei dati.');
+            $this->setErrorMessage('PDOException, check errorInfo.',
+                'Impossibile eliminare l\'evento.',
+                $this->db->errorInfo());
+
+            $this->db->rollBack();
 
             return false;
         }
+
+        $this->db->commit();
 
         return true;
     }
 
     private function deleteFromProposes($eventID): bool
     {
+
         $sth = $this->db->prepare('
             DELETE
             FROM Proporre
@@ -631,6 +661,8 @@ class EventController extends Controller
             $revisionato = 0;
         }
 
+        $this->db->beginTransaction();
+
         $sth = $this->db->prepare('
             UPDATE Evento E 
             SET E.titolo = :titolo, E.immagine = :immagine, E.descrizione = :descrizione, 
@@ -651,8 +683,11 @@ class EventController extends Controller
         try {
             $sth->execute();
         } catch (\PDOException $e) {
-            $this->setErrorMessage('updateEvent(): PDOException, check errorInfo.',
-                'Modifica evento: errore nell\'elaborazione dei dati.');
+            $this->setErrorMessage('PDOException, check errorInfo.',
+                'Impossibile modificare l\'evento.',
+                $this->db->errorInfo());
+
+            $this->db->rollBack();
 
             return false;
         }
@@ -660,8 +695,10 @@ class EventController extends Controller
         try {
             $this->deleteOldProposes($eventID);
         } catch (\PDOException $e) {
-            $this->setErrorMessage('updateEvent()->deleteOldProposes(): PDOException, check errorInfo.',
-                'Modifica evento: errore nell\'elaborazione dei dati.');
+            $this->setErrorMessage('PDOException, check errorInfo.',
+                'Impossibile modificare le precedenti associazioni collegate all\'evento.');
+
+            $this->db->rollBack();
 
             return false;
         }
@@ -669,11 +706,15 @@ class EventController extends Controller
         try {
             $this->createProposes($eventID, $update);
         } catch (\PDOException $e) {
-            $this->setErrorMessage('updateEvent()->deleteOldProposes(): PDOException, check errorInfo.',
-                'Modifica evento: errore nell\'elaborazione dei dati.');
+            $this->setErrorMessage('PDOException, check errorInfo.',
+                'Impossibile modificare le precedenti associazioni collegate all\'evento.');
+
+            $this->db->rollBack();
 
             return false;
         }
+
+        $this->db->commit();
 
         return true;
     }
@@ -793,8 +834,9 @@ class EventController extends Controller
         try {
             $sth->execute();
         } catch (\PDOException $e) {
-            $this->setErrorMessage('updatePageEvent(): PDOException, check errorInfo.',
-                'Modifica pagina: errore nell\'elaborazione dei dati.');
+            $this->setErrorMessage('PDOException, check errorInfo.',
+                'Impossibile modificare la pagina.',
+                $this->db->errorInfo());
 
             return false;
         }
