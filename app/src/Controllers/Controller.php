@@ -62,10 +62,12 @@ class Controller
 
     }
 
-    public function setErrorMessage($debugMessage = '', $message = '', $errorInfo)
+    public function setErrorMessage($debugMessage = 'Errore nell\'elaborazione dei dati.',
+                                    $message = '',
+                                    $errorInfo = ['', '', ''])
     {
         $this->err['message'] = $message;
-        $this->err['debugMessage'] = $debugMessage;
+        $this->err['debugMessage'] = debug_backtrace()[1]['function'] . ': ' . $debugMessage;
         $this->err['errorInfo'] = $errorInfo[2];
     }
 
