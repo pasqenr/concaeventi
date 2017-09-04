@@ -1,0 +1,52 @@
+{% extends "layouts/main.twig" %}
+
+{% block bodyId %}sponsor{% endblock %}
+{% block metaTitle %}Sponsor{% endblock %}
+
+{% block content %}
+    <section class="section">
+        <div class="nav-left">
+            <a class="button is-primary" href="{{ path_for('sponsorsCreate')|e('html_attr') }}">
+                Aggiungi sponsor
+            </a>
+        </div>
+        <div class="is-small">&nbsp;</div>
+
+        {% if sponsor|length > 0 %}
+            {% for sp in sponsor %}
+                <div class="box">
+                    <article class="media">
+                        {% if sp.logo != '' %}
+                            <div class="media-left">
+                                <figure class="image is-64x64">
+                                    <img src="{{ baseUrl }}/assets/img/sponsors/{{ sp.logo }}"
+                                         alt="Logo {{ sp.nome }}">
+                                </figure>
+                            </div>
+                        {% endif %}
+                        <div class="media-content">
+                            <div class="content">
+                                <p>
+                                    <strong>Nome sponsor: </strong> {{ sp.nome }}.
+                                </p>
+                            </div>
+                            <div class="is-small">&nbsp;</div>
+                            <div class="is-small">
+                                <a class="button"
+                                   href="{{ path_for('sponsorsEdit', {'id':sp.idSponsor})|e('html_attr') }}">
+                                    Modifica
+                                </a>
+                                <a class="button is-danger"
+                                   href="{{ path_for('sponsorsDelete', {'id':sp.idSponsor})|e('html_attr') }}">
+                                    Elimina
+                                </a>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            {% endfor %}
+        {% else %}
+            <h3><em>Non ci sono sponsor.</em></h3>
+        {% endif %}
+    </section>
+{% endblock %}

@@ -1,7 +1,7 @@
 {% extends "layouts/main.twig" %}
 
-{% block bodyId %}error{% endblock %}
-{% block metaTitle %}Error{% endblock %}
+{% block bodyId %}errore{% endblock %}
+{% block metaTitle %}Errore{% endblock %}
 
 {% block content %}
     <section class="section">
@@ -9,9 +9,22 @@
             <div class="columns">
                 <div class="column"></div>
                 <div class="column is-half">
-                    <h1 class="title">Error</h1>
-                    <h3 class="subtitle">An error occurred!</h3>
-                    <a href="{{ path_for('home')|e('html_attr') }}">Go to homepage</a>
+                    <h1 class="title">Errore</h1>
+                    <h3 class="subtitle">È avvenuto un errore.</h3>
+                    {% if err.message is defined %}
+                        <div class="content">
+                            <pre>{{ err.message }}</pre>
+                        </div>
+                        {% if utente.ruolo == 'Amministratore' %}
+                            <div class="content">
+                                <pre>{{ err.debugMessage }}</pre>
+                            </div>
+                            <div class="content">
+                                <pre>{{ err.errorInfo }}</pre>
+                            </div>
+                        {% endif %}
+                    {% endif %}
+                    <a href="{{ path_for('home')|e('html_attr') }}">Torna all'homepage</a>
                 </div>
                 <div class="column"></div>
             </div>

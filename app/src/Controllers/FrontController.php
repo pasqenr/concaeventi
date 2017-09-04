@@ -25,6 +25,18 @@ class FrontController extends Controller
         ]);
     }
 
+    public function history(Request $request, Response $response)
+    {
+        $user = SessionHelper::auth($this, $response, SessionHelper::ALL);
+        $events = $this->getEventsHistory();
+
+        /** @noinspection PhpVoidFunctionResultUsedInspection */
+        return $this->render($response, 'front/history.twig', [
+            'utente' => $user,
+            'eventi' => $events
+        ]);
+    }
+
     /**
      * Merge the Associtations on the rows with the same idEvento. The separator used is comma and space (', ').
      * If there aren't events the function returns an empty array.
@@ -78,6 +90,30 @@ class FrontController extends Controller
             USING (idAssociazione)
             WHERE DATEDIFF(E.istanteFine, CURRENT_TIMESTAMP) > 0
             AND E.revisionato = TRUE
+            ORDER BY E.istanteInizio
+        ');
+        $events = $sth->fetchAll();
+
+        $events = $this->mergeAssociations($events);
+
+        return $events;
+    }
+
+    /**
+     * Get all the events that are available and approved, even before the current time-date.
+     *
+     * @return array The events.
+     */
+    private function getEventsHistory(): array
+    {
+        $sth = $this->db->query('
+            SELECT *
+            FROM Evento E
+            JOIN Proporre P
+            USING (idEvento)
+            JOIN Associazione A
+            USING (idAssociazione)
+            WHERE E.revisionato = TRUE
             ORDER BY E.istanteInizio
         ');
         $events = $sth->fetchAll();

@@ -18,7 +18,7 @@ class AssociationController extends Controller
         $user = SessionHelper::auth($this, $response, SessionHelper::PUBLISHER);
 
         if (empty($user)) {
-            return $response->withRedirect($this->router->pathFor('error'));
+            return $response->withRedirect($this->router->pathFor('auth-error'));
         }
 
         $associations = $this->getAssociations();
@@ -36,7 +36,7 @@ class AssociationController extends Controller
         $user = SessionHelper::auth($this, $response, SessionHelper::PUBLISHER);
 
         if (empty($user)) {
-            return $response->withRedirect($this->router->pathFor('error'));
+            return $response->withRedirect($this->router->pathFor('auth-error'));
         }
 
         $members = $this->getAllMembers();
@@ -53,17 +53,21 @@ class AssociationController extends Controller
         $user = SessionHelper::auth($this, $response, SessionHelper::PUBLISHER);
 
         if (empty($user)) {
-            return $response->withRedirect($this->router->pathFor('error'));
+            return $response->withRedirect($this->router->pathFor('auth-error'));
         }
 
         $parsedBody = $request->getParsedBody();
         $created = $this->createAssociation($parsedBody);
 
         if ($created === false) {
-            return $response->withRedirect($this->router->pathFor('associations'));
+            /** @noinspection PhpVoidFunctionResultUsedInspection */
+            return $this->render($response, 'errors/error.twig', [
+                'utente' => $user,
+                'err' => $this->getErrorMessage()
+            ]);
         }
 
-        return $response->withRedirect($this->router->pathFor('error'));
+        return $response->withRedirect($this->router->pathFor('associations'));
     }
 
     public function edit(Request $request, Response $response, $args)
@@ -71,13 +75,25 @@ class AssociationController extends Controller
         $user = SessionHelper::auth($this, $response, SessionHelper::PUBLISHER);
 
         if (empty($user)) {
-            return $response->withRedirect($this->router->pathFor('error'));
+            return $response->withRedirect($this->router->pathFor('auth-error'));
         }
 
         $associationID = $args['id'];
-        $association = $this->getAssociation($associationID);
-        $members = $this->getAllMembers();
-        $belongs = $this->getBelongsByAssociation($associationID);
+
+        try {
+            $association = $this->getAssociation($associationID);
+            $members = $this->getAllMembers();
+            $belongs = $this->getBelongsByAssociation($associationID);
+        } catch (\PDOException $e) {
+            $this->setErrorMessage('PDOException, check errorInfo.',
+                'Errore nell\'elaborazione dei dati.');
+
+            /** @noinspection PhpVoidFunctionResultUsedInspection */
+            return $this->render($response, 'errors/error.twig', [
+                'utente' => $user,
+                'err' => $this->getErrorMessage()
+            ]);
+        }
 
         /** @noinspection PhpVoidFunctionResultUsedInspection */
         return $this->render($response, 'associations/edit.twig', [
@@ -93,7 +109,7 @@ class AssociationController extends Controller
         $user = SessionHelper::auth($this, $response, SessionHelper::PUBLISHER);
 
         if (empty($user)) {
-            return $response->withRedirect($this->router->pathFor('error'));
+            return $response->withRedirect($this->router->pathFor('auth-error'));
         }
 
         $associationID = $args['id'];
@@ -101,8 +117,11 @@ class AssociationController extends Controller
         $updated = $this->updateAssociation($associationID, $parsedBody);
 
         if ($updated === false) {
-            return $response->withRedirect($this->router->pathFor('error'));
-
+            /** @noinspection PhpVoidFunctionResultUsedInspection */
+            return $this->render($response, 'errors/error.twig', [
+                'utente' => $user,
+                'err' => $this->getErrorMessage()
+            ]);
         }
 
         return $response->withRedirect($this->router->pathFor('associations'));
@@ -113,11 +132,22 @@ class AssociationController extends Controller
         $user = SessionHelper::auth($this, $response, SessionHelper::DIRETTORE);
 
         if (empty($user)) {
-            return $response->withRedirect($this->router->pathFor('error'));
+            return $response->withRedirect($this->router->pathFor('auth-error'));
         }
 
         $associationID = $args['id'];
-        $association = $this->getAssociation($associationID);
+        try {
+            $association = $this->getAssociation($associationID);
+        } catch (\PDOException $e) {
+            $this->setErrorMessage('PDOException, check errorInfo.',
+                'Errore nell\'elaborazione dei dati.');
+
+            /** @noinspection PhpVoidFunctionResultUsedInspection */
+            return $this->render($response, 'errors/error.twig', [
+                'utente' => $user,
+                'err' => $this->getErrorMessage()
+            ]);
+        }
 
         /** @noinspection PhpVoidFunctionResultUsedInspection */
         return $this->render($response, 'associations/delete.twig', [
@@ -131,11 +161,20 @@ class AssociationController extends Controller
         $user = SessionHelper::auth($this, $response, SessionHelper::DIRETTORE);
 
         if (empty($user)) {
-            return $response->withRedirect($this->router->pathFor('error'));
+            return $response->withRedirect($this->router->pathFor('auth-error'));
         }
 
         $eventID = (int)$args['id'];
-        $this->deleteAssociation($eventID);
+
+        try {
+            $this->deleteAssociation($eventID);
+        } catch (\PDOException $e) {
+            /** @noinspection PhpVoidFunctionResultUsedInspection */
+            return $this->render($response, 'errors/error.twig', [
+                'utente' => $user,
+                'err' => $this->getErrorMessage()
+            ]);
+        }
 
         return $response->withRedirect($this->router->pathFor('associations'));
     }
@@ -170,7 +209,7 @@ class AssociationController extends Controller
 
     private function getAssociations(): array
     {
-        $sth = $this->db->prepare('
+        $sth = $this->db->query('
             SELECT A.idAssociazione, A.nomeAssociazione, A.logo, CONCAT_WS(\' \', U.nome, U.cognome) AS nomeUtente
             FROM Associazione A
             LEFT JOIN Appartiene AP
@@ -178,7 +217,6 @@ class AssociationController extends Controller
             LEFT JOIN Utente U
             USING (idUtente)
         ');
-        $sth->execute();
 
         return $sth->fetchAll();
     }
@@ -195,9 +233,19 @@ class AssociationController extends Controller
 
     private function createAssociation($data): bool
     {
-        $nomeAssociazione = $data['nomeAssociazione'];
+        $associationName = $data['nomeAssociazione'];
         $logo = $data['logo'];
-        $membri = $data['membri'];
+        $members = $data['membri'];
+
+        if ($associationName === '' || empty($members)) {
+            $this->setErrorMessage(
+                'PDOException, check errorInfo.',
+                'Un campo obbligatorio non è stato inserito.');
+
+            return false;
+        }
+
+        $this->db->beginTransaction();
 
         $sth = $this->db->prepare('
             INSERT INTO Associazione (
@@ -206,24 +254,48 @@ class AssociationController extends Controller
               NULL, :nomeAssociazione, :logo
             )
         ');
-        $sth->bindParam(':nomeAssociazione', $nomeAssociazione, \PDO::PARAM_STR);
+        $sth->bindParam(':nomeAssociazione', $associationName, \PDO::PARAM_STR);
         $sth->bindParam(':logo', $logo, \PDO::PARAM_STR);
 
-        $good = $sth->execute();
+        try {
+            $sth->execute();
+        } catch (\PDOException $e) {
+            $this->setErrorMessage('PDOException, check errorInfo.',
+                'Impossibile creare l\'associazione.',
+                $this->db->errorInfo());
 
-        if (!$good) {
+            $this->db->rollBack();
+
             return false;
         }
 
-        $associationID = $this->getLastAssociationID();
+        try {
+            $associationID = $this->getLastAssociationID();
+        } catch (\PDOException $e) {
+            $this->setErrorMessage(
+                'PDOException, check errorInfo.',
+                'Impossibile recupeare l\'ultima associazione.');
 
-        foreach ($membri as $membro) {
-            $good = $this->addBelong($associationID, $membro);
+            $this->db->rollBack();
 
-            if (!$good) {
+            return false;
+        }
+
+        foreach ($members as $membro) {
+            try {
+                $this->addBelong($associationID, $membro);
+            } catch (\PDOException $e) {
+                $this->setErrorMessage(
+                    'PDOException, check errorInfo.',
+                    'Impossibile inserire un membro nell\'associazione.');
+
+                $this->db->rollBack();
+
                 return false;
             }
         }
+
+        $this->db->commit();
 
         return true;
     }
@@ -236,10 +308,11 @@ class AssociationController extends Controller
             ORDER BY A.idAssociazione DESC
             LIMIT 1
         ');
-        $good = $sth->execute();
 
-        if (!$good) {
-            return false;
+        try {
+            $sth->execute();
+        } catch (\PDOException $e) {
+            throw $e;
         }
 
         return (int)$sth->fetch()['idAssociazione'];
@@ -257,7 +330,13 @@ class AssociationController extends Controller
         $sth->bindParam(':idUtente', $membro, \PDO::PARAM_INT);
         $sth->bindParam(':idAssociazione', $associationID, \PDO::PARAM_INT);
 
-        return $sth->execute();
+        try {
+            $sth->execute();
+        } catch (\PDOException $e) {
+            throw $e;
+        }
+
+        return true;
     }
 
     private function getAssociation($associationID): array
@@ -268,24 +347,15 @@ class AssociationController extends Controller
             WHERE A.idAssociazione = :idAssociazione
         ');
         $sth->bindParam(':idAssociazione', $associationID, \PDO::PARAM_INT);
-        $sth->execute();
+
+
+        try {
+            $sth->execute();
+        } catch (\PDOException $e) {
+            throw $e;
+        }
 
         return $sth->fetch();
-    }
-
-    private function getAssociationMembers($associationID): array
-    {
-        $sth = $this->db->prepare('
-            SELECT U.idUtente, U.nome, U.cognome
-            FROM Appartiene AP
-            JOIN Utente U
-            USING (idUtente)
-            WHERE AP.idAssociazione = :idAssociazione
-        ');
-        $sth->bindParam(':idAssociazione', $associationID, \PDO::PARAM_INT);
-        $sth->execute();
-
-        return $sth->fetchAll();
     }
 
     private function getBelongsByAssociation($associationID): array
@@ -296,7 +366,12 @@ class AssociationController extends Controller
             WHERE AP.idAssociazione = :idAssociazione
         ');
         $sth->bindParam(':idAssociazione', $associationID, \PDO::PARAM_INT);
-        $sth->execute();
+
+        try {
+            $sth->execute();
+        } catch (\PDOException $e) {
+            throw $e;
+        }
 
         return $sth->fetchAll();
     }
@@ -307,6 +382,16 @@ class AssociationController extends Controller
         $logo = $data['logo'];
         $members = $data['membri'];
 
+        if ($associationName === '' || empty($members)) {
+            $this->setErrorMessage(
+                'PDOException, check errorInfo.',
+                'Un campo obbligatorio non è stato inserito.');
+
+            return false;
+        }
+
+        $this->db->beginTransaction();
+
         $sth = $this->db->prepare('
             UPDATE Associazione A
             SET A.nomeAssociazione = :nomeAssociazione, A.logo = :logo
@@ -316,21 +401,46 @@ class AssociationController extends Controller
         $sth->bindParam(':logo', $logo, \PDO::PARAM_STR);
         $sth->bindParam(':idAssociazione', $associationID, \PDO::PARAM_INT);
 
-        $good = $sth->execute();
+        try {
+            $sth->execute();
+        } catch (\PDOException $e) {
+            $this->setErrorMessage(
+                'PDOException, check errorInfo.',
+                'Impossibile modificare l\'evento.',
+                $this->db->errorInfo());
 
-        if (!$good) {
+            $this->db->rollBack();
+
             return false;
         }
 
-        $good = $this->deleteOldBelongs($associationID);
+        try {
+            $this->deleteOldBelongs($associationID);
+        } catch (\PDOException $e) {
+            $this->setErrorMessage(
+                'PDOException, check errorInfo.',
+                'Impossibile modificare le precedenti appartenenze.');
 
-        if (!$good) {
+            $this->db->rollBack();
+
             return false;
         }
 
-        $good = $this->createBelongs($associationID, $members);
+        try {
+            $this->createBelongs($associationID, $members);
+        } catch (\PDOException $e) {
+            $this->setErrorMessage(
+                'PDOException, check errorInfo.',
+                'Impossibile modificare le precedenti appartenenze.');
 
-        return $good;
+            $this->db->rollBack();
+
+            return false;
+        }
+
+        $this->db->commit();
+
+        return true;
     }
 
     private function deleteOldBelongs($associationID): bool
@@ -342,11 +452,19 @@ class AssociationController extends Controller
         ');
         $sth->bindParam(':idAssociazione', $associationID, \PDO::PARAM_INT);
 
-        return $sth->execute();
+        try {
+            $sth->execute();
+        } catch (\PDOException $e) {
+            throw $e;
+        }
+
+        return true;
     }
 
     private function createBelongs($associationID, $members): bool
     {
+        $res = false;
+
         foreach ($members as $member => $memberID) {
             $sth = $this->db->prepare('
                 INSERT INTO Appartiene (
@@ -358,22 +476,27 @@ class AssociationController extends Controller
             ');
             $sth->bindParam(':idUtente', $memberID, \PDO::PARAM_INT);
             $sth->bindParam(':idAssociazione', $associationID, \PDO::PARAM_INT);
-            $good = $sth->execute();
 
-            if (!$good) {
-                return false;
+            try {
+                $res = $sth->execute();
+            } catch (\PDOException $e) {
+                throw $e;
             }
         }
 
-        return true;
+        return $res;
     }
 
     private function deleteAssociation($associationID): bool
     {
-        $good = $this->deleteFromBelongs($associationID);
+        $this->db->beginTransaction();
 
-        if (!$good) {
-            return false;
+        try {
+            $res = $this->deleteFromBelongs($associationID);
+        } catch (\PDOException $e) {
+            $this->db->rollBack();
+
+            throw $e;
         }
 
         $sth = $this->db->prepare('
@@ -383,7 +506,22 @@ class AssociationController extends Controller
         ');
         $sth->bindParam(':idAssociazione', $associationID, \PDO::PARAM_INT);
 
-        return $sth->execute();
+        try {
+            $res &= $sth->execute();
+        } catch (\PDOException $e) {
+            $this->setErrorMessage(
+                'PDOException, check errorInfo.',
+                'Errore nell\'eliminazione dell\'associazione.',
+                $sth->errorInfo());
+
+            $this->db->rollBack();
+
+            throw $e;
+        }
+
+        $this->db->commit();
+
+        return $res;
     }
 
     private function deleteFromBelongs($associationID): bool
@@ -395,6 +533,17 @@ class AssociationController extends Controller
         ');
         $sth->bindParam(':idAssociazione', $associationID, \PDO::PARAM_INT);
 
-        return $sth->execute();
+        try {
+            $res = $sth->execute();
+        } catch (\PDOException $e) {
+            $this->setErrorMessage(
+                'PDOException, check errorInfo.',
+                'Errore nell\'eliminazione dei membri appartenenti all\'associazione.',
+                $sth->errorInfo());
+
+            throw $e;
+        }
+
+        return $res;
     }
 }

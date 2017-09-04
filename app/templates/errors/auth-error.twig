@@ -1,7 +1,7 @@
 {% extends "layouts/main.twig" %}
 
-{% block bodyId %}not-found{% endblock %}
-{% block metaTitle %}404 not found{% endblock %}
+{% block bodyId %}errore{% endblock %}
+{% block metaTitle %}Errore{% endblock %}
 
 {% block content %}
     <section class="section">
@@ -9,13 +9,12 @@
             <div class="columns">
                 <div class="column"></div>
                 <div class="column is-half">
-                    <h1 class="title">Risorsa non trovata</h1>
-                    <h3 class="subtitle">La pagina richiesta non esiste.</h3>
+                    <h1 class="title">Errore</h1>
+                    <h3 class="subtitle">Non hai i permessi per compiere questa azione.</h3>
                     <a href="{{ path_for('home')|e('html_attr') }}">Torna all'homepage</a>
                 </div>
                 <div class="column"></div>
             </div>
-
         </div>
     </section>
 {% endblock %}

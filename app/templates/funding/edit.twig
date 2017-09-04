@@ -1,0 +1,86 @@
+{% extends "layouts/main.twig" %}
+
+{% block bodyId %}modifica-finanziamento{% endblock %}
+{% block metaTitle %}Modifica finanziamento{% endblock %}
+
+{% block content %}
+    <section class="section">
+        <div class="container">
+            <div class="columns">
+                <div class="column"></div>
+                <div class="column is-half">
+                    <form action="{{ path_for('fundingEdit',
+                        {'eventID':funding.idEvento, 'sponsorID':funding.idSponsor})|e('html_attr') }}"
+                          method="post">
+                        <div class="field">
+                            <label class="label">Evento</label>
+                            <p class="control has-icons-left">
+                                <input class="input" type="text" name="idEvento"
+                                       value="{{ funding.titolo|e('html_attr') }} (# {{ funding.idEvento|e('html_attr') }})"
+                                       readonly>
+                                <span class="icon is-small is-left">
+                                    <i class="fa fa-hashtag"></i>
+                                </span>
+                            </p>
+                        </div>
+
+                        <div class="field">
+                            <label class="label">Sponsor</label>
+                            <p class="control has-icons-left">
+                                <input class="input" type="text" name="idSponsor"
+                                       value="{{ funding.nome|e('html_attr') }} (# {{ funding.idSponsor|e('html_attr') }})"
+                                       readonly>
+                                <span class="icon is-small is-left">
+                                    <i class="fa fa-hashtag"></i>
+                                </span>
+                            </p>
+                        </div>
+
+                        <label class="label">Importo</label>
+                        <div class="field has-addons">
+                            <p class="control">
+                                {% if funding.importo is defined %}
+                                    <input class="input" name="importo" type="text" value="{{ funding.importo }}">
+                                {% else %}
+                                    <input class="input" name="importo" type="text" placeholder="0.00" value="">
+                                {% endif %}
+                            </p>
+                            <p class="control">
+                                <a class="button is-static">
+                                    €
+                                </a>
+                            </p>
+                        </div>
+
+                        <div class="field">
+                            <label class="label">Data e ora creazione</label>
+                            <p class="control has-icons-left">
+                                <input class="input" type="text" name="dataCreazione"
+                                       value="{{ funding.dataFinanziamento|e('html_attr') }}"
+                                       readonly>
+                                <span class="icon is-small is-left">
+                                    <i class="fa fa-edit"></i>
+                                </span>
+                            </p>
+                        </div>
+
+                        <div class="is-small">&nbsp;</div>
+                        <div class="field is-grouped">
+                            <div class="control">
+                                <button class="button is-primary">Modifica</button>
+                            </div>
+                            <div class="control">
+                                <p class="button is-light" onclick="goBack();">Annulla</p>
+                            </div>
+                        </div>
+
+                        <input type="hidden" name="_method" value="UPDATE">
+                        <input type="hidden" name="{{csrf.keys.name}}" value="{{csrf.name}}">
+                        <input type="hidden" name="{{csrf.keys.value}}" value="{{csrf.value}}">
+                    </form>
+                </div>
+                <div class="column"></div>
+            </div>
+        </div>
+    </section>
+{% endblock %}

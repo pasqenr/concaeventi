@@ -1,0 +1,84 @@
+{% extends "layouts/main.twig" %}
+
+{% block bodyId %}crea-finanziamento{% endblock %}
+{% block metaTitle %}Crea finanziamento{% endblock %}
+
+{% block content %}
+    <section class="section">
+        <div class="container">
+            <div class="columns">
+                <div class="column"></div>
+                <div class="column is-half">
+                    <form action="{{ path_for('fundingCreate')|e('html_attr') }}" method="post">
+                        <div class="columns">
+                            <div class="column">
+                                <label>Sponsor</label>
+                            </div>
+                            <div class="column">
+                                <div class="control">
+                                    <div class="select">
+                                        <select name="idSponsor">
+                                            {% for s in sponsors %}
+                                                <option value="{{ s.idSponsor }}">{{ s.nome }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="columns">
+                            <div class="column">
+                                <label>Evento</label>
+                            </div>
+                            <div class="column">
+                                <div class="control">
+                                    <div class="select">
+                                        <select name="idEvento">
+                                            {% for e in events %}
+                                                <option value="{{ e.idEvento }}">{{ e.titolo }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="columns">
+                            <div class="column">
+                                <label>Importo</label>
+                            </div>
+                            <div class="column">
+                                <div class="field has-addons">
+                                    <p class="control">
+                                        <input class="input" name="importo" type="text" placeholder="0.00" value="">
+                                    </p>
+                                    <p class="control">
+                                        <a class="button is-static">
+                                            €
+                                        </a>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="is-small">&nbsp;</div>
+                        <div class="field is-grouped">
+                            <div class="control">
+                                <button class="button is-primary">Finanzia</button>
+                            </div>
+                            <div class="control">
+                                <p class="button is-light" onclick="goBack();">Annulla</p>
+                            </div>
+                        </div>
+
+                        <input type="hidden" name="_method" value="POST">
+                        <input type="hidden" name="{{csrf.keys.name}}" value="{{csrf.name}}">
+                        <input type="hidden" name="{{csrf.keys.value}}" value="{{csrf.value}}">
+                    </form>
+                </div>
+                <div class="column"></div>
+            </div>
+        </div>
+    </section>
+{% endblock %}

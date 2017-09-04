@@ -6,6 +6,7 @@ use \App\Helpers\SessionHelper;
 use Slim\Http\Response;
 use Slim\Http\Request;
 use Slim\Router;
+use Slim\Container;
 
 /**
  * @property Router router
@@ -13,12 +14,19 @@ use Slim\Router;
  */
 class EventController extends Controller
 {
+    public function __construct(Container $container)
+    {
+        parent::__construct($container);
+
+        $this->setErrorMessage();
+    }
+
     public function showEvents(Request $request, Response $response)
     {
         $user = SessionHelper::auth($this, $response, SessionHelper::EDITORE);
 
         if (empty($user)) {
-            return $response->withRedirect($this->router->pathFor('error'));
+            return $response->withRedirect($this->router->pathFor('auth-error'));
         }
 
         $events  = $this->getEvents();
@@ -35,7 +43,7 @@ class EventController extends Controller
         $user = SessionHelper::auth($this, $response, SessionHelper::PUBLISHER);
 
         if (empty($user)) {
-            return $response->withRedirect($this->router->pathFor('error'));
+            return $response->withRedirect($this->router->pathFor('auth-error'));
         }
 
         $associations = $this->getAssociations();
@@ -52,14 +60,18 @@ class EventController extends Controller
         $user = SessionHelper::auth($this, $response, SessionHelper::EDITORE);
 
         if (empty($user)) {
-            return $response->withRedirect($this->router->pathFor('error'));
+            return $response->withRedirect($this->router->pathFor('auth-error'));
         }
 
         $parsedBody = $request->getParsedBody();
         $created = $this->createEvent($user['idUtente'], $parsedBody);
 
         if ($created === false) {
-            return $response->withRedirect($this->router->pathFor('error'));
+            /** @noinspection PhpVoidFunctionResultUsedInspection */
+            return $this->render($response, 'errors/error.twig', [
+                'utente' => $user,
+                'err' => $this->getErrorMessage()
+            ]);
         }
 
         return $response->withRedirect($this->router->pathFor('events'));
@@ -70,11 +82,23 @@ class EventController extends Controller
         $user = SessionHelper::auth($this, $response, SessionHelper::DIRETTORE);
 
         if (empty($user)) {
-            return $response->withRedirect($this->router->pathFor('error'));
+            return $response->withRedirect($this->router->pathFor('auth-error'));
         }
 
         $eventID = (int)$args['id'];
-        $event = $this->getEvent($eventID);
+
+        try {
+            $event = $this->getEvent($eventID);
+        } catch (\PDOException $e) {
+            $this->setErrorMessage('PDOException, check errorInfo.',
+                'Impossibile trovare l\'evento.');
+
+            /** @noinspection PhpVoidFunctionResultUsedInspection */
+            return $this->render($response, 'errors/error.twig', [
+                'utente' => $user,
+                'err' => $this->getErrorMessage()
+            ]);
+        }
 
         if (empty($event)) {
             return $response->withRedirect($this->router->pathFor('not-found'));
@@ -92,11 +116,19 @@ class EventController extends Controller
         $user = SessionHelper::auth($this, $response, SessionHelper::DIRETTORE);
 
         if (empty($user)) {
-            return $response->withRedirect($this->router->pathFor('error'));
+            return $response->withRedirect($this->router->pathFor('auth-error'));
         }
 
         $eventID = (int)$args['id'];
-        $this->deleteEvent($eventID);
+        $deleted = $this->deleteEvent($eventID);
+
+        if ($deleted === false) {
+            /** @noinspection PhpVoidFunctionResultUsedInspection */
+            return $this->render($response, 'errors/error.twig', [
+                'utente' => $user,
+                'err' => $this->getErrorMessage()
+            ]);
+        }
 
         return $response->withRedirect($this->router->pathFor('events'));
     }
@@ -106,11 +138,22 @@ class EventController extends Controller
         $user = SessionHelper::auth($this, $response, SessionHelper::PUBLISHER);
 
         if (empty($user)) {
-            return $response->withRedirect($this->router->pathFor('error'));
+            return $response->withRedirect($this->router->pathFor('auth-error'));
         }
 
         $eventID = (int)$args['id'];
-        $event   = $this->getEvent($eventID);
+        try {
+            $event = $this->getEvent($eventID);
+        } catch (\PDOException $e) {
+            $this->setErrorMessage('PDOException, check errorInfo.',
+                'Impossibile trovare l\'evento.');
+
+            /** @noinspection PhpVoidFunctionResultUsedInspection */
+            return $this->render($response, 'errors/error.twig', [
+                'utente' => $user,
+                'err' => $this->getErrorMessage()
+            ]);
+        }
 
         if (empty($event)) {
             return $response->withRedirect($this->router->pathFor('not-found'));
@@ -118,7 +161,18 @@ class EventController extends Controller
 
         $associations = $this->getAssociations();
 
-        $eventAssociations = $this->getEventAssociationsIds($event['nomeAssociazione']);
+        try {
+            $eventAssociations = $this->getEventAssociationsIds($event['nomeAssociazione']);
+        } catch (\PDOException $e) {
+            $this->setErrorMessage('PDOException, check errorInfo.',
+                'Impossibile trovare le associazioni.');
+
+            /** @noinspection PhpVoidFunctionResultUsedInspection */
+            return $this->render($response, 'errors/error.twig', [
+                'utente' => $user,
+                'err' => $this->getErrorMessage()
+            ]);
+        }
 
         /** @noinspection PhpVoidFunctionResultUsedInspection */
         return $this->render($response, 'events/edit.twig', [
@@ -134,14 +188,18 @@ class EventController extends Controller
         $user = SessionHelper::auth($this, $response, SessionHelper::PUBLISHER);
 
         if (empty($user)) {
-            return $response->withRedirect($this->router->pathFor('error'));
+            return $response->withRedirect($this->router->pathFor('auth-error'));
         }
 
         $parsedBody = $request->getParsedBody();
         $updated = $this->updateEvent($parsedBody);
 
         if ($updated === false) {
-            return $response->withRedirect($this->router->pathFor('error'));
+            /** @noinspection PhpVoidFunctionResultUsedInspection */
+            return $this->render($response, 'errors/error.twig', [
+                'utente' => $user,
+                'err' => $this->getErrorMessage()
+            ]);
         }
 
         return $response->withRedirect($this->router->pathFor('events'));
@@ -151,7 +209,20 @@ class EventController extends Controller
     {
         $user = SessionHelper::auth($this, $response, SessionHelper::ALL);
         $eventID = (int)$args['id'];
-        $event   = $this->getEvent($eventID);
+
+        try {
+            $event = $this->getEvent($eventID);
+        } catch (\PDOException $e) {
+            $this->setErrorMessage('PDOException, check errorInfo.',
+                'Impossibile trovare l\'evento.');
+
+            /** @noinspection PhpVoidFunctionResultUsedInspection */
+            return $this->render($response, 'errors/error.twig', [
+                'utente' => $user,
+                'err' => $this->getErrorMessage()
+            ]);
+        }
+
         $associations = $this->getEventAssociations($event);
 
         if (empty($event)) {
@@ -171,11 +242,23 @@ class EventController extends Controller
         $user = SessionHelper::auth($this, $response, SessionHelper::EDITORE);
 
         if (empty($user)) {
-            return $response->withRedirect($this->router->pathFor('events'));
+            return $response->withRedirect($this->router->pathFor('auth-error'));
         }
 
         $eventID = (int)$args['id'];
-        $event   = $this->getEvent($eventID);
+
+        try {
+            $event = $this->getEvent($eventID);
+        } catch (\PDOException $e) {
+            $this->setErrorMessage('PDOException, check errorInfo.',
+                'Impossibile trovare l\'evento.');
+
+            /** @noinspection PhpVoidFunctionResultUsedInspection */
+            return $this->render($response, 'errors/error.twig', [
+                'utente' => $user,
+                'err' => $this->getErrorMessage()
+            ]);
+        }
         $associations = $this->getEventAssociations($event);
 
         if (empty($event)) {
@@ -195,15 +278,18 @@ class EventController extends Controller
         $user = SessionHelper::auth($this, $response, SessionHelper::EDITORE);
 
         if (empty($user)) {
-            return $response->withRedirect($this->router->pathFor('error'));
+            return $response->withRedirect($this->router->pathFor('auth-error'));
         }
 
         $parsedBody = $request->getParsedBody();
         $modified = $this->updatePageEvent($args['id'], $parsedBody);
 
         if ($modified === false) {
-            return $response->withRedirect($this->router->pathFor('error'));
-
+            /** @noinspection PhpVoidFunctionResultUsedInspection */
+            return $this->render($response, 'errors/error.twig', [
+                'utente' => $user,
+                'err' => $this->getErrorMessage()
+            ]);
         }
 
         return $response->withRedirect($this->router->pathFor('events'));
@@ -255,8 +341,8 @@ class EventController extends Controller
     {
         $sth = $this->db->query('
             SELECT U.idUtente, A.idAssociazione, E.idEvento, E.titolo, E.immagine, E.descrizione, E.istanteCreazione,
-                   E.istanteInizio, E.istanteFine, E.pagina, E.revisionato, A.nomeAssociazione, A.logo,
-                   U.nome AS nomeUtente, U.cognome AS cognomeUtente, U.email, U.ruolo
+                   E.istanteInizio, E.istanteFine, E.pagina, E.revisionato, A2.nomeAssociazione AS nomeAssPrimaria,
+                   A.nomeAssociazione, A.logo, U.nome AS nomeUtente, U.cognome AS cognomeUtente, U.email, U.ruolo
             FROM Evento E
             LEFT JOIN Proporre P
             USING (idEvento)
@@ -264,10 +350,20 @@ class EventController extends Controller
             USING (idAssociazione)
             LEFT JOIN Utente U
             USING (idUtente)
+            LEFT JOIN Associazione A2
+            ON (E.idAssPrimaria = A2.idAssociazione)
             WHERE DATEDIFF(E.istanteFine, CURRENT_TIMESTAMP) > 0
             ORDER BY E.istanteInizio
         ');
-        $events = $sth->fetchAll();
+        try {
+            $events = $sth->fetchAll();
+        } catch (\PDOException $e) {
+            $this->setErrorMessage('getEvents(): PDOException, check errorInfo.',
+                'Recupero eventi: errore nell\'elaborazione dei dati.',
+                $this->db->errorInfo());
+
+            throw $e;
+        }
 
         $events = $this->mergeAssociations($events);
 
@@ -281,7 +377,7 @@ class EventController extends Controller
      */
     private function createEvent($userID, $data): bool
     {
-        $id = $userID;
+        $idUtente = $userID;
         $titolo = $data['titolo'];
         $immagine = $data['immagine'];
         $descrizione = $data['descrizione'];
@@ -290,9 +386,22 @@ class EventController extends Controller
         $pagina = $data['pagina'];
         $revisionato = $data['revisionato'];
         $associazioni = $data['associazioni'];
+        $idAssPrimaria = $data['assPrimaria'];
 
-        if ($titolo === '' || $descrizione === '' || $istanteInizio === 'yyyy-mm-gg hh:mm:ss' ||
-            $istanteFine === 'yyyy-mm-gg hh:mm:ss') {
+        $date_pattern = '^\d{4}-\d{2}-\d{2} (\d{2}(:\d{2}(:\d{2})?)?)?$^';
+
+        if ($titolo === '' || $descrizione === '' || $istanteInizio === '' || $istanteFine === '' ||
+            $associazioni === '' || $idAssPrimaria === '') {
+            $this->setErrorMessage('createEvent(): Empty field.',
+                'Creazione evento: un campo obbligatorio non è stato compilato.');
+
+            return false;
+        }
+
+        if (!preg_match($date_pattern, $istanteInizio) || !preg_match($date_pattern, $istanteFine)) {
+            $this->setErrorMessage('createEvent(): Wrong date match.',
+                'Creazione evento: formato data errato.');
+
             return false;
         }
 
@@ -302,14 +411,16 @@ class EventController extends Controller
             $revisionato = 0;
         }
 
+        $this->db->beginTransaction();
+
         $sth = $this->db->prepare('
             INSERT INTO Evento (
                 idEvento, titolo, immagine, descrizione, istanteCreazione, istanteInizio, istanteFine, 
-                pagina, revisionato, idUtente
+                pagina, revisionato, idUtente, idAssPrimaria
             )
             VALUES (
                 NULL, :titolo, :immagine, :descrizione, CURRENT_TIMESTAMP, :istanteInizio, :istanteFine, :pagina, 
-                :revisionato, :idUtente
+                :revisionato, :idUtente, :idAssPrimaria
             )
         ');
         $sth->bindParam(':titolo', $titolo, \PDO::PARAM_STR);
@@ -319,23 +430,45 @@ class EventController extends Controller
         $sth->bindParam(':istanteFine', $istanteFine, \PDO::PARAM_STR);
         $sth->bindParam(':pagina', $pagina, \PDO::PARAM_STR);
         $sth->bindParam(':revisionato', $revisionato, \PDO::PARAM_INT);
-        $sth->bindParam(':idUtente', $id, \PDO::PARAM_INT);
+        $sth->bindParam(':idUtente', $idUtente, \PDO::PARAM_INT);
+        $sth->bindParam(':idAssPrimaria', $idAssPrimaria, \PDO::PARAM_INT);
 
-        $good = $sth->execute();
+        try {
+            $sth->execute();
+        } catch (\PDOException $e) {
+            $this->setErrorMessage('PDOException, check errorInfo.',
+                'Impossibile creare l\'evento.',
+                $this->db->errorInfo());
 
-        if (!$good) {
+            $this->db->rollBack();
+
             return false;
         }
 
-        $eventID = $this->getLastEventID();
+        try {
+            $eventID = $this->getLastEventID();
+        } catch (\PDOException $e) {
+            $this->setErrorMessage('PDOException, check errorInfo.',
+                'Impossibile recupeare l\'ultimo evento.');
+
+            $this->db->rollBack();
+
+            return false;
+        }
 
         foreach ($associazioni as $ass) {
-            $good = $this->addPropose($eventID, $ass);
+            try {
+                $this->addPropose($eventID, $ass);
+            } catch (\PDOException $e) {
+                $this->setErrorMessage('PDOException, check errorInfo.',
+                    'Impossibile associare le associazioni.');
 
-            if (!$good) {
+                $this->db->rollBack();
+
                 return false;
             }
         }
+        $this->db->commit();
 
         return true;
     }
@@ -358,10 +491,11 @@ class EventController extends Controller
             ORDER BY E.idEvento DESC
             LIMIT 1
         ');
-        $good = $sth->execute();
 
-        if (!$good) {
-            return -1;
+        try {
+            $sth->execute();
+        } catch (\PDOException $e) {
+            throw $e;
         }
 
         return (int)$sth->fetch()['idEvento'];
@@ -380,7 +514,13 @@ class EventController extends Controller
         $sth->bindParam(':idEvento', $eventID, \PDO::PARAM_INT);
         $sth->bindParam(':idAssociazione', $associationID, \PDO::PARAM_INT);
 
-        return $sth->execute();
+        try {
+            $sth->execute();
+        } catch (\PDOException $e) {
+            throw $e;
+        }
+
+        return true;
     }
 
     /**
@@ -396,8 +536,9 @@ class EventController extends Controller
 
         $sth = $this->db->prepare('
             SELECT U.idUtente, A.idAssociazione, E.idEvento, E.titolo, E.immagine, E.descrizione, E.istanteCreazione,
-                   E.istanteInizio, E.istanteFine, E.pagina, E.revisionato, A.nomeAssociazione, A.logo,
-                   U.nome AS nomeUtente, U.cognome AS cognomeUtente, U.email, U.ruolo
+                   E.istanteInizio, E.istanteFine, E.pagina, E.revisionato, A2.nomeAssociazione AS nomeAssPrimaria, 
+                   A2.idAssociazione AS idAssPrimaria, A.nomeAssociazione, A.logo, U.nome AS nomeUtente, 
+                   U.cognome AS cognomeUtente, U.email, U.ruolo
             FROM Evento E
             LEFT JOIN Proporre P
             USING (idEvento)
@@ -405,10 +546,18 @@ class EventController extends Controller
             USING (idAssociazione)
             LEFT JOIN Utente U
             USING (idUtente)
+            LEFT JOIN Associazione A2
+            ON (E.idAssPrimaria = A2.idAssociazione)
             WHERE E.idEvento = :eventID
         ');
         $sth->bindParam(':eventID', $id, \PDO::PARAM_INT);
-        $sth->execute();
+
+        try {
+            $sth->execute();
+        } catch (\PDOException $e) {
+            throw $e;
+        }
+
         $events = $sth->fetchAll();
 
         if (empty($events)) {
@@ -422,9 +571,16 @@ class EventController extends Controller
 
     private function deleteEvent($eventID): bool
     {
-        $good = $this->deleteFromProposes($eventID);
+        $this->db->beginTransaction();
 
-        if (!$good) {
+        try {
+            $this->deleteFromProposes($eventID);
+        } catch (\PDOException $e) {
+            $this->setErrorMessage('PDOException, check errorInfo.',
+                'Impossibile eliminare le associazioni collegate all\'evento.');
+
+            $this->db->rollBack();
+
             return false;
         }
 
@@ -435,11 +591,26 @@ class EventController extends Controller
         ');
         $sth->bindParam(':idEvento', $eventID, \PDO::PARAM_INT);
 
-        return $sth->execute();
+        try {
+            $sth->execute();
+        } catch (\PDOException $e) {
+            $this->setErrorMessage('PDOException, check errorInfo.',
+                'Impossibile eliminare l\'evento.',
+                $this->db->errorInfo());
+
+            $this->db->rollBack();
+
+            return false;
+        }
+
+        $this->db->commit();
+
+        return true;
     }
 
     private function deleteFromProposes($eventID): bool
     {
+
         $sth = $this->db->prepare('
             DELETE
             FROM Proporre
@@ -447,7 +618,13 @@ class EventController extends Controller
         ');
         $sth->bindParam(':idEvento', $eventID, \PDO::PARAM_INT);
 
-        return $sth->execute();
+        try {
+            $sth->execute();
+        } catch (\PDOException $e) {
+            throw $e;
+        }
+
+        return true;
     }
 
     private function updateEvent($update): bool
@@ -462,11 +639,29 @@ class EventController extends Controller
         $pagina = $update['pagina'];
         $revisionato = $update['revisionato'];
 
+        $date_pattern = '^\d{4}-\d{2}-\d{2} (\d{2}(:\d{2}(:\d{2})?)?)?$^';
+
+        if ($titolo === '' || $descrizione === '' || $istanteInizio === '' || $istanteFine === '') {
+            $this->setErrorMessage('updateEvent(): Empty field.',
+                'Modifica evento: un campo obbligatorio non è stato compilato.');
+
+            return false;
+        }
+
+        if (!preg_match($date_pattern, $istanteInizio) || !preg_match($date_pattern, $istanteFine)) {
+            $this->setErrorMessage('updateEvent(): Wrong date match.',
+                'Modifica evento: formato data errato.');
+
+            return false;
+        }
+
         if ($revisionato === 'on') {
             $revisionato = 1;
         } else {
             $revisionato = 0;
         }
+
+        $this->db->beginTransaction();
 
         $sth = $this->db->prepare('
             UPDATE Evento E 
@@ -485,21 +680,43 @@ class EventController extends Controller
         $sth->bindParam(':pagina', $pagina, \PDO::PARAM_STR);
         $sth->bindParam(':revisionato', $revisionato, \PDO::PARAM_INT);
 
-        $good = $sth->execute();
+        try {
+            $sth->execute();
+        } catch (\PDOException $e) {
+            $this->setErrorMessage('PDOException, check errorInfo.',
+                'Impossibile modificare l\'evento.',
+                $this->db->errorInfo());
 
-        if (!$good) {
+            $this->db->rollBack();
+
             return false;
         }
 
-        $good = $this->deleteOldProposes($eventID);
+        try {
+            $this->deleteOldProposes($eventID);
+        } catch (\PDOException $e) {
+            $this->setErrorMessage('PDOException, check errorInfo.',
+                'Impossibile modificare le precedenti associazioni collegate all\'evento.');
 
-        if (!$good) {
+            $this->db->rollBack();
+
             return false;
         }
 
-        $good = $this->createProposes($eventID, $update);
+        try {
+            $this->createProposes($eventID, $update);
+        } catch (\PDOException $e) {
+            $this->setErrorMessage('PDOException, check errorInfo.',
+                'Impossibile modificare le precedenti associazioni collegate all\'evento.');
 
-        return $good;
+            $this->db->rollBack();
+
+            return false;
+        }
+
+        $this->db->commit();
+
+        return true;
     }
 
     private function deleteOldProposes($eventID): bool
@@ -511,7 +728,13 @@ class EventController extends Controller
         ');
         $sth->bindParam(':idEvento', $eventID, \PDO::PARAM_INT);
 
-        return $sth->execute();
+        try {
+            $sth->execute();
+        } catch (\PDOException $e) {
+            throw $e;
+        }
+
+        return true;
     }
 
     private function createProposes($eventID, $event): bool
@@ -529,10 +752,12 @@ class EventController extends Controller
             ');
             $sth->bindParam(':idEvento', $eventID, \PDO::PARAM_INT);
             $sth->bindParam(':idAssociazione', $associationsID, \PDO::PARAM_INT);
-            $good = $sth->execute();
 
-            if (!$good) {
-                return false;
+
+            try {
+                $sth->execute();
+            } catch (\PDOException $e) {
+                throw $e;
             }
         }
 
@@ -546,7 +771,12 @@ class EventController extends Controller
         $assCount = count($associationNames);
 
         for ($i = 0; $i < $assCount; $i++) {
-            $associationID = $this->getAssociationIdByName($associationNames[$i]);
+            try {
+                $associationID = $this->getAssociationIdByName($associationNames[$i]);
+            } catch (\PDOException $e) {
+                throw $e;
+            }
+
             $associations[$i] = $associationID;
         }
 
@@ -562,7 +792,13 @@ class EventController extends Controller
             LIMIT 1
         ');
         $sth->bindParam(':nomeAssociazione', $assName, \PDO::PARAM_STR);
-        $sth->execute();
+
+        try {
+            $sth->execute();
+        } catch (\PDOException $e) {
+            throw $e;
+        }
+
 
         return $sth->fetch()['idAssociazione'];
     }
@@ -585,16 +821,26 @@ class EventController extends Controller
     private function updatePageEvent($eventID, $update): bool
     {
         $id = (int)$eventID;
-        $pagina = $update['pagina'];
+        $page = $update['pagina'];
 
         $sth = $this->db->prepare('
             UPDATE Evento E
             SET E.pagina = :pagina
             WHERE E.idEvento = :eventID
         ');
-        $sth->bindParam(':pagina', $pagina, \PDO::PARAM_STR);
+        $sth->bindParam(':pagina', $page, \PDO::PARAM_STR);
         $sth->bindParam(':eventID', $id, \PDO::PARAM_INT);
 
-        return $sth->execute();
+        try {
+            $sth->execute();
+        } catch (\PDOException $e) {
+            $this->setErrorMessage('PDOException, check errorInfo.',
+                'Impossibile modificare la pagina.',
+                $this->db->errorInfo());
+
+            return false;
+        }
+
+        return true;
     }
 }

@@ -85,8 +85,24 @@
                             </select>
                         </div>
 
+                        <div class="is-small">&nbsp;</div>
+
+                        <label class="label">
+                            Associazione primaria:
+                        </label>
+                        <div class="select">
+                            <select name="assPrimaria">
+                                {% for ass in associazioni %}
+                                    <option value="{{ ass.idAssociazione }}">{{ ass.nomeAssociazione }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="is-small">&nbsp;</div>
+
                         {% if utente.idUtente is defined %}
-                            {% if utente.ruolo == 'Direttore' or utente.ruolo == 'Publisher' %}
+                            {% if utente.ruolo == 'Amministratore' or utente.ruolo == 'Direttore'
+                                or utente.ruolo == 'Publisher' %}
                                 <div class="field">
                                     <div class="control">
                                         <label class="checkbox">

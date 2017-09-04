@@ -14,6 +14,7 @@ class SessionHelper {
     const EDITORE = 'Editore';
     const PUBLISHER = 'Publisher';
     const DIRETTORE = 'Direttore';
+    const AMMINISTRATORE = 'Amministratore';
 
     /**
      * Check if the idUtente variable in the session is setted.
@@ -69,6 +70,8 @@ class SessionHelper {
         }
 
         switch ($user['ruolo']) {
+            case SessionHelper::AMMINISTRATORE:
+                break;
             case SessionHelper::DIRETTORE:
                 break;
             case SessionHelper::PUBLISHER:

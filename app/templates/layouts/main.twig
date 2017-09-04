@@ -48,15 +48,15 @@
                                 <span class="nav-item">Home</span>
                             </a>
                             {% if utente.idUtente is defined %}
-                                {% if utente.ruolo == 'Direttore'
-                                    or utente.ruolo == 'Publisher'
-                                    or utente.ruolo == 'Editore' %}
-                                    <a class="nav-item" href="{{ path_for('panel')|e('html_attr') }}">
-                                        <i class="fa fa-book"></i>
-                                        <span class="nav-item">Pannello</span>
-                                    </a>
-                                {% endif %}
+                                <a class="nav-item" href="{{ path_for('panel')|e('html_attr') }}">
+                                    <i class="fa fa-book"></i>
+                                    <span class="nav-item">Pannello</span>
+                                </a>
                             {% endif %}
+                            <a class="nav-item" href="{{ path_for('history')|e('html_attr') }}">
+                                <i class="fa fa-university"></i>
+                                <span class="nav-item">Storico</span>
+                            </a>
                         </div>
                         <div class="nav-right">
                             {% if utente.idUtente is defined %}
@@ -100,7 +100,9 @@
                                 {% if utente.idUtente is defined %}
                                     Loggato come <strong>{{ utente.nome }} {{ utente.cognome }}</strong>
                                     <span class="icon is-small">
-                                    {% if utente.ruolo == 'Direttore' %}
+                                    {% if utente.ruolo == 'Amministratore' %}
+                                        <i class="fa fa-id-card"></i>
+                                    {% elseif utente.ruolo == 'Direttore' %}
                                         <i class="fa fa-user-circle-o"></i>
                                     {% elseif utente.ruolo == 'Publisher' %}
                                         <i class="fa fa-user-plus"></i>
@@ -130,7 +132,7 @@
                         The source code is licensed
                         <a href="https://www.gnu.org/licenses/gpl-3.0.en.html">GPL-3.0</a>. The website content
                         is licensed <a href="http://creativecommons.org/licenses/by-nc-sa/4.0/">CC ANS 4.0</a>.
-                        Version: RC1.
+                        Version: RC2.
                     </p>
                     <p>
                         <a class="icon" href="https://github.com/pasqenr/concaeventi">

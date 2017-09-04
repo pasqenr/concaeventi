@@ -13,6 +13,15 @@ class Controller
     private $container;
 
     /**
+     * @var array $err Contains useful information for the user when an error appears.
+     */
+    private $err = [
+        'message' => '',
+        'debugMessage' => '',
+        'errorInfo' => ''
+    ];
+
+    /**
      * @param Container $container
      */
     public function __construct(Container $container)
@@ -41,5 +50,29 @@ class Controller
     public function __get($name)
     {
         return $this->container->get($name);
+    }
+
+    public function __set($name, $value)
+    {
+
+    }
+
+    public function __isset($name)
+    {
+
+    }
+
+    public function setErrorMessage($debugMessage = 'Errore nell\'elaborazione dei dati.',
+                                    $message = '',
+                                    $errorInfo = ['', '', ''])
+    {
+        $this->err['message'] = $message;
+        $this->err['debugMessage'] = debug_backtrace()[1]['function'] . ': ' . $debugMessage;
+        $this->err['errorInfo'] = $errorInfo[2];
+    }
+
+    public function getErrorMessage()
+    {
+        return $this->err;
     }
 }
