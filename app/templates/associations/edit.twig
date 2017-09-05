@@ -65,6 +65,29 @@
 
                         <div class="is-small">&nbsp;</div>
 
+                        <label class="label">Telefono:</label>
+                        <div class="field is-expanded">
+                            <div class="field has-addons">
+                                <p class="control">
+                                    <a class="button is-static">
+                                        +39
+                                    </a>
+                                </p>
+                                <p class="control is-expanded">
+                                    <input class="input" name="telefono" type="tel"
+                                           value="{{ ass.telefono }}"
+                                           placeholder="Numero di telefono">
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="is-small">&nbsp;</div>
+
+                        <label class="label">Stile:</label>
+                        <div class="field">
+                            <input name="stile" type="color" value="{{ ass.stile }}">
+                        </div>
+
                         <div class="field is-grouped">
                             <div class="control">
                                 <button class="button is-primary">Modifica</button>
@@ -73,6 +96,8 @@
                                 <p class="button is-light" onclick="goBack();">Annulla</p>
                             </div>
                         </div>
+
+                        <div class="is-small">&nbsp;</div>
 
                         <input type="hidden" name="_method" value="UPDATE">
                         <input type="hidden" name="{{csrf.keys.name}}" value="{{csrf.name}}">

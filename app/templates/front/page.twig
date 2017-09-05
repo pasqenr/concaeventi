@@ -10,7 +10,7 @@
                 <div class="column"></div>
                 <div class="column is-three-quarters">
                     <div class="container">
-                        <h1 class="title">{{ evento.titolo }}</h1>
+                        <h1 class="title" style="color: {{ evento.stile }};">{{ evento.titolo }}</h1>
                     </div>
                     <div class="is-small">&nbsp;</div>
                     <div class="container">
@@ -27,8 +27,6 @@
                         <div class="container">
                             {{ evento.pagina|raw }}
                         </div>
-                    {% else %}
-
                     {% endif %}
 
                     <div class="is-small">&nbsp;</div>
@@ -46,10 +44,14 @@
                             {% endif %}
                         {% endfor %}
                     </div>
+
+                    {% if evento.telefono != '' %}
+                        <div class="is-small">&nbsp;</div>
+                        <p><strong>Telefono:</strong> {{ evento.telefono }}</p>
+                    {% endif %}
                 </div>
                 <div class="column"></div>
             </div>
-
         </div>
     </section>
 {% endblock %}

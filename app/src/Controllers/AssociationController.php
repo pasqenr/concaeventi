@@ -210,7 +210,8 @@ class AssociationController extends Controller
     private function getAssociations(): array
     {
         $sth = $this->db->query('
-            SELECT A.idAssociazione, A.nomeAssociazione, A.logo, CONCAT_WS(\' \', U.nome, U.cognome) AS nomeUtente
+            SELECT A.idAssociazione, A.nomeAssociazione, A.logo, A.telefono,
+              CONCAT_WS(\' \', U.nome, U.cognome) AS nomeUtente
             FROM Associazione A
             LEFT JOIN Appartiene AP
             USING (idAssociazione)
@@ -234,28 +235,62 @@ class AssociationController extends Controller
     private function createAssociation($data): bool
     {
         $associationName = $data['nomeAssociazione'];
-        $logo = $data['logo'];
+        $logo = $data['logo'] ?? '';
         $members = $data['membri'];
+        $telephone = $data['telefono'] ?? '';
+        $style = $data['stile'] ?? '';
 
         if ($associationName === '' || empty($members)) {
             $this->setErrorMessage(
-                'PDOException, check errorInfo.',
+                'Empty request fields.',
                 'Un campo obbligatorio non è stato inserito.');
 
             return false;
+        }
+
+        if ($telephone !== '') {
+            if ($this->isValidThelephone($telephone) === false) {
+                $this->setErrorMessage(
+                    'Wrong telephone format.',
+                    'Il numero di telefono non è nel formato corretto.');
+
+                return false;
+            }
+        }
+
+        /*$associationID = $this->getLastAssociationID() + 1;
+        $styleCreated = $this->setStyle($associationID, $style);
+        $style_path = WWW_PATH . '/assets/css/ass/' . $associationID . '.css';
+
+        if ($styleCreated === false) {
+            $this->setErrorMessage(
+                'Impossible to write the new style CSS file.',
+                'Impossibile creare lo stile associato.');
+
+            return false;
+        }*/
+
+        if ($style !== '' && $this->isValidHex($style) === false) {
+                $this->setErrorMessage(
+                    'Wrong hex format.',
+                    'Il colore scelto non è nel formato corretto.');
+
+                return false;
         }
 
         $this->db->beginTransaction();
 
         $sth = $this->db->prepare('
             INSERT INTO Associazione (
-              idAssociazione, nomeAssociazione, logo
+              idAssociazione, nomeAssociazione, logo, telefono, stile
             ) VALUES (
-              NULL, :nomeAssociazione, :logo
+              NULL, :nomeAssociazione, :logo, :telefono, :stile
             )
         ');
         $sth->bindParam(':nomeAssociazione', $associationName, \PDO::PARAM_STR);
         $sth->bindParam(':logo', $logo, \PDO::PARAM_STR);
+        $sth->bindParam(':telefono', $telephone, \PDO::PARAM_STR);
+        $sth->bindParam(':stile', $style, \PDO::PARAM_STR);
 
         try {
             $sth->execute();
@@ -342,7 +377,7 @@ class AssociationController extends Controller
     private function getAssociation($associationID): array
     {
         $sth = $this->db->prepare('
-            SELECT A.idAssociazione, A.nomeAssociazione, A.logo
+            SELECT A.idAssociazione, A.nomeAssociazione, A.logo, A.telefono, A.stile
             FROM Associazione A
             WHERE A.idAssociazione = :idAssociazione
         ');
@@ -381,24 +416,57 @@ class AssociationController extends Controller
         $associationName = $data['nomeAssociazione'];
         $logo = $data['logo'];
         $members = $data['membri'];
+        $telephone = $data['telefono'] ?? '';
+        $style = $data['stile'] ?? '';
 
         if ($associationName === '' || empty($members)) {
             $this->setErrorMessage(
-                'PDOException, check errorInfo.',
+                'Empty field.',
                 'Un campo obbligatorio non è stato inserito.');
 
             return false;
+        }
+
+        if ($telephone !== '') {
+            if ($this->isValidThelephone($telephone) === false) {
+                $this->setErrorMessage(
+                    'Wrong telephone format.',
+                    'Il formato del numero di telefono non è valido.');
+
+                return false;
+            }
+        }
+
+        /*$styleCreated = $this->setStyle($associationID, $style);
+        $style_path = WWW_PATH . '/assets/css/ass/' . $associationID . '.css';
+
+        if ($styleCreated === false) {
+            $this->setErrorMessage(
+                'Impossible to write the style CSS file.',
+                'Impossibile modificare lo stile associato.');
+
+            return false;
+        }*/
+
+        if ($style !== '' && $this->isValidHex($style) === false) {
+                $this->setErrorMessage(
+                    'Wrong hex format.',
+                    'Il colore scelto non è nel formato corretto.');
+
+                return false;
         }
 
         $this->db->beginTransaction();
 
         $sth = $this->db->prepare('
             UPDATE Associazione A
-            SET A.nomeAssociazione = :nomeAssociazione, A.logo = :logo
+            SET A.nomeAssociazione = :nomeAssociazione, A.logo = :logo, A.telefono = :telefono, A.stile = :stile
             WHERE A.idAssociazione = :idAssociazione
         ');
         $sth->bindParam(':nomeAssociazione', $associationName, \PDO::PARAM_STR);
         $sth->bindParam(':logo', $logo, \PDO::PARAM_STR);
+        $sth->bindParam(':telefono', $telephone, \PDO::PARAM_STR);
+        $sth->bindParam(':stile', $style, \PDO::PARAM_STR);
         $sth->bindParam(':idAssociazione', $associationID, \PDO::PARAM_INT);
 
         try {
@@ -545,5 +613,24 @@ class AssociationController extends Controller
         }
 
         return $res;
+    }
+
+    /*private function setStyle($associationID, $style): bool
+    {
+        $style_path = WWW_PATH . '/assets/css/ass/' . $associationID . '.css';
+
+        $good = file_put_contents($style_path, $style, LOCK_EX);
+
+        return $good !== false;
+    }*/
+
+    private function isValidThelephone($telNumber): bool
+    {
+        return preg_match('^\d{10}$', $telNumber) !== 0;
+    }
+
+    private function isValidHex($hex): bool
+    {
+        return preg_match('^#(\d|[a-f]){6}$', $hex) !== 0;
     }
 }

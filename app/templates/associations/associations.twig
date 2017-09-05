@@ -46,6 +46,14 @@
                                         </em>
                                     </div>
                                     <div class="content">
+                                        <strong>Telefono: </strong>
+                                        {% if ass.telefono != '' %}
+                                            {{ ass.telefono }}
+                                        {% else %}
+                                            <em>Non disponibile</em>
+                                        {% endif %}
+                                    </div>
+                                    <div class="content">
                                         <a class="button"
                                            href="{{ path_for('associationsEdit',
                                             {'id':ass.idAssociazione})|e('html_attr') }}">

@@ -537,8 +537,8 @@ class EventController extends Controller
         $sth = $this->db->prepare('
             SELECT U.idUtente, A.idAssociazione, E.idEvento, E.titolo, E.immagine, E.descrizione, E.istanteCreazione,
                    E.istanteInizio, E.istanteFine, E.pagina, E.revisionato, A2.nomeAssociazione AS nomeAssPrimaria, 
-                   A2.idAssociazione AS idAssPrimaria, A.nomeAssociazione, A.logo, U.nome AS nomeUtente, 
-                   U.cognome AS cognomeUtente, U.email, U.ruolo
+                   A2.idAssociazione AS idAssPrimaria, A2.stile, A2.telefono, A.nomeAssociazione, A.logo, 
+                   U.nome AS nomeUtente, U.cognome AS cognomeUtente, U.email, U.ruolo
             FROM Evento E
             LEFT JOIN Proporre P
             USING (idEvento)
