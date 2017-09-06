@@ -6,7 +6,6 @@ use \App\Helpers\SessionHelper;
 use Slim\Http\Response;
 use Slim\Http\Request;
 use Slim\Router;
-use Slim\Container;
 
 /**
  * @property Router router
@@ -14,14 +13,8 @@ use Slim\Container;
  */
 class EventController extends Controller
 {
-    public function __construct(Container $container)
-    {
-        parent::__construct($container);
-
-        $this->setErrorMessage();
-    }
-
-    public function showEvents(Request $request, Response $response)
+    public function showEvents(/** @noinspection PhpUnusedParameterInspection */
+        Request $request, Response $response, $args)
     {
         $user = SessionHelper::auth($this, $response, SessionHelper::EDITORE);
 
@@ -38,7 +31,8 @@ class EventController extends Controller
         ]);
     }
 
-    public function create(Request $request, Response $response)
+    public function create(/** @noinspection PhpUnusedParameterInspection */
+        Request $request, Response $response, $args)
     {
         $user = SessionHelper::auth($this, $response, SessionHelper::PUBLISHER);
 
@@ -55,7 +49,8 @@ class EventController extends Controller
         ]);
     }
 
-    public function doCreate(Request $request, Response $response)
+    public function doCreate(/** @noinspection PhpUnusedParameterInspection */
+        Request $request, Response $response, $args)
     {
         $user = SessionHelper::auth($this, $response, SessionHelper::EDITORE);
 
@@ -77,7 +72,8 @@ class EventController extends Controller
         return $response->withRedirect($this->router->pathFor('events'));
     }
 
-    public function delete(Request $request, Response $response, $args)
+    public function delete(/** @noinspection PhpUnusedParameterInspection */
+        Request $request, Response $response, $args)
     {
         $user = SessionHelper::auth($this, $response, SessionHelper::DIRETTORE);
 
@@ -111,7 +107,8 @@ class EventController extends Controller
         ]);
     }
 
-    public function doDelete(Request $request, Response $response, $args)
+    public function doDelete(/** @noinspection PhpUnusedParameterInspection */
+        Request $request, Response $response, $args)
     {
         $user = SessionHelper::auth($this, $response, SessionHelper::DIRETTORE);
 
@@ -133,7 +130,8 @@ class EventController extends Controller
         return $response->withRedirect($this->router->pathFor('events'));
     }
 
-    public function edit(Request $request, Response $response, $args)
+    public function edit(/** @noinspection PhpUnusedParameterInspection */
+        Request $request, Response $response, $args)
     {
         $user = SessionHelper::auth($this, $response, SessionHelper::PUBLISHER);
 
@@ -183,7 +181,8 @@ class EventController extends Controller
         ]);
     }
 
-    public function doEdit(Request $request, Response $response, $args)
+    public function doEdit(/** @noinspection PhpUnusedParameterInspection */
+        Request $request, Response $response, $args)
     {
         $user = SessionHelper::auth($this, $response, SessionHelper::PUBLISHER);
 
@@ -205,9 +204,10 @@ class EventController extends Controller
         return $response->withRedirect($this->router->pathFor('events'));
     }
 
-    public function showPage(Request $request, Response $response, $args)
+    public function showPage(/** @noinspection PhpUnusedParameterInspection */
+        Request $request, Response $response, $args)
     {
-        $user = SessionHelper::auth($this, $response, SessionHelper::ALL);
+        $user = SessionHelper::auth($this, $response);
         $eventID = (int)$args['id'];
 
         try {
@@ -237,7 +237,8 @@ class EventController extends Controller
         ]);
     }
 
-    public function page(Request $request, Response $response, $args)
+    public function page(/** @noinspection PhpUnusedParameterInspection */
+        Request $request, Response $response, $args)
     {
         $user = SessionHelper::auth($this, $response, SessionHelper::EDITORE);
 
@@ -273,7 +274,8 @@ class EventController extends Controller
         ]);
     }
 
-    public function doPage(Request $request, Response $response, $args)
+    public function doPage(/** @noinspection PhpUnusedParameterInspection */
+        Request $request, Response $response, $args)
     {
         $user = SessionHelper::auth($this, $response, SessionHelper::EDITORE);
 
@@ -313,6 +315,7 @@ class EventController extends Controller
         $old = $events[0];
         $eventsCount = count($events);
 
+        /** @noinspection ForeachInvariantsInspection */
         for ($i = 0, $j = 0; $i < $eventsCount; $i++, $j++) {
             if ($old['idEvento'] === $events[$i]['idEvento'] &&
                 $old['nomeAssociazione'] !== $events[$i]['nomeAssociazione']) {
@@ -336,6 +339,7 @@ class EventController extends Controller
      * Get all the events that are available before the current timestamp and order them by timestamp.
      *
      * @return array The events.
+     * @throws \PDOException
      */
     private function getEvents(): array
     {
@@ -456,6 +460,7 @@ class EventController extends Controller
             return false;
         }
 
+        /** @var $associazioni int[] */
         foreach ($associazioni as $ass) {
             try {
                 $this->addPropose($eventID, $ass);
@@ -528,6 +533,7 @@ class EventController extends Controller
      *
      * @param $eventID
      * @return array The events.
+     * @throws \PDOException
      * @internal param int $id The event identifier.
      */
     private function getEvent($eventID): array
@@ -741,6 +747,7 @@ class EventController extends Controller
     {
         $associationsIds = $event['associazioni'];
 
+        /** @var $associationsIds int[] */
         foreach ($associationsIds as $associationsID) {
             $sth = $this->db->prepare('
                 INSERT INTO Proporre (
@@ -770,6 +777,7 @@ class EventController extends Controller
         $associations = [];
         $assCount = count($associationNames);
 
+        /** @noinspection ForeachInvariantsInspection */
         for ($i = 0; $i < $assCount; $i++) {
             try {
                 $associationID = $this->getAssociationIdByName($associationNames[$i]);
@@ -810,6 +818,7 @@ class EventController extends Controller
         $associations = [];
         $assCount = count($associationNames);
 
+        /** @noinspection ForeachInvariantsInspection */
         for ($i = 0; $i < $assCount; $i++) {
             $associations[$i]['nome'] = $associationNames[$i];
             $associations[$i]['logo'] = $associationLogos[$i];

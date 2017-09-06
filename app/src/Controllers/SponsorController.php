@@ -13,7 +13,8 @@ use Slim\Router;
  */
 class SponsorController extends Controller
 {
-    public function showAll(Request $request, Response $response)
+    public function showAll(/** @noinspection PhpUnusedParameterInspection */
+        Request $request, Response $response, $args)
     {
         $user = SessionHelper::auth($this, $response, SessionHelper::DIRETTORE);
 
@@ -30,7 +31,8 @@ class SponsorController extends Controller
         ]);
     }
 
-    public function create(Request $request, Response $response, $args)
+    public function create(/** @noinspection PhpUnusedParameterInspection */
+        Request $request, Response $response, $args)
     {
         $user = SessionHelper::auth($this, $response, SessionHelper::DIRETTORE);
 
@@ -44,7 +46,8 @@ class SponsorController extends Controller
         ]);
     }
 
-    public function doCreate(Request $request, Response $response, $args)
+    public function doCreate(/** @noinspection PhpUnusedParameterInspection */
+        Request $request, Response $response, $args)
     {
         $user = SessionHelper::auth($this, $response, SessionHelper::DIRETTORE);
 
@@ -66,7 +69,8 @@ class SponsorController extends Controller
         return $response->withRedirect($this->router->pathFor('sponsors'));
     }
 
-    public function edit(Request $request, Response $response, $args)
+    public function edit(/** @noinspection PhpUnusedParameterInspection */
+        Request $request, Response $response, $args)
     {
         $user = SessionHelper::auth($this, $response, SessionHelper::DIRETTORE);
 
@@ -95,7 +99,8 @@ class SponsorController extends Controller
         ]);
     }
 
-    public function doEdit(Request $request, Response $response, $args)
+    public function doEdit(/** @noinspection PhpUnusedParameterInspection */
+        Request $request, Response $response, $args)
     {
         $user = SessionHelper::auth($this, $response, SessionHelper::DIRETTORE);
 
@@ -118,7 +123,8 @@ class SponsorController extends Controller
         return $response->withRedirect($this->router->pathFor('sponsors'));
     }
 
-    public function delete(Request $request, Response $response, $args)
+    public function delete(/** @noinspection PhpUnusedParameterInspection */
+        Request $request, Response $response, $args)
     {
         $user = SessionHelper::auth($this, $response, SessionHelper::DIRETTORE);
 
@@ -147,7 +153,8 @@ class SponsorController extends Controller
         ]);
     }
 
-    public function doDelete(Request $request, Response $response, $args)
+    public function doDelete(/** @noinspection PhpUnusedParameterInspection */
+        Request $request, Response $response, $args)
     {
         $user = SessionHelper::auth($this, $response, SessionHelper::DIRETTORE);
 

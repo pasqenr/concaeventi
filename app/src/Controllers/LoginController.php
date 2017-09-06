@@ -6,6 +6,7 @@ use \App\Helpers\SessionHelper;
 use Slim\Http\Response;
 use Slim\Http\Request;
 use Slim\Router;
+use \RKA\Session;
 
 /**
  * @property Router router
@@ -13,9 +14,10 @@ use Slim\Router;
  */
 class LoginController extends Controller
 {
-    public function login(Request $request, Response $response)
+    public function login(/** @noinspection PhpUnusedParameterInspection */
+        Request $request, Response $response, $args)
     {
-        $session = new \RKA\Session();
+        $session = new Session();
         $user    = [];
 
         if (SessionHelper::isLogged($session)) {
@@ -28,9 +30,10 @@ class LoginController extends Controller
         ]);
     }
 
-    public function doLogin(Request $request, Response $response)
+    public function doLogin(/** @noinspection PhpUnusedParameterInspection */
+        Request $request, Response $response, $args)
     {
-        $session = new \RKA\Session();
+        $session = new Session();
 
         $arguments = $request->getParsedBody();
         $email     = trim($arguments['email']);
@@ -59,9 +62,10 @@ class LoginController extends Controller
         return $response->withRedirect($this->router->pathFor('home'));
     }
 
-    public function logout(Request $request, Response $response)
+    public function logout(/** @noinspection PhpUnusedParameterInspection */
+        Request $request, Response $response, $args)
     {
-        \RKA\Session::destroy();
+        Session::destroy();
 
         return $response->withRedirect($this->router->pathFor('home'));
     }

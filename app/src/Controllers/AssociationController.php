@@ -13,7 +13,8 @@ use Slim\Router;
  */
 class AssociationController extends Controller
 {
-    public function showAll(Request $request, Response $response)
+    public function showAll(/** @noinspection PhpUnusedParameterInspection */
+        Request $request, Response $response, $args)
     {
         $user = SessionHelper::auth($this, $response, SessionHelper::PUBLISHER);
 
@@ -31,7 +32,8 @@ class AssociationController extends Controller
         ]);
     }
 
-    public function create(Request $request, Response $response, $args)
+    public function create(/** @noinspection PhpUnusedParameterInspection */
+        Request $request, Response $response, $args)
     {
         $user = SessionHelper::auth($this, $response, SessionHelper::PUBLISHER);
 
@@ -48,7 +50,8 @@ class AssociationController extends Controller
         ]);
     }
 
-    public function doCreate(Request $request, Response $response, $args)
+    public function doCreate(/** @noinspection PhpUnusedParameterInspection */
+        Request $request, Response $response, $args)
     {
         $user = SessionHelper::auth($this, $response, SessionHelper::PUBLISHER);
 
@@ -70,7 +73,8 @@ class AssociationController extends Controller
         return $response->withRedirect($this->router->pathFor('associations'));
     }
 
-    public function edit(Request $request, Response $response, $args)
+    public function edit(/** @noinspection PhpUnusedParameterInspection */
+        Request $request, Response $response, $args)
     {
         $user = SessionHelper::auth($this, $response, SessionHelper::PUBLISHER);
 
@@ -104,7 +108,8 @@ class AssociationController extends Controller
         ]);
     }
 
-    public function doEdit(Request $request, Response $response, $args)
+    public function doEdit(/** @noinspection PhpUnusedParameterInspection */
+        Request $request, Response $response, $args)
     {
         $user = SessionHelper::auth($this, $response, SessionHelper::PUBLISHER);
 
@@ -127,7 +132,8 @@ class AssociationController extends Controller
         return $response->withRedirect($this->router->pathFor('associations'));
     }
 
-    public function delete(Request $request, Response $response, $args)
+    public function delete(/** @noinspection PhpUnusedParameterInspection */
+        Request $request, Response $response, $args)
     {
         $user = SessionHelper::auth($this, $response, SessionHelper::DIRETTORE);
 
@@ -156,7 +162,8 @@ class AssociationController extends Controller
         ]);
     }
 
-    public function doDelete(Request $request, Response $response, $args)
+    public function doDelete(/** @noinspection PhpUnusedParameterInspection */
+        Request $request, Response $response, $args)
     {
         $user = SessionHelper::auth($this, $response, SessionHelper::DIRETTORE);
 
@@ -189,6 +196,7 @@ class AssociationController extends Controller
         $old = $associations[0];
         $assCount = count($associations);
 
+        /** @noinspection ForeachInvariantsInspection */
         for ($i = 0, $j = 0; $i < $assCount; $i++, $j++) {
             if ($old['idAssociazione'] === $associations[$i]['idAssociazione'] &&
                 $old['nomeUtente'] !== $associations[$i]['nomeUtente']) {
@@ -248,14 +256,12 @@ class AssociationController extends Controller
             return false;
         }
 
-        if ($telephone !== '') {
-            if ($this->isValidThelephone($telephone) === false) {
-                $this->setErrorMessage(
-                    'Wrong telephone format.',
-                    'Il numero di telefono non è nel formato corretto.');
+        if ($telephone !== '' && $this->isValidTelephone($telephone) === false) {
+            $this->setErrorMessage(
+                'Wrong telephone format.',
+                'Il numero di telefono non è nel formato corretto.');
 
-                return false;
-            }
+            return false;
         }
 
         /*$associationID = $this->getLastAssociationID() + 1;
@@ -316,6 +322,7 @@ class AssociationController extends Controller
             return false;
         }
 
+        /** @var $members int[] */
         foreach ($members as $membro) {
             try {
                 $this->addBelong($associationID, $membro);
@@ -427,14 +434,12 @@ class AssociationController extends Controller
             return false;
         }
 
-        if ($telephone !== '') {
-            if ($this->isValidThelephone($telephone) === false) {
-                $this->setErrorMessage(
-                    'Wrong telephone format.',
-                    'Il formato del numero di telefono non è valido.');
+        if ($telephone !== '' && $this->isValidTelephone($telephone) === false) {
+            $this->setErrorMessage(
+                'Wrong telephone format.',
+                'Il formato del numero di telefono non è valido.');
 
-                return false;
-            }
+            return false;
         }
 
         /*$styleCreated = $this->setStyle($associationID, $style);
@@ -533,6 +538,7 @@ class AssociationController extends Controller
     {
         $res = false;
 
+        /** @var $members int[] */
         foreach ($members as $member => $memberID) {
             $sth = $this->db->prepare('
                 INSERT INTO Appartiene (

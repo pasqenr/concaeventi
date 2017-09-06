@@ -13,7 +13,8 @@ use Slim\Router;
  */
 class PanelController extends Controller
 {
-    public function panel(Request $request, Response $response, $args)
+    public function panel(/** @noinspection PhpUnusedParameterInspection */
+        Request $request, Response $response, $args)
     {
         $user = SessionHelper::auth($this, $response, SessionHelper::EDITORE);
 

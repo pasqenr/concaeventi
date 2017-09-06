@@ -13,9 +13,10 @@ use Slim\Router;
  */
 class FrontController extends Controller
 {
-    public function home(Request $request, Response $response)
+    public function home(/** @noinspection PhpUnusedParameterInspection */
+        Request $request, Response $response, $args)
     {
-        $user = SessionHelper::auth($this, $response, SessionHelper::ALL);
+        $user = SessionHelper::auth($this, $response);
         $events = $this->getEvents();
 
         /** @noinspection PhpVoidFunctionResultUsedInspection */
@@ -25,9 +26,10 @@ class FrontController extends Controller
         ]);
     }
 
-    public function history(Request $request, Response $response)
+    public function history(/** @noinspection PhpUnusedParameterInspection */
+        Request $request, Response $response, $args)
     {
-        $user = SessionHelper::auth($this, $response, SessionHelper::ALL);
+        $user = SessionHelper::auth($this, $response);
         $events = $this->getEventsHistory();
 
         /** @noinspection PhpVoidFunctionResultUsedInspection */
@@ -56,6 +58,7 @@ class FrontController extends Controller
 
         $eventsCount = count($events);
 
+        /** @noinspection ForeachInvariantsInspection */
         for ($i = 0, $j = 0; $i < $eventsCount; $i++, $j++) {
             if ($old['idEvento'] === $events[$i]['idEvento'] &&
                 $old['nomeAssociazione'] !== $events[$i]['nomeAssociazione']) {
