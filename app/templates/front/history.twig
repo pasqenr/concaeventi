@@ -28,7 +28,7 @@
                                             {{ evento.titolo }}
                                         </a>
                                     </strong>.
-                                    Inizio: <small>{{ evento.istanteInizio|date('d/m/Y h:i') }}</small> - Fine: <small>{{ evento.istanteFine|date('d/m/Y h:i') }}</small>
+                                    Inizio: <small>{{ evento.istanteInizio|date('d/m/Y H:i') }}</small> - Fine: <small>{{ evento.istanteFine|date('d/m/Y H:i') }}</small>
                                     <br>
                                     {{ evento.descrizione }}
                                 </p>
@@ -63,7 +63,7 @@
                 </div>
             {% endfor %}
         {% else %}
-            <h3><em>Non ci sono eventi programmati.</em></h3>
+            <h3><em>Non ci sono eventi.</em></h3>
         {% endif %}
     </section>
 {% endblock %}
