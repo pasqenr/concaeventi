@@ -624,7 +624,7 @@ class AssociationController extends Controller
         return $good !== false;
     }*/
 
-    private function isValidThelephone($telNumber): bool
+    private function isValidTelephone($telNumber): bool
     {
         return preg_match('^\d{10}$', $telNumber) !== 0;
     }
