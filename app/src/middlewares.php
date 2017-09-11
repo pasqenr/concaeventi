@@ -1,5 +1,6 @@
 <?php
 
+/** @var $container \Slim\Container */
 if (true === $container->settings['Session']['enable']) {
     // session must be initialized (by another middleware)
     // before adding this Twig extension
