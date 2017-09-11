@@ -16,15 +16,15 @@ class PanelController extends Controller
     public function panel(/** @noinspection PhpUnusedParameterInspection */
         Request $request, Response $response, $args)
     {
-        $user = SessionHelper::auth($this, $response, SessionHelper::EDITORE);
+        $authorized = $this->session->auth(SessionHelper::EDITORE);
 
-        if (empty($user)) {
+        if (!$authorized) {
             return $response->withRedirect($this->router->pathFor('auth-error'));
         }
 
         /** @noinspection PhpVoidFunctionResultUsedInspection */
         return $this->render($response, 'front/panel.twig', [
-            'utente' => $user
+            'utente' => $this->user
         ]);
     }
 }

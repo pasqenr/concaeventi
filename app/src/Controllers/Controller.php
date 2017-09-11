@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use Psr\Http\Message\ResponseInterface;
 use Slim\Container;
+use \App\Helpers\SessionHelper;
 
 class Controller
 {
@@ -21,12 +22,17 @@ class Controller
         'errorInfo' => ''
     ];
 
+    protected $user;
+    protected $session;
+
     /**
      * @param Container $container
      */
     public function __construct(Container $container)
     {
         $this->container = $container;
+        $this->session = new SessionHelper();
+        $this->user = $this->session->getUser();
     }
 
     /**

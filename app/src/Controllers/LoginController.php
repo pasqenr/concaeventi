@@ -17,47 +17,50 @@ class LoginController extends Controller
     public function login(/** @noinspection PhpUnusedParameterInspection */
         Request $request, Response $response, $args)
     {
-        $session = new Session();
-        $user    = [];
+        $authorized = $this->session->auth();
 
-        if (SessionHelper::isLogged($session)) {
+        if ($authorized) {
             return $response->withRedirect($this->router->pathFor('home'));
         }
 
         /** @noinspection PhpVoidFunctionResultUsedInspection */
         return $this->render($response, 'front/login.twig', [
-            'utente' => $user
+            'utente' => $this->user
         ]);
     }
 
     public function doLogin(/** @noinspection PhpUnusedParameterInspection */
         Request $request, Response $response, $args)
     {
-        $session = new Session();
-
         $arguments = $request->getParsedBody();
         $email     = trim($arguments['email']);
         $password  = trim($arguments['password']);
 
-        $sth = $this->db->prepare('
-            SELECT U.idUtente, U.password, U.nome, U.cognome, U.email, U.ruolo
-            FROM Utente U
-            WHERE U.email LIKE :email
-        ');
-        $sth->bindParam(':email', $email, \PDO::PARAM_STR);
-        $sth->execute();
+        $user = $this->getUserByEmail($email);
 
-        $user = $sth->fetch();
-
-        $good = password_verify($password, $user['password']);
-
-        if (!$good) {
-            return $response->withRedirect($this->router->pathFor('error'));
+        if (!$user) {
+            /** @noinspection PhpVoidFunctionResultUsedInspection */
+            return $this->render($response, 'errors/error.twig', [
+                'utente' => $this->user,
+                'err' => $this->getErrorMessage()
+            ]);
         }
 
-        if ($user) {
-            SessionHelper::setSessionUser($session, $user);
+        $passwordMatch = password_verify($password, $user['password']);
+
+        if (!$passwordMatch) {
+            /*return $response->withRedirect($this->router->pathFor('error'));*/
+            $this->setErrorMessage('Password don\'t match.',
+                'Email o password errati.');
+
+            /** @noinspection PhpVoidFunctionResultUsedInspection */
+            return $this->render($response, 'errors/error.twig', [
+                'utente' => $this->user,
+                'err' => $this->getErrorMessage()
+            ]);
         }
+
+        $this->session->setUserData($user);
 
         return $response->withRedirect($this->router->pathFor('home'));
     }
@@ -65,8 +68,27 @@ class LoginController extends Controller
     public function logout(/** @noinspection PhpUnusedParameterInspection */
         Request $request, Response $response, $args)
     {
-        Session::destroy();
+        $this->session->destroySession();
 
         return $response->withRedirect($this->router->pathFor('home'));
+    }
+
+    private function getUserByEmail($email)
+    {
+        $sth = $this->db->prepare('
+            SELECT U.idUtente, U.password, U.nome, U.cognome, U.email, U.ruolo
+            FROM Utente U
+            WHERE U.email LIKE :email
+        ');
+        $sth->bindParam(':email', $email, \PDO::PARAM_STR);
+
+        try {
+            $sth->execute();
+        } catch (\PDOException $e) {
+            $this->setErrorMessage('PDOException, check errorInfo.',
+                'Impossibile trovare l\'utente o errore generico.');
+        }
+
+        return $sth->fetch();
     }
 }

@@ -16,9 +16,9 @@ class EventController extends Controller
     public function showEvents(/** @noinspection PhpUnusedParameterInspection */
         Request $request, Response $response, $args)
     {
-        $user = SessionHelper::auth($this, $response, SessionHelper::EDITORE);
+        $authorized = $this->session->auth(SessionHelper::EDITORE);
 
-        if (empty($user)) {
+        if (!$authorized) {
             return $response->withRedirect($this->router->pathFor('auth-error'));
         }
 
@@ -26,7 +26,7 @@ class EventController extends Controller
 
         /** @noinspection PhpVoidFunctionResultUsedInspection */
         return $this->render($response, 'events/events.twig', [
-            'utente' => $user,
+            'utente' => $this->user,
             'eventi' => $events
         ]);
     }
@@ -34,9 +34,9 @@ class EventController extends Controller
     public function create(/** @noinspection PhpUnusedParameterInspection */
         Request $request, Response $response, $args)
     {
-        $user = SessionHelper::auth($this, $response, SessionHelper::PUBLISHER);
+        $authorized = $this->session->auth(SessionHelper::PUBLISHER);
 
-        if (empty($user)) {
+        if (!$authorized) {
             return $response->withRedirect($this->router->pathFor('auth-error'));
         }
 
@@ -44,7 +44,7 @@ class EventController extends Controller
 
         /** @noinspection PhpVoidFunctionResultUsedInspection */
         return $this->render($response, 'events/create.twig', [
-            'utente' => $user,
+            'utente' => $this->user,
             'associazioni' => $associations
         ]);
     }
@@ -52,19 +52,19 @@ class EventController extends Controller
     public function doCreate(/** @noinspection PhpUnusedParameterInspection */
         Request $request, Response $response, $args)
     {
-        $user = SessionHelper::auth($this, $response, SessionHelper::EDITORE);
+        $authorized = $this->session->auth(SessionHelper::EDITORE);
 
-        if (empty($user)) {
+        if (!$authorized) {
             return $response->withRedirect($this->router->pathFor('auth-error'));
         }
 
         $parsedBody = $request->getParsedBody();
-        $created = $this->createEvent($user['idUtente'], $parsedBody);
+        $created = $this->createEvent($this->user['idUtente'], $parsedBody);
 
         if ($created === false) {
             /** @noinspection PhpVoidFunctionResultUsedInspection */
             return $this->render($response, 'errors/error.twig', [
-                'utente' => $user,
+                'utente' => $this->user,
                 'err' => $this->getErrorMessage()
             ]);
         }
@@ -75,9 +75,9 @@ class EventController extends Controller
     public function delete(/** @noinspection PhpUnusedParameterInspection */
         Request $request, Response $response, $args)
     {
-        $user = SessionHelper::auth($this, $response, SessionHelper::DIRETTORE);
+        $authorized = $this->session->auth(SessionHelper::DIRETTORE);
 
-        if (empty($user)) {
+        if (!$authorized) {
             return $response->withRedirect($this->router->pathFor('auth-error'));
         }
 
@@ -91,7 +91,7 @@ class EventController extends Controller
 
             /** @noinspection PhpVoidFunctionResultUsedInspection */
             return $this->render($response, 'errors/error.twig', [
-                'utente' => $user,
+                'utente' => $this->user,
                 'err' => $this->getErrorMessage()
             ]);
         }
@@ -102,7 +102,7 @@ class EventController extends Controller
 
         /** @noinspection PhpVoidFunctionResultUsedInspection */
         return $this->render($response, 'events/delete.twig', [
-            'utente' => $user,
+            'utente' => $this->user,
             'evento' => $event
         ]);
     }
@@ -110,9 +110,9 @@ class EventController extends Controller
     public function doDelete(/** @noinspection PhpUnusedParameterInspection */
         Request $request, Response $response, $args)
     {
-        $user = SessionHelper::auth($this, $response, SessionHelper::DIRETTORE);
+        $authorized = $this->session->auth(SessionHelper::DIRETTORE);
 
-        if (empty($user)) {
+        if (!$authorized) {
             return $response->withRedirect($this->router->pathFor('auth-error'));
         }
 
@@ -122,7 +122,7 @@ class EventController extends Controller
         if ($deleted === false) {
             /** @noinspection PhpVoidFunctionResultUsedInspection */
             return $this->render($response, 'errors/error.twig', [
-                'utente' => $user,
+                'utente' => $this->user,
                 'err' => $this->getErrorMessage()
             ]);
         }
@@ -133,9 +133,9 @@ class EventController extends Controller
     public function edit(/** @noinspection PhpUnusedParameterInspection */
         Request $request, Response $response, $args)
     {
-        $user = SessionHelper::auth($this, $response, SessionHelper::PUBLISHER);
+        $authorized = $this->session->auth(SessionHelper::PUBLISHER);
 
-        if (empty($user)) {
+        if (!$authorized) {
             return $response->withRedirect($this->router->pathFor('auth-error'));
         }
 
@@ -148,7 +148,7 @@ class EventController extends Controller
 
             /** @noinspection PhpVoidFunctionResultUsedInspection */
             return $this->render($response, 'errors/error.twig', [
-                'utente' => $user,
+                'utente' => $this->user,
                 'err' => $this->getErrorMessage()
             ]);
         }
@@ -167,14 +167,14 @@ class EventController extends Controller
 
             /** @noinspection PhpVoidFunctionResultUsedInspection */
             return $this->render($response, 'errors/error.twig', [
-                'utente' => $user,
+                'utente' => $this->user,
                 'err' => $this->getErrorMessage()
             ]);
         }
 
         /** @noinspection PhpVoidFunctionResultUsedInspection */
         return $this->render($response, 'events/edit.twig', [
-            'utente' => $user,
+            'utente' => $this->user,
             'evento' => $event,
             'associazioni' => $associations,
             'associazioniEvento' => $eventAssociations
@@ -184,9 +184,9 @@ class EventController extends Controller
     public function doEdit(/** @noinspection PhpUnusedParameterInspection */
         Request $request, Response $response, $args)
     {
-        $user = SessionHelper::auth($this, $response, SessionHelper::PUBLISHER);
+        $authorized = $this->session->auth(SessionHelper::PUBLISHER);
 
-        if (empty($user)) {
+        if (!$authorized) {
             return $response->withRedirect($this->router->pathFor('auth-error'));
         }
 
@@ -196,7 +196,7 @@ class EventController extends Controller
         if ($updated === false) {
             /** @noinspection PhpVoidFunctionResultUsedInspection */
             return $this->render($response, 'errors/error.twig', [
-                'utente' => $user,
+                'utente' => $this->user,
                 'err' => $this->getErrorMessage()
             ]);
         }
@@ -207,8 +207,12 @@ class EventController extends Controller
     public function showPage(/** @noinspection PhpUnusedParameterInspection */
         Request $request, Response $response, $args)
     {
-        $user = SessionHelper::auth($this, $response);
+        $authorized = $this->session->auth($response);
         $eventID = (int)$args['id'];
+
+        if (!$authorized) {
+            return $response->withRedirect($this->router->pathFor('auth-error'));
+        }
 
         try {
             $event = $this->getEvent($eventID);
@@ -218,7 +222,7 @@ class EventController extends Controller
 
             /** @noinspection PhpVoidFunctionResultUsedInspection */
             return $this->render($response, 'errors/error.twig', [
-                'utente' => $user,
+                'utente' => $this->user,
                 'err' => $this->getErrorMessage()
             ]);
         }
@@ -231,7 +235,7 @@ class EventController extends Controller
 
         /** @noinspection PhpVoidFunctionResultUsedInspection */
         return $this->render($response, 'front/page.twig', [
-            'utente' => $user,
+            'utente' => $this->user,
             'evento' => $event,
             'associazioni' => $associations
         ]);
@@ -240,9 +244,9 @@ class EventController extends Controller
     public function page(/** @noinspection PhpUnusedParameterInspection */
         Request $request, Response $response, $args)
     {
-        $user = SessionHelper::auth($this, $response, SessionHelper::EDITORE);
+        $authorized = $this->session->auth(SessionHelper::EDITORE);
 
-        if (empty($user)) {
+        if (!$authorized) {
             return $response->withRedirect($this->router->pathFor('auth-error'));
         }
 
@@ -256,7 +260,7 @@ class EventController extends Controller
 
             /** @noinspection PhpVoidFunctionResultUsedInspection */
             return $this->render($response, 'errors/error.twig', [
-                'utente' => $user,
+                'utente' => $this->user,
                 'err' => $this->getErrorMessage()
             ]);
         }
@@ -268,7 +272,7 @@ class EventController extends Controller
 
         /** @noinspection PhpVoidFunctionResultUsedInspection */
         return $this->render($response, 'events/page.twig', [
-            'utente' => $user,
+            'utente' => $this->user,
             'evento' => $event,
             'associazioni' => $associations
         ]);
@@ -277,9 +281,9 @@ class EventController extends Controller
     public function doPage(/** @noinspection PhpUnusedParameterInspection */
         Request $request, Response $response, $args)
     {
-        $user = SessionHelper::auth($this, $response, SessionHelper::EDITORE);
+        $authorized = $this->session->auth(SessionHelper::EDITORE);
 
-        if (empty($user)) {
+        if (!$authorized) {
             return $response->withRedirect($this->router->pathFor('auth-error'));
         }
 
@@ -289,7 +293,7 @@ class EventController extends Controller
         if ($modified === false) {
             /** @noinspection PhpVoidFunctionResultUsedInspection */
             return $this->render($response, 'errors/error.twig', [
-                'utente' => $user,
+                'utente' => $this->user,
                 'err' => $this->getErrorMessage()
             ]);
         }

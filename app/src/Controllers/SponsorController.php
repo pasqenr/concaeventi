@@ -16,9 +16,9 @@ class SponsorController extends Controller
     public function showAll(/** @noinspection PhpUnusedParameterInspection */
         Request $request, Response $response, $args)
     {
-        $user = SessionHelper::auth($this, $response, SessionHelper::DIRETTORE);
+        $authorized = $this->session->auth(SessionHelper::DIRETTORE);
 
-        if (empty($user)) {
+        if (!$authorized) {
             return $response->withRedirect($this->router->pathFor('auth-error'));
         }
 
@@ -26,7 +26,7 @@ class SponsorController extends Controller
 
         /** @noinspection PhpVoidFunctionResultUsedInspection */
         return $this->render($response, 'sponsors/sponsors.twig', [
-            'utente' => $user,
+            'utente' => $this->user,
             'sponsor' => $sponsors
         ]);
     }
@@ -34,24 +34,24 @@ class SponsorController extends Controller
     public function create(/** @noinspection PhpUnusedParameterInspection */
         Request $request, Response $response, $args)
     {
-        $user = SessionHelper::auth($this, $response, SessionHelper::DIRETTORE);
+        $authorized = $this->session->auth(SessionHelper::DIRETTORE);
 
-        if (empty($user)) {
+        if (!$authorized) {
             return $response->withRedirect($this->router->pathFor('auth-error'));
         }
 
         /** @noinspection PhpVoidFunctionResultUsedInspection */
         return $this->render($response, 'sponsors/create.twig', [
-            'utente' => $user
+            'utente' => $this->user
         ]);
     }
 
     public function doCreate(/** @noinspection PhpUnusedParameterInspection */
         Request $request, Response $response, $args)
     {
-        $user = SessionHelper::auth($this, $response, SessionHelper::DIRETTORE);
+        $authorized = $this->session->auth(SessionHelper::DIRETTORE);
 
-        if (empty($user)) {
+        if (!$authorized) {
             return $response->withRedirect($this->router->pathFor('auth-error'));
         }
 
@@ -61,7 +61,7 @@ class SponsorController extends Controller
         if ($created === false) {
             /** @noinspection PhpVoidFunctionResultUsedInspection */
             return $this->render($response, 'errors/error.twig', [
-                'utente' => $user,
+                'utente' => $this->user,
                 'err' => $this->getErrorMessage()
             ]);
         }
@@ -72,9 +72,9 @@ class SponsorController extends Controller
     public function edit(/** @noinspection PhpUnusedParameterInspection */
         Request $request, Response $response, $args)
     {
-        $user = SessionHelper::auth($this, $response, SessionHelper::DIRETTORE);
+        $authorized = $this->session->auth(SessionHelper::DIRETTORE);
 
-        if (empty($user)) {
+        if (!$authorized) {
             return $response->withRedirect($this->router->pathFor('auth-error'));
         }
 
@@ -87,14 +87,14 @@ class SponsorController extends Controller
 
             /** @noinspection PhpVoidFunctionResultUsedInspection */
             return $this->render($response, 'errors/error.twig', [
-                'utente' => $user,
+                'utente' => $this->user,
                 'err' => $this->getErrorMessage()
             ]);
         }
 
         /** @noinspection PhpVoidFunctionResultUsedInspection */
         return $this->render($response, 'sponsors/edit.twig', [
-            'utente' => $user,
+            'utente' => $this->user,
             'sponsor' => $sponsor
         ]);
     }
@@ -102,9 +102,9 @@ class SponsorController extends Controller
     public function doEdit(/** @noinspection PhpUnusedParameterInspection */
         Request $request, Response $response, $args)
     {
-        $user = SessionHelper::auth($this, $response, SessionHelper::DIRETTORE);
+        $authorized = $this->session->auth(SessionHelper::DIRETTORE);
 
-        if (empty($user)) {
+        if (!$authorized) {
             return $response->withRedirect($this->router->pathFor('auth-error'));
         }
 
@@ -115,7 +115,7 @@ class SponsorController extends Controller
         if ($updated === false) {
             /** @noinspection PhpVoidFunctionResultUsedInspection */
             return $this->render($response, 'errors/error.twig', [
-                'utente' => $user,
+                'utente' => $this->user,
                 'err' => $this->getErrorMessage()
             ]);
         }
@@ -126,9 +126,9 @@ class SponsorController extends Controller
     public function delete(/** @noinspection PhpUnusedParameterInspection */
         Request $request, Response $response, $args)
     {
-        $user = SessionHelper::auth($this, $response, SessionHelper::DIRETTORE);
+        $authorized = $this->session->auth(SessionHelper::DIRETTORE);
 
-        if (empty($user)) {
+        if (!$authorized) {
             return $response->withRedirect($this->router->pathFor('auth-error'));
         }
 
@@ -141,14 +141,14 @@ class SponsorController extends Controller
 
             /** @noinspection PhpVoidFunctionResultUsedInspection */
             return $this->render($response, 'errors/error.twig', [
-                'utente' => $user,
+                'utente' => $this->user,
                 'err' => $this->getErrorMessage()
             ]);
         }
 
         /** @noinspection PhpVoidFunctionResultUsedInspection */
         return $this->render($response, 'sponsors/delete.twig', [
-            'utente' => $user,
+            'utente' => $this->user,
             'sponsor' => $sponsor
         ]);
     }
@@ -156,9 +156,9 @@ class SponsorController extends Controller
     public function doDelete(/** @noinspection PhpUnusedParameterInspection */
         Request $request, Response $response, $args)
     {
-        $user = SessionHelper::auth($this, $response, SessionHelper::DIRETTORE);
+        $authorized = $this->session->auth(SessionHelper::DIRETTORE);
 
-        if (empty($user)) {
+        if (!$authorized) {
             return $response->withRedirect($this->router->pathFor('auth-error'));
         }
 

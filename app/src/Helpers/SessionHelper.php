@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Helpers;
+use RKA\Session;
 
 /**
  * Class used to provide helper functions to manage users' sessions. It's intended to have
@@ -15,6 +16,13 @@ class SessionHelper {
     const PUBLISHER = 'Publisher';
     const DIRETTORE = 'Direttore';
     const AMMINISTRATORE = 'Amministratore';
+    
+    private $session;
+
+    public function __construct()
+    {
+        $this->session = new \RKA\Session();
+    }
 
     /**
      * Check if the idUtente variable in the session is setted.
@@ -22,69 +30,66 @@ class SessionHelper {
      * @param $session \RKA\Session The user session.
      * @return bool True if the user is logged, false otherwise.
      */
-    public static function isLogged(&$session)
+    public function isLogged(): bool
     {
-        return isset($session->idUtente);
+        return $this->session->get('idUtente') !== null;
     }
 
-    /**
-     * @param $session \RKA\Session The user session.
-     * @param $user array The user array with the following members: idUtente, nome, cognome, email and ruolo.
-     */
-    public static function setSessionUser(&$session, &$user)
+    public function auth($level = self::ALL): bool
     {
-        $session->idUtente      = $user['idUtente'];
-        $session->nomeUtente    = $user['nome'];
-        $session->cognomeUtente = $user['cognome'];
-        $session->email         = $user['email'];
-        $session->ruolo         = $user['ruolo'];
-    }
-
-    /**
-     * @param $session \RKA\Session The user session.
-     * @param $user array The user array is filled with the following members: idUtente, nome, cognome, email and ruolo.
-     */
-    public static function setSessionArray(&$session, &$user)
-    {
-        $user['idUtente'] = $session->idUtente;
-        $user['nome']     = $session->nomeUtente;
-        $user['cognome']  = $session->cognomeUtente;
-        $user['ruolo']    = $session->ruolo;
-    }
-
-    public static function auth($that, $response, $level = SessionHelper::ALL)
-    {
-        $session = new \RKA\Session();
-        $user = [];
-
-        if (SessionHelper::isLogged($session)) {
-            SessionHelper::setSessionArray($session, $user);
-        } else {
-            if ($level !== SessionHelper::ALL) {
-                return $user;
-            }
+        if (!$this->isLogged()) {
+            return false;
         }
 
-        if ($level === SessionHelper::ALL) {
-            return $user;
+        if ($level === self::ALL) {
+            return true;
         }
 
-        switch ($user['ruolo']) {
-            case SessionHelper::AMMINISTRATORE:
+        switch ($this->session->get('ruolo')) {
+            case self::AMMINISTRATORE:
                 break;
-            case SessionHelper::DIRETTORE:
+            case self::DIRETTORE:
                 break;
-            case SessionHelper::PUBLISHER:
+            case self::PUBLISHER:
                 break;
-            case SessionHelper::EDITORE:
+            case self::EDITORE:
                 break;
-            case SessionHelper::ALL;
+            case self::ALL;
                 break;
 
             default:
-                return $user;
+                return false;
         }
 
+        return true;
+    }
+
+    public function setUserData(&$user)
+    {
+        $this->session->idUtente      = $user['idUtente'];
+        $this->session->nomeUtente    = $user['nome'];
+        $this->session->cognomeUtente = $user['cognome'];
+        $this->session->email         = $user['email'];
+        $this->session->ruolo         = $user['ruolo'];
+    }
+
+    public function getUser(): array
+    {
+        if (!$this->isLogged()) {
+            return [];
+        }
+
+        $user['idUtente'] = $this->session->idUtente;
+        $user['nome']     = $this->session->nomeUtente;
+        $user['cognome']  = $this->session->cognomeUtente;
+        $user['email']    = $this->session->email;
+        $user['ruolo']    = $this->session->ruolo;
+
         return $user;
+    }
+
+    public function destroySession()
+    {
+        Session::destroy();
     }
 }

@@ -16,12 +16,12 @@ class FrontController extends Controller
     public function home(/** @noinspection PhpUnusedParameterInspection */
         Request $request, Response $response, $args)
     {
-        $user = SessionHelper::auth($this, $response);
+        $authorized = $this->session->auth($response);
         $events = $this->getEvents();
 
         /** @noinspection PhpVoidFunctionResultUsedInspection */
         return $this->render($response, 'front/home.twig', [
-            'utente' => $user,
+            'utente' => $this->user,
             'eventi' => $events
         ]);
     }
@@ -29,12 +29,12 @@ class FrontController extends Controller
     public function history(/** @noinspection PhpUnusedParameterInspection */
         Request $request, Response $response, $args)
     {
-        $user = SessionHelper::auth($this, $response);
+        $authorized = $this->session->auth($response);
         $events = $this->getEventsHistory();
 
         /** @noinspection PhpVoidFunctionResultUsedInspection */
         return $this->render($response, 'front/history.twig', [
-            'utente' => $user,
+            'utente' => $this->user,
             'eventi' => $events
         ]);
     }

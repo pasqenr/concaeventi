@@ -17,9 +17,9 @@ class FundingController extends Controller
     public function showAll(/** @noinspection PhpUnusedParameterInspection */
         Request $request, Response $response, $args)
     {
-        $user = SessionHelper::auth($this, $response, SessionHelper::DIRETTORE);
+        $authorized = $this->session->auth(SessionHelper::DIRETTORE);
 
-        if (empty($user)) {
+        if (!$authorized) {
             return $response->withRedirect($this->router->pathFor('auth-error'));
         }
 
@@ -27,7 +27,7 @@ class FundingController extends Controller
 
         /** @noinspection PhpVoidFunctionResultUsedInspection */
         return $this->render($response, 'funding/fundings.twig', [
-            'utente' => $user,
+            'utente' => $this->user,
             'eventi' => $eventsWithFunding
         ]);
     }
@@ -35,9 +35,9 @@ class FundingController extends Controller
     public function create(/** @noinspection PhpUnusedParameterInspection */
         Request $request, Response $response, $args)
     {
-        $user = SessionHelper::auth($this, $response, SessionHelper::DIRETTORE);
+        $authorized = $this->session->auth(SessionHelper::DIRETTORE);
 
-        if (empty($user)) {
+        if (!$authorized) {
             return $response->withRedirect($this->router->pathFor('auth-error'));
         }
 
@@ -46,7 +46,7 @@ class FundingController extends Controller
 
         /** @noinspection PhpVoidFunctionResultUsedInspection */
         return $this->render($response, 'funding/create.twig', [
-            'utente' => $user,
+            'utente' => $this->user,
             'events' => $events,
             'sponsors' => $sponsors
         ]);
@@ -55,9 +55,9 @@ class FundingController extends Controller
     public function doCreate(/** @noinspection PhpUnusedParameterInspection */
         Request $request, Response $response, $args)
     {
-        $user = SessionHelper::auth($this, $response, SessionHelper::DIRETTORE);
+        $authorized = $this->session->auth(SessionHelper::DIRETTORE);
 
-        if (empty($user)) {
+        if (!$authorized) {
             return $response->withRedirect($this->router->pathFor('auth-error'));
         }
 
@@ -67,7 +67,7 @@ class FundingController extends Controller
         if ($created === false) {
             /** @noinspection PhpVoidFunctionResultUsedInspection */
             return $this->render($response, 'errors/error.twig', [
-                'utente' => $user,
+                'utente' => $this->user,
                 'err' => $this->getErrorMessage()
             ]);
         }
@@ -78,9 +78,9 @@ class FundingController extends Controller
     public function edit(/** @noinspection PhpUnusedParameterInspection */
         Request $request, Response $response, $args)
     {
-        $user = SessionHelper::auth($this, $response, SessionHelper::DIRETTORE);
+        $authorized = $this->session->auth(SessionHelper::DIRETTORE);
 
-        if (empty($user)) {
+        if (!$authorized) {
             return $response->withRedirect($this->router->pathFor('auth-error'));
         }
 
@@ -95,14 +95,14 @@ class FundingController extends Controller
 
             /** @noinspection PhpVoidFunctionResultUsedInspection */
             return $this->render($response, 'errors/error.twig', [
-                'utente' => $user,
+                'utente' => $this->user,
                 'err' => $this->getErrorMessage()
             ]);
         }
 
         /** @noinspection PhpVoidFunctionResultUsedInspection */
         return $this->render($response, 'funding/edit.twig', [
-            'utente' => $user,
+            'utente' => $this->user,
             'funding' => $funding
         ]);
     }
@@ -110,9 +110,9 @@ class FundingController extends Controller
     public function doEdit(/** @noinspection PhpUnusedParameterInspection */
         Request $request, Response $response, $args)
     {
-        $user = SessionHelper::auth($this, $response, SessionHelper::DIRETTORE);
+        $authorized = $this->session->auth(SessionHelper::DIRETTORE);
 
-        if (empty($user)) {
+        if (!$authorized) {
             return $response->withRedirect($this->router->pathFor('auth-error'));
         }
 
@@ -127,7 +127,7 @@ class FundingController extends Controller
 
             /** @noinspection PhpVoidFunctionResultUsedInspection */
             return $this->render($response, 'errors/error.twig', [
-                'utente' => $user,
+                'utente' => $this->user,
                 'err' => $this->getErrorMessage()
             ]);
         }
@@ -138,9 +138,9 @@ class FundingController extends Controller
     public function delete(/** @noinspection PhpUnusedParameterInspection */
         Request $request, Response $response, $args)
     {
-        $user = SessionHelper::auth($this, $response, SessionHelper::DIRETTORE);
+        $authorized = $this->session->auth(SessionHelper::DIRETTORE);
 
-        if (empty($user)) {
+        if (!$authorized) {
             return $response->withRedirect($this->router->pathFor('auth-error'));
         }
 
@@ -155,14 +155,14 @@ class FundingController extends Controller
 
             /** @noinspection PhpVoidFunctionResultUsedInspection */
             return $this->render($response, 'errors/error.twig', [
-                'utente' => $user,
+                'utente' => $this->user,
                 'err' => $this->getErrorMessage()
             ]);
         }
 
         /** @noinspection PhpVoidFunctionResultUsedInspection */
         return $this->render($response, 'funding/delete.twig', [
-            'utente' => $user,
+            'utente' => $this->user,
             'funding' => $funding
         ]);
     }
@@ -170,9 +170,9 @@ class FundingController extends Controller
     public function doDelete(/** @noinspection PhpUnusedParameterInspection */
         Request $request, Response $response, $args)
     {
-        $user = SessionHelper::auth($this, $response, SessionHelper::DIRETTORE);
+        $authorized = $this->session->auth(SessionHelper::DIRETTORE);
 
-        if (empty($user)) {
+        if (!$authorized) {
             return $response->withRedirect($this->router->pathFor('auth-error'));
         }
 
@@ -183,7 +183,7 @@ class FundingController extends Controller
         } catch (\PDOException $e) {
             /** @noinspection PhpVoidFunctionResultUsedInspection */
             return $this->render($response, 'errors/error.twig', [
-                'utente' => $user,
+                'utente' => $this->user,
                 'err' => $this->getErrorMessage()
             ]);
         }

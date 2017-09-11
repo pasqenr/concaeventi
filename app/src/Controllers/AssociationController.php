@@ -16,9 +16,9 @@ class AssociationController extends Controller
     public function showAll(/** @noinspection PhpUnusedParameterInspection */
         Request $request, Response $response, $args)
     {
-        $user = SessionHelper::auth($this, $response, SessionHelper::PUBLISHER);
+        $authorized = $this->session->auth(SessionHelper::PUBLISHER);
 
-        if (empty($user)) {
+        if (!$authorized) {
             return $response->withRedirect($this->router->pathFor('auth-error'));
         }
 
@@ -27,7 +27,7 @@ class AssociationController extends Controller
 
         /** @noinspection PhpVoidFunctionResultUsedInspection */
         return $this->render($response, 'associations/associations.twig', [
-            'utente' => $user,
+            'utente' => $this->user,
             'associazioni' => $associations
         ]);
     }
@@ -35,9 +35,9 @@ class AssociationController extends Controller
     public function create(/** @noinspection PhpUnusedParameterInspection */
         Request $request, Response $response, $args)
     {
-        $user = SessionHelper::auth($this, $response, SessionHelper::PUBLISHER);
+        $authorized = $this->session->auth(SessionHelper::PUBLISHER);
 
-        if (empty($user)) {
+        if (!$authorized) {
             return $response->withRedirect($this->router->pathFor('auth-error'));
         }
 
@@ -45,7 +45,7 @@ class AssociationController extends Controller
 
         /** @noinspection PhpVoidFunctionResultUsedInspection */
         return $this->render($response, 'associations/create.twig', [
-            'utente' => $user,
+            'utente' => $this->user,
             'membri' => $members
         ]);
     }
@@ -53,9 +53,9 @@ class AssociationController extends Controller
     public function doCreate(/** @noinspection PhpUnusedParameterInspection */
         Request $request, Response $response, $args)
     {
-        $user = SessionHelper::auth($this, $response, SessionHelper::PUBLISHER);
+        $authorized = $this->session->auth(SessionHelper::PUBLISHER);
 
-        if (empty($user)) {
+        if (!$authorized) {
             return $response->withRedirect($this->router->pathFor('auth-error'));
         }
 
@@ -65,7 +65,7 @@ class AssociationController extends Controller
         if ($created === false) {
             /** @noinspection PhpVoidFunctionResultUsedInspection */
             return $this->render($response, 'errors/error.twig', [
-                'utente' => $user,
+                'utente' => $this->user,
                 'err' => $this->getErrorMessage()
             ]);
         }
@@ -76,9 +76,9 @@ class AssociationController extends Controller
     public function edit(/** @noinspection PhpUnusedParameterInspection */
         Request $request, Response $response, $args)
     {
-        $user = SessionHelper::auth($this, $response, SessionHelper::PUBLISHER);
+        $authorized = $this->session->auth(SessionHelper::PUBLISHER);
 
-        if (empty($user)) {
+        if (!$authorized) {
             return $response->withRedirect($this->router->pathFor('auth-error'));
         }
 
@@ -94,14 +94,14 @@ class AssociationController extends Controller
 
             /** @noinspection PhpVoidFunctionResultUsedInspection */
             return $this->render($response, 'errors/error.twig', [
-                'utente' => $user,
+                'utente' => $this->user,
                 'err' => $this->getErrorMessage()
             ]);
         }
 
         /** @noinspection PhpVoidFunctionResultUsedInspection */
         return $this->render($response, 'associations/edit.twig', [
-            'utente' => $user,
+            'utente' => $this->user,
             'ass' => $association,
             'membri' => $members,
             'appartenenza' => $belongs
@@ -111,9 +111,9 @@ class AssociationController extends Controller
     public function doEdit(/** @noinspection PhpUnusedParameterInspection */
         Request $request, Response $response, $args)
     {
-        $user = SessionHelper::auth($this, $response, SessionHelper::PUBLISHER);
+        $authorized = $this->session->auth(SessionHelper::PUBLISHER);
 
-        if (empty($user)) {
+        if (!$authorized) {
             return $response->withRedirect($this->router->pathFor('auth-error'));
         }
 
@@ -124,7 +124,7 @@ class AssociationController extends Controller
         if ($updated === false) {
             /** @noinspection PhpVoidFunctionResultUsedInspection */
             return $this->render($response, 'errors/error.twig', [
-                'utente' => $user,
+                'utente' => $this->user,
                 'err' => $this->getErrorMessage()
             ]);
         }
@@ -135,9 +135,9 @@ class AssociationController extends Controller
     public function delete(/** @noinspection PhpUnusedParameterInspection */
         Request $request, Response $response, $args)
     {
-        $user = SessionHelper::auth($this, $response, SessionHelper::DIRETTORE);
+        $authorized = $this->session->auth(SessionHelper::DIRETTORE);
 
-        if (empty($user)) {
+        if (!$authorized) {
             return $response->withRedirect($this->router->pathFor('auth-error'));
         }
 
@@ -150,14 +150,14 @@ class AssociationController extends Controller
 
             /** @noinspection PhpVoidFunctionResultUsedInspection */
             return $this->render($response, 'errors/error.twig', [
-                'utente' => $user,
+                'utente' => $this->user,
                 'err' => $this->getErrorMessage()
             ]);
         }
 
         /** @noinspection PhpVoidFunctionResultUsedInspection */
         return $this->render($response, 'associations/delete.twig', [
-            'utente' => $user,
+            'utente' => $this->user,
             'ass' => $association
         ]);
     }
@@ -165,9 +165,9 @@ class AssociationController extends Controller
     public function doDelete(/** @noinspection PhpUnusedParameterInspection */
         Request $request, Response $response, $args)
     {
-        $user = SessionHelper::auth($this, $response, SessionHelper::DIRETTORE);
+        $authorized = $this->session->auth(SessionHelper::DIRETTORE);
 
-        if (empty($user)) {
+        if (!$authorized) {
             return $response->withRedirect($this->router->pathFor('auth-error'));
         }
 
@@ -178,7 +178,7 @@ class AssociationController extends Controller
         } catch (\PDOException $e) {
             /** @noinspection PhpVoidFunctionResultUsedInspection */
             return $this->render($response, 'errors/error.twig', [
-                'utente' => $user,
+                'utente' => $this->user,
                 'err' => $this->getErrorMessage()
             ]);
         }

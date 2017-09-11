@@ -6,7 +6,8 @@ $app->get('/', 'App\Controllers\FrontController:home')
     ->setName('home');
 
 $app->get('/error/', function ($request, $response, $args) {
-        $user = SessionHelper::auth($this, $response);
+        $session = new SessionHelper();
+        $user = $session->getUser();
 
         return $this->view->render($response, 'errors/error.twig', [
             'utente' => $user
@@ -15,7 +16,8 @@ $app->get('/error/', function ($request, $response, $args) {
     ->setName('error');
 
 $app->get('/not-found/', function ($request, $response, $args) {
-        $user = SessionHelper::auth($this, $response);
+    $session = new SessionHelper();
+    $user = $session->getUser();
 
         return $this->view->render($response, 'errors/not-found.twig', [
             'utente' => $user
@@ -24,7 +26,8 @@ $app->get('/not-found/', function ($request, $response, $args) {
     ->setName('not-found');
 
 $app->get('/auth-error/', function ($request, $response, $args) {
-    $user = SessionHelper::auth($this, $response);
+    $session = new SessionHelper();
+    $user = $session->getUser();
 
     return $this->view->render($response, 'errors/auth-error.twig', [
         'utente' => $user
