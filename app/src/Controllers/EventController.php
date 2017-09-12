@@ -40,7 +40,7 @@ class EventController extends Controller
             return $response->withRedirect($this->router->pathFor('auth-error'));
         }
 
-        $associations = $this->getAssociations();
+        $associations = $this->getUserAssociations($this->user['idUtente']);
 
         /** @noinspection PhpVoidFunctionResultUsedInspection */
         return $this->render($response, 'events/create.twig', [
@@ -157,7 +157,7 @@ class EventController extends Controller
             return $response->withRedirect($this->router->pathFor('not-found'));
         }
 
-        $associations = $this->getAssociations();
+        $associations = $this->getUserAssociations($this->user['idUtente']);
 
         try {
             $eventAssociations = $this->getEventAssociationsIds($event['nomeAssociazione']);
@@ -482,12 +482,22 @@ class EventController extends Controller
         return true;
     }
 
-    private function getAssociations(): array
+    private function getUserAssociations($userID): array
     {
-        $sth = $this->db->query('
+        $sth = $this->db->prepare('
             SELECT A.idAssociazione, A.nomeAssociazione, A.logo
             FROM Associazione A
+              JOIN Appartiene AP
+              USING (idAssociazione)
+            WHERE AP.idUtente = :idUtente
         ');
+        $sth->bindParam(':idUtente', $userID, \PDO::PARAM_INT);
+
+        try {
+            $sth->execute();
+        } catch (\PDOException $e) {
+            throw $e;
+        }
 
         return $sth->fetchAll();
     }
