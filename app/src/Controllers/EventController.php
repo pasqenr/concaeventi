@@ -354,7 +354,8 @@ class EventController extends Controller
         $sth = $this->db->query('
             SELECT U.idUtente, A.idAssociazione, E.idEvento, E.titolo, E.immagine, E.descrizione, E.istanteCreazione,
                    E.istanteInizio, E.istanteFine, E.pagina, E.revisionato, A2.nomeAssociazione AS nomeAssPrimaria,
-                   A.nomeAssociazione, A.logo, U.nome AS nomeUtente, U.cognome AS cognomeUtente, U.email, U.ruolo
+                   A.nomeAssociazione, A.logo, U.nome AS nomeUtente, U.cognome AS cognomeUtente, U.email, U.ruolo,
+                   A2.logo AS logoPrimario
             FROM Evento E
             LEFT JOIN Proporre P
             USING (idEvento)
@@ -560,7 +561,7 @@ class EventController extends Controller
             SELECT U.idUtente, A.idAssociazione, E.idEvento, E.titolo, E.immagine, E.descrizione, E.istanteCreazione,
                    E.istanteInizio, E.istanteFine, E.pagina, E.revisionato, A2.nomeAssociazione AS nomeAssPrimaria, 
                    A2.idAssociazione AS idAssPrimaria, A2.stile, A2.telefono, A.nomeAssociazione, A.logo, 
-                   U.nome AS nomeUtente, U.cognome AS cognomeUtente, U.email, U.ruolo
+                   U.nome AS nomeUtente, U.cognome AS cognomeUtente, U.email, U.ruolo, A2.logo AS logoPrimario
             FROM Evento E
             LEFT JOIN Proporre P
             USING (idEvento)

@@ -85,17 +85,33 @@ class FrontController extends Controller
     private function getEvents(): array
     {
         $sth = $this->db->query('
-            SELECT *
+            SELECT U.idUtente, A.idAssociazione, E.idEvento, E.titolo, E.immagine, E.descrizione, E.istanteCreazione,
+                   E.istanteInizio, E.istanteFine, E.pagina, E.revisionato, A2.nomeAssociazione AS nomeAssPrimaria,
+                   A.nomeAssociazione, A.logo, U.nome AS nomeUtente, U.cognome AS cognomeUtente, U.email, U.ruolo,
+                   A2.logo AS logoPrimario
             FROM Evento E
-            JOIN Proporre P
+            LEFT JOIN Proporre P
             USING (idEvento)
-            JOIN Associazione A
+            LEFT JOIN Associazione A
             USING (idAssociazione)
+            LEFT JOIN Utente U
+            USING (idUtente)
+            LEFT JOIN Associazione A2
+            ON (E.idAssPrimaria = A2.idAssociazione)
             WHERE DATEDIFF(E.istanteFine, CURRENT_TIMESTAMP) > 0
-            AND E.revisionato = TRUE
+              AND E.revisionato = TRUE
             ORDER BY E.istanteInizio
         ');
-        $events = $sth->fetchAll();
+
+        try {
+            $events = $sth->fetchAll();
+        } catch (\PDOException $e) {
+            $this->setErrorMessage('getEvents(): PDOException, check errorInfo.',
+                'Recupero eventi: errore nell\'elaborazione dei dati.',
+                $this->db->errorInfo());
+
+            throw $e;
+        }
 
         $events = $this->mergeAssociations($events);
 
@@ -110,16 +126,32 @@ class FrontController extends Controller
     private function getEventsHistory(): array
     {
         $sth = $this->db->query('
-            SELECT *
+            SELECT U.idUtente, A.idAssociazione, E.idEvento, E.titolo, E.immagine, E.descrizione, E.istanteCreazione,
+                   E.istanteInizio, E.istanteFine, E.pagina, E.revisionato, A2.nomeAssociazione AS nomeAssPrimaria,
+                   A.nomeAssociazione, A.logo, U.nome AS nomeUtente, U.cognome AS cognomeUtente, U.email, U.ruolo,
+                   A2.logo AS logoPrimario
             FROM Evento E
-            JOIN Proporre P
+            LEFT JOIN Proporre P
             USING (idEvento)
-            JOIN Associazione A
+            LEFT JOIN Associazione A
             USING (idAssociazione)
+            LEFT JOIN Utente U
+            USING (idUtente)
+            LEFT JOIN Associazione A2
+            ON (E.idAssPrimaria = A2.idAssociazione)
             WHERE E.revisionato = TRUE
-            ORDER BY E.istanteInizio
+            ORDER BY E.istanteInizio DESC
         ');
-        $events = $sth->fetchAll();
+
+        try {
+            $events = $sth->fetchAll();
+        } catch (\PDOException $e) {
+            $this->setErrorMessage('getEvents(): PDOException, check errorInfo.',
+                'Recupero eventi: errore nell\'elaborazione dei dati.',
+                $this->db->errorInfo());
+
+            throw $e;
+        }
 
         $events = $this->mergeAssociations($events);
 

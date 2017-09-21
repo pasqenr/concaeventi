@@ -13,11 +13,11 @@
                             <figure class="image is-64x64">
                                 {% set eventoImg = 'stemma-concamarise.gif' %}
 
-                                {% if evento.immagine != '' %}
-                                    {% set eventoImg = evento.immagine %}
+                                {% if evento.logoPrimario != '' %}
+                                    {% set eventoImg = evento.logoPrimario %}
                                 {% endif %}
 
-                                <img src="{{ baseUrl }}/assets/img/{{ eventoImg }}" alt="Immagine evento {{ evento.idEvento }}">
+                                <img src="{{ baseUrl }}/assets/img/associations/{{ eventoImg }}" alt="Immagine evento {{ evento.idEvento }}">
                             </figure>
                         </div>
                         <div class="media-content">
