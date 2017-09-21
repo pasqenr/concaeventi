@@ -26,6 +26,10 @@ $config = require 'config.php';
 
 // ========== PHP (from configuration) ==========
 
+// language
+date_default_timezone_set('Europe/Rome');
+setlocale(LC_TIME, 'it_IT');
+
 // time zone
 date_default_timezone_set($config['PHP']['default_timezone']);
 
