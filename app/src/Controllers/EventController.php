@@ -392,7 +392,6 @@ class EventController extends Controller
     {
         $idUtente = $userID;
         $titolo = $data['titolo'];
-        $immagine = $data['immagine'];
         $descrizione = $data['descrizione'];
         $istanteInizio = $data['istanteInizio'];
         $istanteFine = $data['istanteFine'];
@@ -427,16 +426,15 @@ class EventController extends Controller
 
         $sth = $this->db->prepare('
             INSERT INTO Evento (
-                idEvento, titolo, immagine, descrizione, istanteCreazione, istanteInizio, istanteFine, 
+                idEvento, titolo, descrizione, istanteCreazione, istanteInizio, istanteFine, 
                 revisionato, idUtente, idAssPrimaria
             )
             VALUES (
-                NULL, :titolo, :immagine, :descrizione, CURRENT_TIMESTAMP, :istanteInizio, :istanteFine, 
+                NULL, :titolo, :descrizione, CURRENT_TIMESTAMP, :istanteInizio, :istanteFine, 
                 :revisionato, :idUtente, :idAssPrimaria
             )
         ');
         $sth->bindParam(':titolo', $titolo, \PDO::PARAM_STR);
-        $sth->bindParam(':immagine', $immagine, \PDO::PARAM_STR);
         $sth->bindParam(':descrizione', $descrizione, \PDO::PARAM_STR);
         $sth->bindParam(':istanteInizio', $istanteInizio, \PDO::PARAM_STR);
         $sth->bindParam(':istanteFine', $istanteFine, \PDO::PARAM_STR);
@@ -654,7 +652,6 @@ class EventController extends Controller
     {
         $eventID = $update['id'];
         $titolo = $update['titolo'];
-        $immagine = $update['immagine'];
         $descrizione = $update['descrizione'];
         $istanteCreazione = $update['istanteCreazione'];
         $istanteInizio = $update['istanteInizio'];
@@ -687,14 +684,13 @@ class EventController extends Controller
 
         $sth = $this->db->prepare('
             UPDATE Evento E 
-            SET E.titolo = :titolo, E.immagine = :immagine, E.descrizione = :descrizione, 
+            SET E.titolo = :titolo, E.descrizione = :descrizione, 
                 E.istanteCreazione = :istanteCreazione, E.istanteInizio = :istanteInizio, E.istanteFine = :istanteFine,
                 E.revisionato = :revisionato
             WHERE E.idEvento = :idEvento
         ');
         $sth->bindParam(':idEvento', $eventID, \PDO::PARAM_INT);
         $sth->bindParam(':titolo', $titolo, \PDO::PARAM_STR);
-        $sth->bindParam(':immagine', $immagine, \PDO::PARAM_STR);
         $sth->bindParam(':descrizione', $descrizione, \PDO::PARAM_STR);
         $sth->bindParam(':istanteCreazione', $istanteCreazione, \PDO::PARAM_STR);
         $sth->bindParam(':istanteInizio', $istanteInizio, \PDO::PARAM_STR);

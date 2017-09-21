@@ -33,17 +33,6 @@
                         </div>
 
                         <div class="field">
-                            <label class="label">Immagine</label>
-                            <p class="control has-icons-left">
-                                <input class="input" type="text" name="immagine"
-                                       value="{{ evento.immagine|e('html_attr') }}">
-                                <span class="icon is-small is-left">
-                                    <i class="fa fa-edit"></i>
-                                </span>
-                            </p>
-                        </div>
-
-                        <div class="field">
                             <label class="label">Descrizione</label>
                             <div class="control">
                                 <textarea name="descrizione" class="textarea">{{ evento.descrizione|trim }}</textarea>
