@@ -31,7 +31,9 @@
                         <div class="media-content">
                             <div class="content">
                                 <p>
-                                    <strong>{{ evento.titolo }}</strong>. Inizio: <small>{{ evento.istanteInizio|date('d/m/Y H:i') }}</small> - Fine: <small>{{ evento.istanteFine|date('d/m/Y H:i') }}</small>
+                                    <strong>{{ evento.titolo }}</strong> -
+                                    Inizio: <small>{{ evento.istanteInizio|date('d/m/Y H:i') }}</small> -
+                                    Fine: <small>{{ evento.istanteFine|date('d/m/Y H:i') }}</small>
                                     <br>
                                     {{ evento.descrizione }}
                                 </p>
@@ -67,7 +69,7 @@
                             <div class="content">
                                 <p><strong>Creatore:</strong>
                                     <em>
-                                        {{ evento.nomeUtente }} {{  evento.cognomeUtente }} ({{ evento.ruolo }}) - ID: {{ evento.idEvento }}
+                                        {{ evento.nomeUtente }} {{  evento.cognomeUtente }} ({{ evento.ruolo }})
                                     </em>
                                 </p>
                             </div>
