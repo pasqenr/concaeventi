@@ -11,3 +11,10 @@ document.getElementsByTagName('head')[0].appendChild(link);
 function goBack() {
     window.history.back();
 }
+
+/* Event listener for page poster selection */
+var inputPoster = document.getElementById('input-locandina');
+var filenamePoster = document.getElementById('locandina-filename');
+inputPoster.addEventListener('change', function () {
+    filenamePoster.textContent = inputPoster.value;
+});
