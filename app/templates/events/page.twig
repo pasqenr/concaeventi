@@ -9,7 +9,8 @@
             <div class="columns">
                 <div class="column"></div>
                 <div class="column is-three-quarters">
-                    <form action="{{ path_for('eventsPage', {'id': evento.idEvento })|e('html_attr') }}" method="post">
+                    <form action="{{ path_for('eventsPage', {'id': evento.idEvento })|e('html_attr') }}" method="post"
+                          enctype="multipart/form-data">
                         <h1 class="title">{{ evento.titolo }}</h1>
                             <h3 class="subtitle">
                                 {{ evento.descrizione }}
@@ -28,6 +29,29 @@
                                 Pagina
                                 <textarea name="pagina" class="textarea">{{ evento.pagina|trim }}</textarea>
                             </label>
+                        </div>
+
+                        <div class="is-small">&nbsp;</div>
+
+                        <div class="control">
+                            <div class="file has-name is-fullwidth">
+                                <label class="file-label">
+                                    <input type="file" class="file-input" name="locandina"/>
+                                    <span class="file-cta">
+                                        <span class="file-icon">
+                                            <i class="fa fa-upload"></i>
+                                        </span>
+                                        <span class="file-label">
+                                            Scegli un file...
+                                        </span>
+                                    </span>
+                                    <span id="locandina-filename" class="file-name">
+                                        {% if evento.immagine != '' %}
+                                            {{ evento.immagine }}
+                                        {% endif %}
+                                    </span>
+                                </label>
+                            </div>
                         </div>
 
                         <div class="is-small">&nbsp;</div>

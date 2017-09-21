@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use \App\Helpers\SessionHelper;
+use http\Exception\InvalidArgumentException;
 use Slim\Http\Response;
 use Slim\Http\Request;
 use Slim\Router;
@@ -13,6 +14,8 @@ use Slim\Router;
  */
 class EventController extends Controller
 {
+    private $IMAGE_PATH = WWW_PATH.'/img/events/';
+
     public function showEvents(/** @noinspection PhpUnusedParameterInspection */
         Request $request, Response $response, $args)
     {
@@ -288,7 +291,8 @@ class EventController extends Controller
         }
 
         $parsedBody = $request->getParsedBody();
-        $modified = $this->updatePageEvent($args['id'], $parsedBody);
+        $uploadedFiles = $request->getUploadedFiles();
+        $modified = $this->updatePageEvent($args['id'], $parsedBody, $uploadedFiles);
 
         if ($modified === false) {
             /** @noinspection PhpVoidFunctionResultUsedInspection */
@@ -391,7 +395,6 @@ class EventController extends Controller
         $descrizione = $data['descrizione'];
         $istanteInizio = $data['istanteInizio'];
         $istanteFine = $data['istanteFine'];
-        $pagina = $data['pagina'];
         $revisionato = $data['revisionato'];
         $associazioni = $data['associazioni'];
         $idAssPrimaria = $data['assPrimaria'];
@@ -424,10 +427,10 @@ class EventController extends Controller
         $sth = $this->db->prepare('
             INSERT INTO Evento (
                 idEvento, titolo, immagine, descrizione, istanteCreazione, istanteInizio, istanteFine, 
-                pagina, revisionato, idUtente, idAssPrimaria
+                revisionato, idUtente, idAssPrimaria
             )
             VALUES (
-                NULL, :titolo, :immagine, :descrizione, CURRENT_TIMESTAMP, :istanteInizio, :istanteFine, :pagina, 
+                NULL, :titolo, :immagine, :descrizione, CURRENT_TIMESTAMP, :istanteInizio, :istanteFine, 
                 :revisionato, :idUtente, :idAssPrimaria
             )
         ');
@@ -436,7 +439,6 @@ class EventController extends Controller
         $sth->bindParam(':descrizione', $descrizione, \PDO::PARAM_STR);
         $sth->bindParam(':istanteInizio', $istanteInizio, \PDO::PARAM_STR);
         $sth->bindParam(':istanteFine', $istanteFine, \PDO::PARAM_STR);
-        $sth->bindParam(':pagina', $pagina, \PDO::PARAM_STR);
         $sth->bindParam(':revisionato', $revisionato, \PDO::PARAM_INT);
         $sth->bindParam(':idUtente', $idUtente, \PDO::PARAM_INT);
         $sth->bindParam(':idAssPrimaria', $idAssPrimaria, \PDO::PARAM_INT);
@@ -656,7 +658,6 @@ class EventController extends Controller
         $istanteCreazione = $update['istanteCreazione'];
         $istanteInizio = $update['istanteInizio'];
         $istanteFine = $update['istanteFine'];
-        $pagina = $update['pagina'];
         $revisionato = $update['revisionato'];
 
         $date_pattern = '^\d{4}-\d{2}-\d{2} (\d{2}(:\d{2}(:\d{2})?)?)?$^';
@@ -687,7 +688,7 @@ class EventController extends Controller
             UPDATE Evento E 
             SET E.titolo = :titolo, E.immagine = :immagine, E.descrizione = :descrizione, 
                 E.istanteCreazione = :istanteCreazione, E.istanteInizio = :istanteInizio, E.istanteFine = :istanteFine,
-                E.pagina = :pagina, E.revisionato = :revisionato
+                E.revisionato = :revisionato
             WHERE E.idEvento = :idEvento
         ');
         $sth->bindParam(':idEvento', $eventID, \PDO::PARAM_INT);
@@ -697,7 +698,6 @@ class EventController extends Controller
         $sth->bindParam(':istanteCreazione', $istanteCreazione, \PDO::PARAM_STR);
         $sth->bindParam(':istanteInizio', $istanteInizio, \PDO::PARAM_STR);
         $sth->bindParam(':istanteFine', $istanteFine, \PDO::PARAM_STR);
-        $sth->bindParam(':pagina', $pagina, \PDO::PARAM_STR);
         $sth->bindParam(':revisionato', $revisionato, \PDO::PARAM_INT);
 
         try {
@@ -841,18 +841,40 @@ class EventController extends Controller
         return $associations;
     }
 
-    private function updatePageEvent($eventID, $update): bool
+    private function updatePageEvent($eventID, $update, $files): bool
     {
         $id = (int)$eventID;
         $page = $update['pagina'];
+        $imageFilename = '';
+
+        /**
+         * @var $image \Slim\Http\UploadedFile
+         */
+        if (!empty($files)) {
+            $image = $files['locandina'];
+
+            if ($image->getError() === UPLOAD_ERR_OK) {
+                $imageFilename = $image->getClientFilename();
+            }
+
+            if ($this->isValidImage($image) === false) {
+            $this->setErrorMessage('Uploaded file is not an valid image.',
+                'Il file caricato non è un\'immagine col formato supportato.',
+                $this->db->errorInfo());
+
+                return false;
+            }
+        }
 
         $sth = $this->db->prepare('
             UPDATE Evento E
-            SET E.pagina = :pagina
+            SET E.pagina = :pagina,
+              E.immagine = :immagine
             WHERE E.idEvento = :eventID
         ');
         $sth->bindParam(':pagina', $page, \PDO::PARAM_STR);
         $sth->bindParam(':eventID', $id, \PDO::PARAM_INT);
+        $sth->bindParam(':immagine', $imageFilename, \PDO::PARAM_STR);
 
         try {
             $sth->execute();
@@ -864,6 +886,29 @@ class EventController extends Controller
             return false;
         }
 
+        /**
+         * TODO: Make folder writable
+         */
+        if ($imageFilename !== '') {
+            try {
+                $image->moveTo($this->IMAGE_PATH.$imageFilename);
+            } catch (InvalidArgumentException $e) {
+
+            } catch (\Exception $e) {
+
+            }
+        }
+
         return true;
+    }
+
+    /**
+     * @var $image \Slim\Http\UploadedFile
+     * @return bool TRUE if the file have an image format, FALSE otherwise.
+     *         WARNING: This function is NOT secure.
+     */
+    private function isValidImage($image): bool
+    {
+        return !(strrpos($image->getClientMediaType(), 'image') === false);
     }
 }

@@ -85,17 +85,6 @@
                         </div>
 
                         <div class="field">
-                            <label class="label">Pagina</label>
-                            <p class="control has-icons-left">
-                                <input class="input" type="text" name="pagina" placeholder="/pagina/"
-                                       value="{{ evento.pagina|e('html_attr') }}">
-                                <span class="icon is-small is-left">
-                                    <i class="fa fa-edit"></i>
-                                </span>
-                            </p>
-                        </div>
-
-                        <div class="field">
                             <p>
                                 <strong>Scritto da:</strong> {{ evento.nomeUtente }} {{  evento.cognomeUtente }}
                                 ({{ evento.ruolo }}, #{{ evento.idUtente }})

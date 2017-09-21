@@ -16,8 +16,10 @@
                     <div class="container">
                         <p>{{ evento.descrizione }}</p>
                     </div>
+
                     <div class="is-small">&nbsp;</div>
                     <div class="container">
+
                         <p><strong>Inizio: </strong>{{ evento.istanteInizio|date('d/m/Y H:i') }}</p>
                         <p><strong>Fine: </strong>{{ evento.istanteFine|date('d/m/Y H:i') }}</p>
                     </div>
@@ -25,11 +27,23 @@
                     {% if evento.pagina != '' %}
                         <div class="is-small">&nbsp;</div>
                         <div class="container">
-                            {{ evento.pagina|raw }}
+                            <p>
+                                {{ evento.pagina|replace({'\n': '<br>'})|raw }}
+                            </p>
                         </div>
                     {% endif %}
 
                     <div class="is-small">&nbsp;</div>
+
+                    {% if evento.immagine != '' %}
+                        <div class="container">
+                            <figure class="image">
+                                <!-- TODO: Better CSS in stylesheet -->
+                                <img src="/assets/img/events/{{ evento.immagine|e('html_attr') }}" style="max-width: 70%;">
+                            </figure>
+                        </div>
+                    {% endif %}
+
                     <p><strong>Associazioni:</strong></p>
                     <div class="container is-flex">
                         {% for associazione in associazioni %}
