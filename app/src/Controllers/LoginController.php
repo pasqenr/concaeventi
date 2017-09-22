@@ -2,11 +2,10 @@
 
 namespace App\Controllers;
 
-use \App\Helpers\SessionHelper;
+use \App\Models\UserModel;
 use Slim\Http\Response;
 use Slim\Http\Request;
 use Slim\Router;
-use \RKA\Session;
 
 /**
  * @property Router router
@@ -14,6 +13,14 @@ use \RKA\Session;
  */
 class LoginController extends Controller
 {
+    private $userModel;
+
+    public function __construct($container)
+    {
+        parent::__construct($container);
+        $this->userModel = new UserModel($this->db);
+    }
+
     public function login(/** @noinspection PhpUnusedParameterInspection */
         Request $request, Response $response, $args)
     {
@@ -75,20 +82,6 @@ class LoginController extends Controller
 
     private function getUserByEmail($email)
     {
-        $sth = $this->db->prepare('
-            SELECT U.idUtente, U.password, U.nome, U.cognome, U.email, U.ruolo
-            FROM Utente U
-            WHERE U.email LIKE :email
-        ');
-        $sth->bindParam(':email', $email, \PDO::PARAM_STR);
-
-        try {
-            $sth->execute();
-        } catch (\PDOException $e) {
-            $this->setErrorMessage('PDOException, check errorInfo.',
-                'Impossibile trovare l\'utente o errore generico.');
-        }
-
-        return $sth->fetch();
+        return $this->userModel->getUserByEmail($email);
     }
 }
