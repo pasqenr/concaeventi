@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use \App\Helpers\SessionHelper;
+use \App\Helpers\ErrorHelper;
 use \App\Models\AssociationModel;
 use \App\Models\UserModel;
 use Slim\Http\Response;
@@ -17,12 +18,14 @@ class AssociationController extends Controller
 {
     private $associationModel;
     private $userModel;
+    private $errorHelper;
 
     public function __construct($container)
     {
         parent::__construct($container);
-        $this->associationModel = new AssociationModel($this->db);
-        $this->userModel = new UserModel($this->db);
+        $this->errorHelper = new ErrorHelper();
+        $this->associationModel = new AssociationModel($this->db, $this->errorHelper);
+        $this->userModel = new UserModel($this->db, $this->errorHelper);
     }
 
     public function showAll(/** @noinspection PhpUnusedParameterInspection */
