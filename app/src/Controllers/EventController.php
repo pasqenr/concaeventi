@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use \App\Helpers\SessionHelper;
+use \App\Helpers\ErrorHelper;
 use \App\Models\EventModel;
 use \App\Models\AssociationModel;
 use http\Exception\InvalidArgumentException;
@@ -19,12 +20,14 @@ class EventController extends Controller
     private $IMAGE_PATH = WWW_PATH.'/img/events/';
     private $eventModel;
     private $associationModel;
+    private $errorHelper;
 
     public function __construct($container)
     {
         parent::__construct($container);
-        $this->eventModel = new EventModel($this->db);
-        $this->associationModel = new AssociationModel($this->db);
+        $this->errorHelper = new ErrorHelper();
+        $this->eventModel = new EventModel($this->db, $this->errorHelper);
+        $this->associationModel = new AssociationModel($this->db, $this->errorHelper);
     }
 
     public function showEvents(/** @noinspection PhpUnusedParameterInspection */
@@ -79,7 +82,7 @@ class EventController extends Controller
             /** @noinspection PhpVoidFunctionResultUsedInspection */
             return $this->render($response, 'errors/error.twig', [
                 'utente' => $this->user,
-                'err' => $this->getErrorMessage()
+                'err' => $this->errorHelper->getErrorMessage()
             ]);
         }
 
@@ -100,13 +103,13 @@ class EventController extends Controller
         try {
             $event = $this->getEvent($eventID);
         } catch (\PDOException $e) {
-            $this->setErrorMessage('PDOException, check errorInfo.',
+            $this->errorHelper->setErrorMessage('PDOException, check errorInfo.',
                 'Impossibile trovare l\'evento.');
 
             /** @noinspection PhpVoidFunctionResultUsedInspection */
             return $this->render($response, 'errors/error.twig', [
                 'utente' => $this->user,
-                'err' => $this->getErrorMessage()
+                'err' => $this->errorHelper->getErrorMessage()
             ]);
         }
 
@@ -137,7 +140,7 @@ class EventController extends Controller
             /** @noinspection PhpVoidFunctionResultUsedInspection */
             return $this->render($response, 'errors/error.twig', [
                 'utente' => $this->user,
-                'err' => $this->getErrorMessage()
+                'err' => $this->errorHelper->getErrorMessage()
             ]);
         }
 
@@ -157,13 +160,13 @@ class EventController extends Controller
         try {
             $event = $this->getEvent($eventID);
         } catch (\PDOException $e) {
-            $this->setErrorMessage('PDOException, check errorInfo.',
+            $this->errorHelper->setErrorMessage('PDOException, check errorInfo.',
                 'Impossibile trovare l\'evento.');
 
             /** @noinspection PhpVoidFunctionResultUsedInspection */
             return $this->render($response, 'errors/error.twig', [
                 'utente' => $this->user,
-                'err' => $this->getErrorMessage()
+                'err' => $this->errorHelper->getErrorMessage()
             ]);
         }
 
@@ -176,13 +179,13 @@ class EventController extends Controller
         try {
             $eventAssociations = $this->getEventAssociationsIds($event['nomeAssociazione']);
         } catch (\PDOException $e) {
-            $this->setErrorMessage('PDOException, check errorInfo.',
+            $this->errorHelper->setErrorMessage('PDOException, check errorInfo.',
                 'Impossibile trovare le associazioni.');
 
             /** @noinspection PhpVoidFunctionResultUsedInspection */
             return $this->render($response, 'errors/error.twig', [
                 'utente' => $this->user,
-                'err' => $this->getErrorMessage()
+                'err' => $this->errorHelper->getErrorMessage()
             ]);
         }
 
@@ -211,7 +214,7 @@ class EventController extends Controller
             /** @noinspection PhpVoidFunctionResultUsedInspection */
             return $this->render($response, 'errors/error.twig', [
                 'utente' => $this->user,
-                'err' => $this->getErrorMessage()
+                'err' => $this->errorHelper->getErrorMessage()
             ]);
         }
 
@@ -231,13 +234,13 @@ class EventController extends Controller
         try {
             $event = $this->getEvent($eventID);
         } catch (\PDOException $e) {
-            $this->setErrorMessage('PDOException, check errorInfo.',
+            $this->errorHelper->setErrorMessage('PDOException, check errorInfo.',
                 'Impossibile trovare l\'evento.');
 
             /** @noinspection PhpVoidFunctionResultUsedInspection */
             return $this->render($response, 'errors/error.twig', [
                 'utente' => $this->user,
-                'err' => $this->getErrorMessage()
+                'err' => $this->errorHelper->getErrorMessage()
             ]);
         }
 
@@ -269,13 +272,13 @@ class EventController extends Controller
         try {
             $event = $this->getEvent($eventID);
         } catch (\PDOException $e) {
-            $this->setErrorMessage('PDOException, check errorInfo.',
+            $this->errorHelper->setErrorMessage('PDOException, check errorInfo.',
                 'Impossibile trovare l\'evento.');
 
             /** @noinspection PhpVoidFunctionResultUsedInspection */
             return $this->render($response, 'errors/error.twig', [
                 'utente' => $this->user,
-                'err' => $this->getErrorMessage()
+                'err' => $this->errorHelper->getErrorMessage()
             ]);
         }
         $associations = $this->getEventAssociations($event);
@@ -309,7 +312,7 @@ class EventController extends Controller
             /** @noinspection PhpVoidFunctionResultUsedInspection */
             return $this->render($response, 'errors/error.twig', [
                 'utente' => $this->user,
-                'err' => $this->getErrorMessage()
+                'err' => $this->errorHelper->getErrorMessage()
             ]);
         }
 
@@ -339,14 +342,14 @@ class EventController extends Controller
 
         if ($titolo === '' || $descrizione === '' || $istanteInizio === '' || $istanteFine === '' ||
             $associazioni === '' || $idAssPrimaria === '') {
-            $this->setErrorMessage('createEvent(): Empty field.',
+            $this->errorHelper->setErrorMessage('createEvent(): Empty field.',
                 'Creazione evento: un campo obbligatorio non è stato compilato.');
 
             return false;
         }
 
         if (!preg_match($date_pattern, $istanteInizio) || !preg_match($date_pattern, $istanteFine)) {
-            $this->setErrorMessage('createEvent(): Wrong date match.',
+            $this->errorHelper->setErrorMessage('createEvent(): Wrong date match.',
                 'Creazione evento: formato data errato.');
 
             return false;
@@ -375,14 +378,14 @@ class EventController extends Controller
         $date_pattern = '^\d{4}-\d{2}-\d{2} (\d{2}(:\d{2}(:\d{2})?)?)?$^';
 
         if ($titolo === '' || $descrizione === '' || $istanteInizio === '' || $istanteFine === '') {
-            $this->setErrorMessage('updateEvent(): Empty field.',
+            $this->errorHelper->setErrorMessage('updateEvent(): Empty field.',
                 'Modifica evento: un campo obbligatorio non è stato compilato.');
 
             return false;
         }
 
         if (!preg_match($date_pattern, $istanteInizio) || !preg_match($date_pattern, $istanteFine)) {
-            $this->setErrorMessage('updateEvent(): Wrong date match.',
+            $this->errorHelper->setErrorMessage('updateEvent(): Wrong date match.',
                 'Modifica evento: formato data errato.');
 
             return false;
@@ -449,7 +452,7 @@ class EventController extends Controller
             }
 
             if ($this->isValidImage($image) === false) {
-            $this->setErrorMessage('Uploaded file is not an valid image.',
+            $this->errorHelper->setErrorMessage('Uploaded file is not an valid image.',
                 'Il file caricato non è un\'immagine col formato supportato.',
                 $this->db->errorInfo());
 

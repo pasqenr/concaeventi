@@ -2,9 +2,13 @@
 
 namespace App\Models;
 
+use \App\Helpers\ErrorHelper;
+
 /**
  * Class SponsorModel
  * @package App\Models
+ *
+ * @property ErrorHelper errorHelper
  */
 class SponsorModel extends Model
 {
@@ -60,8 +64,8 @@ class SponsorModel extends Model
         try {
             $sth->execute();
         } catch (\PDOException $e) {
-            /*$this->setErrorMessage('PDOException, check errorInfo.',
-                'Impossibile creare lo sponsor.');*/
+            $this->errorHelper->setErrorMessage('PDOException, check errorInfo.',
+                'Impossibile creare lo sponsor.');
 
             return false;
         }
@@ -91,8 +95,8 @@ class SponsorModel extends Model
         try {
             $sth->execute();
         } catch (\PDOException $e) {
-            /*$this->setErrorMessage('PDOException, check errorInfo.',
-                'Impossibile modificare lo sponsor.');*/
+            $this->errorHelper->setErrorMessage('PDOException, check errorInfo.',
+                'Impossibile modificare lo sponsor.');
 
             return false;
         }
@@ -116,8 +120,8 @@ class SponsorModel extends Model
         try {
             $sth->execute();
         } catch (\PDOException $e) {
-            /*$this->setErrorMessage('PDOException, check errorInfo.',
-                'Impossibile eliminare lo sponsor.');*/
+            $this->errorHelper->setErrorMessage('PDOException, check errorInfo.',
+                'Impossibile eliminare lo sponsor.');
 
             return false;
         }

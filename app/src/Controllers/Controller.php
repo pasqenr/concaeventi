@@ -6,21 +6,18 @@ use Psr\Http\Message\ResponseInterface;
 use Slim\Container;
 use \App\Helpers\SessionHelper;
 
+/**
+ * Class Controller
+ * @package App\Controllers
+ *
+ * @property
+ */
 class Controller
 {
     /**
      * @var Container
      */
     private $container;
-
-    /**
-     * @var array $err Contains useful information for the user when an error appears.
-     */
-    private $err = [
-        'message' => '',
-        'debugMessage' => '',
-        'errorInfo' => ''
-    ];
 
     protected $user;
     protected $session;
@@ -52,6 +49,7 @@ class Controller
      * @param string $name
      *
      * @return mixed
+     * @throws \Interop\Container\Exception\ContainerException
      */
     public function __get($name)
     {
@@ -66,19 +64,5 @@ class Controller
     public function __isset($name)
     {
 
-    }
-
-    public function setErrorMessage($debugMessage = 'Errore nell\'elaborazione dei dati.',
-                                    $message = '',
-                                    $errorInfo = ['', '', ''])
-    {
-        $this->err['message'] = $message;
-        $this->err['debugMessage'] = debug_backtrace()[1]['function'] . ': ' . $debugMessage;
-        $this->err['errorInfo'] = $errorInfo[2];
-    }
-
-    public function getErrorMessage()
-    {
-        return $this->err;
     }
 }

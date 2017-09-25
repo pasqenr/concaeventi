@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use \App\Helpers\SessionHelper;
+use \App\Helpers\ErrorHelper;
 use \App\Models\EventModel;
 use \App\Models\FundingModel;
 use \App\Models\SponsorModel;
@@ -20,13 +21,15 @@ class FundingController extends Controller
     private $eventModel;
     private $fundingModel;
     private $sponsorModel;
+    private $errorHelper;
 
     public function __construct($container)
     {
         parent::__construct($container);
-        $this->eventModel = new EventModel($this->db);
-        $this->fundingModel = new FundingModel($this->db);
-        $this->sponsorModel = new SponsorModel($this->db);
+        $this->errorHelper = new ErrorHelper();
+        $this->eventModel = new EventModel($this->db, $this->errorHelper);
+        $this->fundingModel = new FundingModel($this->db, $this->errorHelper);
+        $this->sponsorModel = new SponsorModel($this->db, $this->errorHelper);
     }
 
     public function showAll(/** @noinspection PhpUnusedParameterInspection */
@@ -83,7 +86,7 @@ class FundingController extends Controller
             /** @noinspection PhpVoidFunctionResultUsedInspection */
             return $this->render($response, 'errors/error.twig', [
                 'utente' => $this->user,
-                'err' => $this->getErrorMessage()
+                'err' => $this->errorHelper->getErrorMessage()
             ]);
         }
 
@@ -105,13 +108,13 @@ class FundingController extends Controller
         try {
             $funding = $this->getFunding($eventID, $sponsorID);
         } catch (\PDOException $e) {
-            $this->setErrorMessage('PDOException, check errorInfo.',
+            $this->errorHelper->setErrorMessage('PDOException, check errorInfo.',
                 'Impossibile trovare il finanziamento.');
 
             /** @noinspection PhpVoidFunctionResultUsedInspection */
             return $this->render($response, 'errors/error.twig', [
                 'utente' => $this->user,
-                'err' => $this->getErrorMessage()
+                'err' => $this->errorHelper->getErrorMessage()
             ]);
         }
 
@@ -137,13 +140,13 @@ class FundingController extends Controller
         $updated = $this->updateFunding($eventID, $sponsorID, $parsedBody);
 
         if ($updated === false) {
-            $this->setErrorMessage('PDOException, check errorInfo.',
+            $this->errorHelper->setErrorMessage('PDOException, check errorInfo.',
                 'Impossibile modificare il finanziamento.');
 
             /** @noinspection PhpVoidFunctionResultUsedInspection */
             return $this->render($response, 'errors/error.twig', [
                 'utente' => $this->user,
-                'err' => $this->getErrorMessage()
+                'err' => $this->errorHelper->getErrorMessage()
             ]);
         }
 
@@ -165,13 +168,13 @@ class FundingController extends Controller
         try {
             $funding = $this->getFunding($eventID, $sponsorID);
         } catch (\PDOException $e) {
-            $this->setErrorMessage('PDOException, check errorInfo.',
+            $this->errorHelper->setErrorMessage('PDOException, check errorInfo.',
                 'Impossibile trovare il finanziamento.');
 
             /** @noinspection PhpVoidFunctionResultUsedInspection */
             return $this->render($response, 'errors/error.twig', [
                 'utente' => $this->user,
-                'err' => $this->getErrorMessage()
+                'err' => $this->errorHelper->getErrorMessage()
             ]);
         }
 
@@ -199,7 +202,7 @@ class FundingController extends Controller
             /** @noinspection PhpVoidFunctionResultUsedInspection */
             return $this->render($response, 'errors/error.twig', [
                 'utente' => $this->user,
-                'err' => $this->getErrorMessage()
+                'err' => $this->errorHelper->getErrorMessage()
             ]);
         }
 
@@ -226,7 +229,7 @@ class FundingController extends Controller
             $amount = str_replace(',', '.', $amount);
 
             if (!preg_match($amount_pattern, $amount)) {
-                $this->setErrorMessage('Wrong amount format.',
+                $this->errorHelper->setErrorMessage('Wrong amount format.',
                     'Formato valuta errato.');
 
                 return false;
@@ -246,7 +249,7 @@ class FundingController extends Controller
         $amount_pattern = '[0-9]{1,6}.[0-9]{1,2}';
 
         if (!preg_match($amount_pattern, $amount)) {
-            $this->setErrorMessage('Wrong amount format.',
+            $this->errorHelper->setErrorMessage('Wrong amount format.',
                 'Formato valuta errato.');
 
             return false;

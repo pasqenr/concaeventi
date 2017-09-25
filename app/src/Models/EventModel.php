@@ -2,9 +2,13 @@
 
 namespace App\Models;
 
+use \App\Helpers\ErrorHelper;
+
 /**
  * Class EventModel
  * @package App\Models
+ * 
+ * @property ErrorHelper errorHelper
  */
 class EventModel extends Model
 {
@@ -36,9 +40,9 @@ class EventModel extends Model
         try {
             $events = $sth->fetchAll();
         } catch (\PDOException $e) {
-            /*$this->setErrorMessage('getEvents(): PDOException, check errorInfo.',
+            $this->errorHelper->setErrorMessage('getEvents(): PDOException, check errorInfo.',
                 'Recupero eventi: errore nell\'elaborazione dei dati.',
-                $this->db->errorInfo());*/
+                $this->db->errorInfo());
 
             throw new GenericPDOException($e);
         }
@@ -75,9 +79,9 @@ class EventModel extends Model
         try {
             $events = $sth->fetchAll();
         } catch (\PDOException $e) {
-            /*$this->setErrorMessage('getEvents(): PDOException, check errorInfo.',
+            $this->errorHelper->setErrorMessage('getEvents(): PDOException, check errorInfo.',
                 'Recupero eventi: errore nell\'elaborazione dei dati.',
-                $this->db->errorInfo());*/
+                $this->db->errorInfo());
 
             throw $e;
         }
@@ -201,9 +205,9 @@ class EventModel extends Model
         try {
             $sth->execute();
         } catch (\PDOException $e) {
-            /*$this->setErrorMessage('PDOException, check errorInfo.',
+            $this->errorHelper->setErrorMessage('PDOException, check errorInfo.',
                 'Impossibile creare l\'evento.',
-                $this->db->errorInfo());*/
+                $this->db->errorInfo());
 
             $this->db->rollBack();
 
@@ -213,8 +217,8 @@ class EventModel extends Model
         try {
             $eventID = $this->getLastEventID();
         } catch (\PDOException $e) {
-            /*$this->setErrorMessage('PDOException, check errorInfo.',
-                'Impossibile recupeare l\'ultimo evento.');*/
+            $this->errorHelper->setErrorMessage('PDOException, check errorInfo.',
+                'Impossibile recupeare l\'ultimo evento.');
 
             $this->db->rollBack();
 
@@ -226,8 +230,8 @@ class EventModel extends Model
             try {
                 $this->addPropose($eventID, $ass);
             } catch (\PDOException $e) {
-                /*$this->setErrorMessage('PDOException, check errorInfo.',
-                    'Impossibile associare le associazioni.');*/
+                $this->errorHelper->setErrorMessage('PDOException, check errorInfo.',
+                    'Impossibile associare le associazioni.');
 
                 $this->db->rollBack();
 
@@ -279,9 +283,9 @@ class EventModel extends Model
         try {
             $sth->execute();
         } catch (\PDOException $e) {
-            /*$this->setErrorMessage('PDOException, check errorInfo.',
+            $this->errorHelper->setErrorMessage('PDOException, check errorInfo.',
                 'Impossibile modificare l\'evento.',
-                $this->db->errorInfo());*/
+                $this->db->errorInfo());
 
             $this->db->rollBack();
 
@@ -291,8 +295,8 @@ class EventModel extends Model
         try {
             $this->deleteOldProposes($eventID);
         } catch (\PDOException $e) {
-            /*$this->setErrorMessage('PDOException, check errorInfo.',
-                'Impossibile modificare le precedenti associazioni collegate all\'evento.');*/
+            $this->errorHelper->setErrorMessage('PDOException, check errorInfo.',
+                'Impossibile modificare le precedenti associazioni collegate all\'evento.');
 
             $this->db->rollBack();
 
@@ -302,8 +306,8 @@ class EventModel extends Model
         try {
             $this->createProposes($eventID, $update);
         } catch (\PDOException $e) {
-            /*$this->setErrorMessage('PDOException, check errorInfo.',
-                'Impossibile modificare le precedenti associazioni collegate all\'evento.');*/
+            $this->errorHelper->setErrorMessage('PDOException, check errorInfo.',
+                'Impossibile modificare le precedenti associazioni collegate all\'evento.');
 
             $this->db->rollBack();
 
@@ -326,8 +330,8 @@ class EventModel extends Model
         try {
             $this->deleteFromProposes($eventID);
         } catch (\PDOException $e) {
-            /*$this->setErrorMessage('PDOException, check errorInfo.',
-                'Impossibile eliminare le associazioni collegate all\'evento.');*/
+            $this->errorHelper->setErrorMessage('PDOException, check errorInfo.',
+                'Impossibile eliminare le associazioni collegate all\'evento.');
 
             $this->db->rollBack();
 
@@ -344,10 +348,10 @@ class EventModel extends Model
         try {
             $sth->execute();
         } catch (\PDOException $e) {
-            /*$this->setErrorMessage('PDOException, check errorInfo.',
+            $this->errorHelper->setErrorMessage('PDOException, check errorInfo.',
                 'Impossibile eliminare l\'evento.',
-                $this->db->errorInfo());*/
-
+                $this->db->errorInfo());
+            
             $this->db->rollBack();
 
             return false;
@@ -378,9 +382,9 @@ class EventModel extends Model
         try {
             $sth->execute();
         } catch (\PDOException $e) {
-            /*$this->setErrorMessage('PDOException, check errorInfo.',
+            $this->errorHelper->setErrorMessage('PDOException, check errorInfo.',
                 'Impossibile modificare la pagina.',
-                $this->db->errorInfo());*/
+                $this->db->errorInfo());
 
             return false;
         }

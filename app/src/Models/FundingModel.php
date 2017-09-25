@@ -2,9 +2,13 @@
 
 namespace App\Models;
 
+use \App\Helpers\ErrorHelper;
+
 /**
  * Class FundingModel
  * @package App\Models
+ *
+ * @property ErrorHelper errorHelper
  */
 class FundingModel extends Model
 {
@@ -73,8 +77,8 @@ class FundingModel extends Model
         try {
             $sth->execute();
         } catch (\PDOException $e) {
-            /*$this->setErrorMessage('PDOException, check errorInfo.',
-                'Creazione finanziamento: errore nell\'elaborazione dei dati.');*/
+            $this->errorHelper->setErrorMessage('PDOException, check errorInfo.',
+                'Creazione finanziamento: errore nell\'elaborazione dei dati.');
 
             return false;
         }
@@ -107,8 +111,8 @@ class FundingModel extends Model
         try {
             $sth->execute();
         } catch (\PDOException $e) {
-            /*$this->setErrorMessage('PDOException, check errorInfo.',
-                'Impossibile modificare il finanziamento.');*/
+            $this->errorHelper->setErrorMessage('PDOException, check errorInfo.',
+                'Impossibile modificare il finanziamento.');
 
             return false;
         }
@@ -135,8 +139,8 @@ class FundingModel extends Model
         try {
             $sth->execute();
         } catch (\PDOException $e) {
-            /*$this->setErrorMessage('PDOException, check errorInfo.',
-                'Impossibile eliminare il finanziamento.');*/
+            $this->errorHelper->setErrorMessage('PDOException, check errorInfo.',
+                'Impossibile eliminare il finanziamento.');
 
             return false;
         }

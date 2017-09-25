@@ -77,7 +77,7 @@ class AssociationController extends Controller
             /** @noinspection PhpVoidFunctionResultUsedInspection */
             return $this->render($response, 'errors/error.twig', [
                 'utente' => $this->user,
-                'err' => $this->getErrorMessage()
+                'err' => $this->errorHelper->getErrorMessage()
             ]);
         }
 
@@ -100,13 +100,13 @@ class AssociationController extends Controller
             $members = $this->getAllMembers();
             $belongs = $this->getBelongsByAssociation($associationID);
         } catch (\PDOException $e) {
-            $this->setErrorMessage('PDOException, check errorInfo.',
+            $this->errorHelper->setErrorMessage('PDOException, check errorInfo.',
                 'Errore nell\'elaborazione dei dati.');
 
             /** @noinspection PhpVoidFunctionResultUsedInspection */
             return $this->render($response, 'errors/error.twig', [
                 'utente' => $this->user,
-                'err' => $this->getErrorMessage()
+                'err' => $this->errorHelper->getErrorMessage()
             ]);
         }
 
@@ -136,7 +136,7 @@ class AssociationController extends Controller
             /** @noinspection PhpVoidFunctionResultUsedInspection */
             return $this->render($response, 'errors/error.twig', [
                 'utente' => $this->user,
-                'err' => $this->getErrorMessage()
+                'err' => $this->errorHelper->getErrorMessage()
             ]);
         }
 
@@ -156,13 +156,13 @@ class AssociationController extends Controller
         try {
             $association = $this->getAssociation($associationID);
         } catch (\PDOException $e) {
-            $this->setErrorMessage('PDOException, check errorInfo.',
+            $this->errorHelper->setErrorMessage('PDOException, check errorInfo.',
                 'Errore nell\'elaborazione dei dati.');
 
             /** @noinspection PhpVoidFunctionResultUsedInspection */
             return $this->render($response, 'errors/error.twig', [
                 'utente' => $this->user,
-                'err' => $this->getErrorMessage()
+                'err' => $this->errorHelper->getErrorMessage()
             ]);
         }
 
@@ -190,7 +190,7 @@ class AssociationController extends Controller
             /** @noinspection PhpVoidFunctionResultUsedInspection */
             return $this->render($response, 'errors/error.twig', [
                 'utente' => $this->user,
-                'err' => $this->getErrorMessage()
+                'err' => $this->errorHelper->getErrorMessage()
             ]);
         }
 
@@ -215,7 +215,7 @@ class AssociationController extends Controller
         $style = $data['stile'] ?? '';
 
         if ($associationName === '' || empty($members)) {
-            $this->setErrorMessage(
+            $this->errorHelper->setErrorMessage(
                 'Empty request fields.',
                 'Un campo obbligatorio non è stato inserito.');
 
@@ -223,7 +223,7 @@ class AssociationController extends Controller
         }
 
         if ($telephone !== '' && $this->isValidTelephone($telephone) === false) {
-            $this->setErrorMessage(
+            $this->errorHelper->setErrorMessage(
                 'Wrong telephone format.',
                 'Il numero di telefono non è nel formato corretto.');
 
@@ -235,7 +235,7 @@ class AssociationController extends Controller
         $style_path = WWW_PATH . '/assets/css/ass/' . $associationID . '.css';
 
         if ($styleCreated === false) {
-            $this->setErrorMessage(
+            $this->errorHelper->setErrorMessage(
                 'Impossible to write the new style CSS file.',
                 'Impossibile creare lo stile associato.');
 
@@ -243,7 +243,7 @@ class AssociationController extends Controller
         }*/
 
         if ($style !== '' && $this->isValidHex($style) === false) {
-                $this->setErrorMessage(
+                $this->errorHelper->setErrorMessage(
                     'Wrong hex format.',
                     'Il colore scelto non è nel formato corretto.');
 
@@ -266,7 +266,7 @@ class AssociationController extends Controller
         $style = $data['stile'] ?? '';
 
         if ($associationName === '' || empty($members)) {
-            $this->setErrorMessage(
+            $this->errorHelper->setErrorMessage(
                 'Empty field.',
                 'Un campo obbligatorio non è stato inserito.');
 
@@ -274,7 +274,7 @@ class AssociationController extends Controller
         }
 
         if ($telephone !== '' && $this->isValidTelephone($telephone) === false) {
-            $this->setErrorMessage(
+            $this->errorHelper->setErrorMessage(
                 'Wrong telephone format.',
                 'Il formato del numero di telefono non è valido.');
 
@@ -285,7 +285,7 @@ class AssociationController extends Controller
         $style_path = WWW_PATH . '/assets/css/ass/' . $associationID . '.css';
 
         if ($styleCreated === false) {
-            $this->setErrorMessage(
+            $this->errorHelper->setErrorMessage(
                 'Impossible to write the style CSS file.',
                 'Impossibile modificare lo stile associato.');
 
@@ -293,7 +293,7 @@ class AssociationController extends Controller
         }*/
 
         if ($style !== '' && $this->isValidHex($style) === false) {
-                $this->setErrorMessage(
+                $this->errorHelper->setErrorMessage(
                     'Wrong hex format.',
                     'Il colore scelto non è nel formato corretto.');
 

@@ -2,22 +2,27 @@
 
 namespace App\Models;
 
+use \App\Helpers\ErrorHelper;
+
 /**
  * Class Model
  * @package App\Models
  *
  * @property \PDO db
+ * @property ErrorHelper errorHelper
  */
 class Model
 {
     private $db;
+    private $errorHelper;
 
-    public function __construct(&$db)
+    public function __construct(&$db, &$errorHelper)
     {
         $this->db = $db;
+        $this->errorHelper = $errorHelper;
     }
 
-    public function __get($name): \PDO
+    public function __get($name)
     {
         if (property_exists($this, $name)) {
             return $this->$name;

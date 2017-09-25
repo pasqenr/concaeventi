@@ -2,9 +2,13 @@
 
 namespace App\Models;
 
+use \App\Helpers\ErrorHelper;
+
 /**
  * Class UserModel
  * @package App\Models
+ *
+ * @property ErrorHelper errorHelper
  */
 class UserModel extends Model
 {
@@ -38,8 +42,8 @@ class UserModel extends Model
         try {
             $sth->execute();
         } catch (\PDOException $e) {
-            /*$this->setErrorMessage('PDOException, check errorInfo.',
-                'Impossibile trovare l\'utente o errore generico.');*/
+            $this->errorHelper->setErrorMessage('PDOException, check errorInfo.',
+                'Impossibile trovare l\'utente o errore generico.');
 
             throw $e;
         }

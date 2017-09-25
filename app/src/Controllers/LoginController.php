@@ -2,6 +2,7 @@
 
 namespace App\Controllers;
 
+use \App\Helpers\ErrorHelper;
 use \App\Models\UserModel;
 use Slim\Http\Response;
 use Slim\Http\Request;
@@ -14,11 +15,13 @@ use Slim\Router;
 class LoginController extends Controller
 {
     private $userModel;
+    private $errorHelper;
 
     public function __construct($container)
     {
         parent::__construct($container);
-        $this->userModel = new UserModel($this->db);
+        $this->errorHelper = new ErrorHelper();
+        $this->userModel = new UserModel($this->db, $this->errorHelper);
     }
 
     public function login(/** @noinspection PhpUnusedParameterInspection */
@@ -49,7 +52,7 @@ class LoginController extends Controller
             /** @noinspection PhpVoidFunctionResultUsedInspection */
             return $this->render($response, 'errors/error.twig', [
                 'utente' => $this->user,
-                'err' => $this->getErrorMessage()
+                'err' => $this->errorHelper->getErrorMessage()
             ]);
         }
 
@@ -57,13 +60,13 @@ class LoginController extends Controller
 
         if (!$passwordMatch) {
             /*return $response->withRedirect($this->router->pathFor('error'));*/
-            $this->setErrorMessage('Password don\'t match.',
+            $this->errorHelper->setErrorMessage('Password don\'t match.',
                 'Email o password errati.');
 
             /** @noinspection PhpVoidFunctionResultUsedInspection */
             return $this->render($response, 'errors/error.twig', [
                 'utente' => $this->user,
-                'err' => $this->getErrorMessage()
+                'err' => $this->errorHelper->getErrorMessage()
             ]);
         }
 

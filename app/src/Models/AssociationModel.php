@@ -2,9 +2,13 @@
 
 namespace App\Models;
 
+use \App\Helpers\ErrorHelper;
+
 /**
  * Class AssociationController
  * @package App\Models
+ *
+ * @property ErrorHelper errorHelper
  */
 class AssociationModel extends Model
 {
@@ -131,9 +135,9 @@ class AssociationModel extends Model
         try {
             $sth->execute();
         } catch (\PDOException $e) {
-            /*$this->setErrorMessage('PDOException, check errorInfo.',
+            $this->errorHelper->setErrorMessage('PDOException, check errorInfo.',
                 'Impossibile creare l\'associazione.',
-                $this->db->errorInfo());*/
+                $this->db->errorInfo());
 
             $this->db->rollBack();
 
@@ -143,9 +147,10 @@ class AssociationModel extends Model
         try {
             $associationID = $this->getLastAssociationID();
         } catch (\PDOException $e) {
-            /*$this->setErrorMessage(
+            $this->errorHelper->setErrorMessage(
                 'PDOException, check errorInfo.',
-                'Impossibile recupeare l\'ultima associazione.');*/
+                'Impossibile recupeare l\'ultima associazione.',
+                $this->db->errorInfo());
 
             $this->db->rollBack();
 
@@ -157,9 +162,9 @@ class AssociationModel extends Model
             try {
                 $this->addBelong($associationID, $membro);
             } catch (\PDOException $e) {
-                /*$this->setErrorMessage(
+                $this->errorHelper->setErrorMessage(
                     'PDOException, check errorInfo.',
-                    'Impossibile inserire un membro nell\'associazione.');*/
+                    'Impossibile inserire un membro nell\'associazione.');
 
                 $this->db->rollBack();
 
@@ -201,10 +206,10 @@ class AssociationModel extends Model
         try {
             $sth->execute();
         } catch (\PDOException $e) {
-            /*$this->setErrorMessage(
+            $this->errorHelper->setErrorMessage(
                 'PDOException, check errorInfo.',
                 'Impossibile modificare l\'evento.',
-                $this->db->errorInfo());*/
+                $this->db->errorInfo());
 
             $this->db->rollBack();
 
@@ -214,7 +219,7 @@ class AssociationModel extends Model
         try {
             $this->deleteOldBelongs($associationID);
         } catch (\PDOException $e) {
-            /*$this->setErrorMessage(
+            /*$this->errorHelper->setErrorMessage(
                 'PDOException, check errorInfo.',
                 'Impossibile modificare le precedenti appartenenze.');*/
 
@@ -226,9 +231,10 @@ class AssociationModel extends Model
         try {
             $this->createBelongs($associationID, $members);
         } catch (\PDOException $e) {
-            /*$this->setErrorMessage(
+            $this->errorHelper->setErrorMessage(
                 'PDOException, check errorInfo.',
-                'Impossibile modificare le precedenti appartenenze.');*/
+                'Impossibile modificare le precedenti appartenenze.',
+                $this->db->errorInfo());
 
             $this->db->rollBack();
 
@@ -267,10 +273,10 @@ class AssociationModel extends Model
         try {
             $res &= $sth->execute();
         } catch (\PDOException $e) {
-            /*$this->setErrorMessage(
+            $this->errorHelper->setErrorMessage(
                 'PDOException, check errorInfo.',
                 'Errore nell\'eliminazione dell\'associazione.',
-                $sth->errorInfo());*/
+                $sth->errorInfo());
 
             $this->db->rollBack();
 
@@ -427,10 +433,10 @@ class AssociationModel extends Model
         try {
             $res = $sth->execute();
         } catch (\PDOException $e) {
-            /*$this->setErrorMessage(
+            $this->errorHelper->setErrorMessage(
                 'PDOException, check errorInfo.',
                 'Errore nell\'eliminazione dei membri appartenenti all\'associazione.',
-                $sth->errorInfo());*/
+                $sth->errorInfo());
 
             throw $e;
         }

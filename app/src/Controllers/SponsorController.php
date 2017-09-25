@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use \App\Helpers\SessionHelper;
+use \App\Helpers\ErrorHelper;
 use \App\Models\SponsorModel;
 use Slim\Http\Response;
 use Slim\Http\Request;
@@ -15,11 +16,13 @@ use Slim\Router;
 class SponsorController extends Controller
 {
     private $sponsorModel;
+    private $errorHelper;
 
     public function __construct($container)
     {
         parent::__construct($container);
-        $this->sponsorModel = new SponsorModel($this->db);
+        $this->errorHelper = new ErrorHelper();
+        $this->sponsorModel = new SponsorModel($this->db, $this->errorHelper);
     }
 
     public function showAll(/** @noinspection PhpUnusedParameterInspection */
@@ -71,7 +74,7 @@ class SponsorController extends Controller
             /** @noinspection PhpVoidFunctionResultUsedInspection */
             return $this->render($response, 'errors/error.twig', [
                 'utente' => $this->user,
-                'err' => $this->getErrorMessage()
+                'err' => $this->errorHelper->getErrorMessage()
             ]);
         }
 
@@ -91,13 +94,13 @@ class SponsorController extends Controller
         try {
             $sponsor = $this->getSponsor($sponsorID);
         } catch (\PDOException $e) {
-            $this->setErrorMessage('PDOException, check errorInfo.',
+            $this->errorHelper->setErrorMessage('PDOException, check errorInfo.',
                 'Impossibile trovare lo sponsor.');
 
             /** @noinspection PhpVoidFunctionResultUsedInspection */
             return $this->render($response, 'errors/error.twig', [
                 'utente' => $this->user,
-                'err' => $this->getErrorMessage()
+                'err' => $this->errorHelper->getErrorMessage()
             ]);
         }
 
@@ -125,7 +128,7 @@ class SponsorController extends Controller
             /** @noinspection PhpVoidFunctionResultUsedInspection */
             return $this->render($response, 'errors/error.twig', [
                 'utente' => $this->user,
-                'err' => $this->getErrorMessage()
+                'err' => $this->errorHelper->getErrorMessage()
             ]);
         }
 
@@ -145,13 +148,13 @@ class SponsorController extends Controller
         try {
             $sponsor = $this->getSponsor($sponsorID);
         } catch (\PDOException $e) {
-            $this->setErrorMessage('PDOException, check errorInfo.',
+            $this->errorHelper->setErrorMessage('PDOException, check errorInfo.',
                 'Impossibile trovare lo sponsor.');
 
             /** @noinspection PhpVoidFunctionResultUsedInspection */
             return $this->render($response, 'errors/error.twig', [
                 'utente' => $this->user,
-                'err' => $this->getErrorMessage()
+                'err' => $this->errorHelper->getErrorMessage()
             ]);
         }
 
@@ -196,7 +199,7 @@ class SponsorController extends Controller
         $sponsorName = $data['nome'];
 
         if ($sponsorName === '') {
-            $this->setErrorMessage('Empty field.',
+            $this->errorHelper->setErrorMessage('Empty field.',
                 'Un campo obbligatorio non è stato inserito.');
 
             return false;
@@ -210,7 +213,7 @@ class SponsorController extends Controller
         $sponsorName = $data['nome'];
 
         if ($sponsorName === '') {
-            $this->setErrorMessage('Empty field.',
+            $this->errorHelper->setErrorMessage('Empty field.',
                 'Un campo obbligatorio non è stato compilato.');
 
             return false;

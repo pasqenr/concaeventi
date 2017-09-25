@@ -2,6 +2,7 @@
 
 namespace App\Controllers;
 
+use \App\Helpers\ErrorHelper;
 use \App\Models\EventModel;
 use Slim\Http\Response;
 use Slim\Http\Request;
@@ -14,11 +15,13 @@ use Slim\Router;
 class FrontController extends Controller
 {
     private $eventModel;
+    private $errorHelper;
 
     public function __construct($container)
     {
         parent::__construct($container);
-        $this->eventModel = new EventModel($this->db);
+        $this->errorHelper = new ErrorHelper();
+        $this->eventModel = new EventModel($this->db, $this->errorHelper);
     }
 
     public function home(/** @noinspection PhpUnusedParameterInspection */
@@ -49,6 +52,7 @@ class FrontController extends Controller
      * Get all the events that are available before the current timestamp and order them by timestamp.
      *
      * @return array The events.
+     * @throws \PDOException
      */
     private function getEvents(): array
     {
@@ -59,6 +63,7 @@ class FrontController extends Controller
      * Get all the events that are available and approved, even before the current time-date.
      *
      * @return array The events.
+     * @throws \PDOException
      */
     private function getEventsHistory(): array
     {
