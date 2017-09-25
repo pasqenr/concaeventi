@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use \App\Helpers\SessionHelper;
+use \App\Models\SponsorModel;
 use Slim\Http\Response;
 use Slim\Http\Request;
 use Slim\Router;
@@ -13,6 +14,14 @@ use Slim\Router;
  */
 class SponsorController extends Controller
 {
+    private $sponsorModel;
+
+    public function __construct($container)
+    {
+        parent::__construct($container);
+        $this->sponsorModel = new SponsorModel($this->db);
+    }
+
     public function showAll(/** @noinspection PhpUnusedParameterInspection */
         Request $request, Response $response, $args)
     {
@@ -174,31 +183,17 @@ class SponsorController extends Controller
 
     private function getSponsors(): array
     {
-        $sth = $this->db->query('
-            SELECT S.idSponsor, S.nome, S.logo
-            FROM Sponsor S
-        ');
-
-        return $sth->fetchAll();
+        return $this->sponsorModel->getSponsors();
     }
 
     private function getSponsor($sponsorID): array
     {
-        $sth = $this->db->prepare('
-            SELECT S.idSponsor, S.nome, S.logo
-            FROM Sponsor S
-            WHERE S.idSponsor = :idSponsor
-        ');
-        $sth->bindParam(':idSponsor', $sponsorID, \PDO::PARAM_INT);
-        $sth->execute();
-
-        return $sth->fetch();
+        return $this->sponsorModel->getSponsor($sponsorID);
     }
 
     private function createSponsor($data): bool
     {
         $sponsorName = $data['nome'];
-        $logo = $data['logo'];
 
         if ($sponsorName === '') {
             $this->setErrorMessage('Empty field.',
@@ -207,32 +202,12 @@ class SponsorController extends Controller
             return false;
         }
 
-        $sth = $this->db->prepare('
-            INSERT INTO Sponsor (
-              idSponsor, nome, logo
-            ) VALUES (
-              NULL, :nome, :logo
-            )
-        ');
-        $sth->bindParam(':nome', $sponsorName, \PDO::PARAM_STR);
-        $sth->bindParam(':logo', $logo, \PDO::PARAM_STR);
-
-        try {
-            $sth->execute();
-        } catch (\PDOException $e) {
-            $this->setErrorMessage('PDOException, check errorInfo.',
-                'Impossibile creare lo sponsor.');
-
-            return false;
-        }
-
-        return true;
+        return $this->sponsorModel->createSponsor($data);
     }
 
     private function updateSponsor($sponsorID, $data): bool
     {
         $sponsorName = $data['nome'];
-        $logo = $data['logo'];
 
         if ($sponsorName === '') {
             $this->setErrorMessage('Empty field.',
@@ -241,45 +216,11 @@ class SponsorController extends Controller
             return false;
         }
 
-        $sth = $this->db->prepare('
-            UPDATE Sponsor S
-            SET S.nome = :nome, S.logo = :logo
-            WHERE S.idSponsor = :idSponsor
-        ');
-        $sth->bindParam(':nome', $sponsorName, \PDO::PARAM_STR);
-        $sth->bindParam(':logo', $logo, \PDO::PARAM_STR);
-        $sth->bindParam(':idSponsor', $sponsorID, \PDO::PARAM_INT);
-
-        try {
-            $sth->execute();
-        } catch (\PDOException $e) {
-            $this->setErrorMessage('PDOException, check errorInfo.',
-                'Impossibile modificare lo sponsor.');
-
-            return false;
-        }
-
-        return true;
+        return $this->sponsorModel->updateSponsor($sponsorID, $data);
     }
 
     private function deleteSponsor($sponsorID): bool
     {
-        $sth = $this->db->prepare('
-            DELETE
-            FROM Sponsor
-            WHERE idSponsor = :idSponsor
-        ');
-        $sth->bindParam(':idSponsor', $sponsorID, \PDO::PARAM_INT);
-
-        try {
-            $sth->execute();
-        } catch (\PDOException $e) {
-            $this->setErrorMessage('PDOException, check errorInfo.',
-                'Impossibile eliminare lo sponsor.');
-
-            return false;
-        }
-
-        return true;
+        return $this->sponsorModel->deleteSponsor($sponsorID);
     }
 }

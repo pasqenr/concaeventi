@@ -391,6 +391,32 @@ class EventModel extends Model
     }
 
     /**
+     * @return array
+     */
+    public function getEventsWithFunding(): array
+    {
+        $sth = $this->db->query('
+            SELECT F.idSponsor, F.idEvento, F.importo, F.dataFinanziamento, S.nome AS nomeSponsor, S.logo, E.titolo
+            FROM Finanziamento F
+            JOIN Sponsor S
+            USING (idSponsor)
+            JOIN Evento E
+            USING (idEvento)
+            ORDER BY F.idEvento DESC, F.idSponsor
+        ');
+
+        $fundings = $sth->fetchAll();
+
+        if ($fundings === []) {
+            return [];
+        }
+
+        $fundings = $this->moveFundingInEvents($fundings);
+
+        return $fundings;
+    }
+
+    /**
      * Merge the Associtations on the rows with the same idEvento. The separator used is comma and space (', ').
      * If there aren't events the function returns an empty array.
      *
@@ -432,6 +458,7 @@ class EventModel extends Model
      * @param $eventID
      * @param $associationID
      * @return bool
+     * @throws \PDOException
      */
     private function addPropose($eventID, $associationID): bool
     {
@@ -518,5 +545,37 @@ class EventModel extends Model
         }
 
         return true;
+    }
+
+    private function moveFundingInEvents($fundings): array
+    {
+        if ($fundings === []) {
+            return [];
+        }
+
+        $eventsWithFundings = [];
+        $fundingsCount = count($fundings);
+
+        for ($i = $j = $k = 0; $i <= $fundingsCount; $i += $j, $j = $i, $k = 0) {
+            $eventsWithFundings[$i]['idEvento'] = $fundings[$i]['idEvento'];
+            $eventsWithFundings[$i]['titolo'] = $fundings[$i]['titolo'];
+
+            do {
+                $eventsWithFundings[$i]['finanziamento'][$k]['idSponsor'] = $fundings[$j]['idSponsor'];
+                $eventsWithFundings[$i]['finanziamento'][$k]['nomeSponsor'] = $fundings[$j]['nomeSponsor'];
+                $eventsWithFundings[$i]['finanziamento'][$k]['logo'] = $fundings[$j]['logo'];
+                $eventsWithFundings[$i]['finanziamento'][$k]['importo'] = $fundings[$j]['importo'];
+                $eventsWithFundings[$i]['finanziamento'][$k]['dataFinanziamento'] = $fundings[$j]['dataFinanziamento'];
+
+                $j++;
+                $k++;
+
+                if ($j >= $fundingsCount) {
+                    break;
+                }
+            } while ($fundings[$j]['idEvento'] === $fundings[$j-1]['idEvento']);
+        }
+
+        return $eventsWithFundings;
     }
 }

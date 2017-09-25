@@ -3,6 +3,9 @@
 namespace App\Controllers;
 
 use \App\Helpers\SessionHelper;
+use \App\Models\EventModel;
+use \App\Models\FundingModel;
+use \App\Models\SponsorModel;
 use Slim\Http\Response;
 use Slim\Http\Request;
 use Slim\Router;
@@ -14,6 +17,18 @@ use Slim\Router;
 
 class FundingController extends Controller
 {
+    private $eventModel;
+    private $fundingModel;
+    private $sponsorModel;
+
+    public function __construct($container)
+    {
+        parent::__construct($container);
+        $this->eventModel = new EventModel($this->db);
+        $this->fundingModel = new FundingModel($this->db);
+        $this->sponsorModel = new SponsorModel($this->db);
+    }
+
     public function showAll(/** @noinspection PhpUnusedParameterInspection */
         Request $request, Response $response, $args)
     {
@@ -193,55 +208,16 @@ class FundingController extends Controller
 
     private function getEventsWithFunding(): array
     {
-        $sth = $this->db->query('
-            SELECT F.idSponsor, F.idEvento, F.importo, F.dataFinanziamento, S.nome AS nomeSponsor, S.logo, E.titolo
-            FROM Finanziamento F
-            JOIN Sponsor S
-            USING (idSponsor)
-            JOIN Evento E
-            USING (idEvento)
-            ORDER BY F.idEvento DESC, F.idSponsor
-        ');
-
-        $fundings = $sth->fetchAll();
-
-        if ($fundings === []) {
-            return [];
-        }
-
-        $fundings = $this->moveFundingInEvents($fundings);
-
-        return $fundings;
+        return $this->eventModel->getEventsWithFunding();
     }
 
     private function getFunding($eventID, $sponsorID): array
     {
-        $sth = $this->db->prepare('
-            SELECT F.idEvento, F.idSponsor, F.importo, F.dataFinanziamento, E.titolo, S.nome
-            FROM Finanziamento F
-            JOIN Evento E
-            ON (F.idEvento)
-            JOIN Sponsor S
-            ON (F.idSponsor)
-            WHERE F.idEvento = :idEvento
-              AND F.idSponsor = :idSponsor
-        ');
-        $sth->bindParam(':idEvento', $eventID, \PDO::PARAM_INT);
-        $sth->bindParam(':idSponsor', $sponsorID, \PDO::PARAM_INT);
-
-        try {
-            $sth->execute();
-        } catch (\PDOException $e) {
-            throw $e;
-        }
-
-        return $sth->fetch();
+        return $this->fundingModel->getFunding($eventID, $sponsorID);
     }
 
     private function createFunding($data): bool
     {
-        $sponsorID = $data['idSponsor'];
-        $eventID = $data['idEvento'];
         $amount = $data['importo'];
 
         $amount_pattern = '[0-9]{1,6}.[0-9]{1,2}';
@@ -256,37 +232,10 @@ class FundingController extends Controller
                 return false;
             }
 
-            $sth = $this->db->prepare('
-                INSERT INTO Finanziamento (
-                  idSponsor, idEvento, importo, dataFinanziamento
-                ) VALUES (
-                  :idSponsor, :idEvento, :importo, CURRENT_TIMESTAMP
-                )
-            ');
-            $sth->bindParam(':importo', $amount, \PDO::PARAM_STR);
-        } else {
-            $sth = $this->db->prepare('
-                INSERT INTO Finanziamento (
-                  idSponsor, idEvento, importo, dataFinanziamento
-                ) VALUES (
-                  :idSponsor, :idEvento, NULL, CURRENT_TIMESTAMP
-                )
-            ');
+            $data['importo'] = $amount;
         }
 
-        $sth->bindParam(':idSponsor', $sponsorID, \PDO::PARAM_INT);
-        $sth->bindParam(':idEvento', $eventID, \PDO::PARAM_INT);
-
-        try {
-            $sth->execute();
-        } catch (\PDOException $e) {
-            $this->setErrorMessage('PDOException, check errorInfo.',
-                'Creazione finanziamento: errore nell\'elaborazione dei dati.');
-
-            return false;
-        }
-
-        return true;
+        return $this->fundingModel->createFunding($data);
     }
 
     private function updateFunding($eventID, $sponsorID, $data): bool
@@ -303,106 +252,47 @@ class FundingController extends Controller
             return false;
         }
 
-        $sth = $this->db->prepare('
-            UPDATE Finanziamento F
-            SET F.importo = :importo
-            WHERE F.idEvento = :idEvento
-              AND F.idSponsor = :idSponsor
-        ');
-        $sth->bindParam(':importo', $amount, \PDO::PARAM_STR);
-        $sth->bindParam(':idEvento', $eventID, \PDO::PARAM_INT);
-        $sth->bindParam(':idSponsor', $sponsorID, \PDO::PARAM_INT);
+        $data['importo'] = $amount;
 
-        try {
-            $sth->execute();
-        } catch (\PDOException $e) {
-            $this->setErrorMessage('PDOException, check errorInfo.',
-                'Impossibile modificare il finanziamento.');
-
-            return false;
-        }
-
-        return true;
+        return $this->fundingModel->updateFunding($eventID, $sponsorID, $data);
     }
 
     private function deleteFunding($eventID, $sponsorID): bool
     {
-        $sth = $this->db->prepare('
-            DELETE
-            FROM Finanziamento
-            WHERE idEvento = :idEvento
-              AND idSponsor = :idSponsor
-        ');
-        $sth->bindParam(':idEvento', $eventID, \PDO::PARAM_INT);
-        $sth->bindParam(':idSponsor', $sponsorID, \PDO::PARAM_INT);
-
-        try {
-            $sth->execute();
-        } catch (\PDOException $e) {
-            $this->setErrorMessage('PDOException, check errorInfo.',
-                'Impossibile eliminare il finanziamento.');
-
-            return false;
-        }
-
-        return true;
+        return $this->fundingModel->deleteFunding($eventID, $sponsorID);
     }
 
     /**
      * Get all the events that are available before the current timestamp and order them by timestamp.
      *
      * @return array The events.
+     * @throws \PDOException
      */
     private function getEvents(): array
     {
-        $sth = $this->db->query('
+        /*$sth = $this->db->query('
             SELECT E.idEvento, E.titolo
             FROM Evento E
             WHERE DATEDIFF(E.istanteFine, CURRENT_TIMESTAMP) > 0
         ');
 
-        return $sth->fetchAll();
+        return $sth->fetchAll();*/
+
+        return $this->eventModel->getEvents();
     }
 
+    /**
+     * @return array
+     */
     private function getSponsors(): array
     {
-        $sth = $this->db->query('
+        /*$sth = $this->db->query('
             SELECT S.idSponsor, S.nome
             FROM Sponsor S
         ');
 
-        return $sth->fetchAll();
-    }
+        return $sth->fetchAll();*/
 
-    private function moveFundingInEvents($fundings): array
-    {
-        if ($fundings === []) {
-            return [];
-        }
-
-        $eventsWithFundings = [];
-        $fundingsCount = count($fundings);
-
-        for ($i = $j = $k = 0; $i <= $fundingsCount; $i += $j, $j = $i, $k = 0) {
-            $eventsWithFundings[$i]['idEvento'] = $fundings[$i]['idEvento'];
-            $eventsWithFundings[$i]['titolo'] = $fundings[$i]['titolo'];
-
-            do {
-                $eventsWithFundings[$i]['finanziamento'][$k]['idSponsor'] = $fundings[$j]['idSponsor'];
-                $eventsWithFundings[$i]['finanziamento'][$k]['nomeSponsor'] = $fundings[$j]['nomeSponsor'];
-                $eventsWithFundings[$i]['finanziamento'][$k]['logo'] = $fundings[$j]['logo'];
-                $eventsWithFundings[$i]['finanziamento'][$k]['importo'] = $fundings[$j]['importo'];
-                $eventsWithFundings[$i]['finanziamento'][$k]['dataFinanziamento'] = $fundings[$j]['dataFinanziamento'];
-
-                $j++;
-                $k++;
-
-                if ($j >= $fundingsCount) {
-                    break;
-                }
-            } while ($fundings[$j]['idEvento'] === $fundings[$j-1]['idEvento']);
-        }
-
-        return $eventsWithFundings;
+        return $this->sponsorModel->getSponsors();
     }
 }
