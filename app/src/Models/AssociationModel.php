@@ -219,9 +219,9 @@ class AssociationModel extends Model
         try {
             $this->deleteOldBelongs($associationID);
         } catch (\PDOException $e) {
-            /*$this->errorHelper->setErrorMessage(
+            $this->errorHelper->setErrorMessage(
                 'PDOException, check errorInfo.',
-                'Impossibile modificare le precedenti appartenenze.');*/
+                'Impossibile modificare le precedenti appartenenze.');
 
             $this->db->rollBack();
 
