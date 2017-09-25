@@ -5,8 +5,6 @@ namespace App\Models;
 /**
  * Class SponsorModel
  * @package App\Models
- *
- * @property \PDO db
  */
 class SponsorModel extends Model
 {

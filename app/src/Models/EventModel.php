@@ -5,8 +5,6 @@ namespace App\Models;
 /**
  * Class EventModel
  * @package App\Models
- *
- * @property \PDO db
  */
 class EventModel extends Model
 {

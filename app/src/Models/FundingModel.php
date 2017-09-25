@@ -5,8 +5,6 @@ namespace App\Models;
 /**
  * Class FundingModel
  * @package App\Models
- *
- * @property \PDO db
  */
 class FundingModel extends Model
 {
@@ -14,6 +12,7 @@ class FundingModel extends Model
      * @param $eventID
      * @param $sponsorID
      * @return array
+     * @throws \PDOException
      */
     public function getFunding($eventID, $sponsorID): array
     {

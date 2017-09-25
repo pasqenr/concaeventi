@@ -5,8 +5,6 @@ namespace App\Models;
 /**
  * Class AssociationController
  * @package App\Models
- *
- * @property \PDO db
  */
 class AssociationModel extends Model
 {
@@ -33,6 +31,7 @@ class AssociationModel extends Model
     /**
      * @param $associationID
      * @return array
+     * @throws \PDOException
      */
     public function getAssociation($associationID): array
     {
@@ -56,6 +55,7 @@ class AssociationModel extends Model
     /**
      * @param $assName
      * @return string
+     * @throws \PDOException
      */
     public function getAssociationIdByName($assName): string
     {
@@ -80,6 +80,7 @@ class AssociationModel extends Model
     /**
      * @param $userID
      * @return array
+     * @throws \PDOException
      */
     public function getUserAssociations($userID): array
     {
@@ -242,6 +243,7 @@ class AssociationModel extends Model
     /**
      * @param $associationID
      * @return bool
+     * @throws \PDOException
      */
     public function deleteAssociation($associationID): bool
     {
@@ -282,6 +284,7 @@ class AssociationModel extends Model
 
     /**
      * @return int
+     * @throws \PDOException
      */
     public function getLastAssociationID(): int
     {
@@ -305,6 +308,7 @@ class AssociationModel extends Model
      * @param $associationID
      * @param $membro
      * @return bool
+     * @throws \PDOException
      */
     private function addBelong($associationID, $membro): bool
     {
@@ -330,6 +334,7 @@ class AssociationModel extends Model
     /**
      * @param $associationID
      * @return array
+     * @throws \PDOException
      */
     public function getBelongsByAssociation($associationID): array
     {
@@ -352,6 +357,7 @@ class AssociationModel extends Model
     /**
      * @param $associationID
      * @return bool
+     * @throws \PDOException
      */
     private function deleteOldBelongs($associationID): bool
     {
@@ -375,6 +381,7 @@ class AssociationModel extends Model
      * @param $associationID
      * @param $members
      * @return bool
+     * @throws \PDOException
      */
     private function createBelongs($associationID, $members): bool
     {
@@ -406,6 +413,7 @@ class AssociationModel extends Model
     /**
      * @param $associationID
      * @return bool
+     * @throws \PDOException
      */
     private function deleteFromBelongs($associationID): bool
     {

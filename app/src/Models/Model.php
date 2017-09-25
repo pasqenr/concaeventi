@@ -22,6 +22,8 @@ class Model
         if (property_exists($this, $name)) {
             return $this->$name;
         }
+
+        throw new \RuntimeException("Property doesn\'t exists.");
     }
 
     public function __set($name, $value): void

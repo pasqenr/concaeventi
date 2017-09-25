@@ -5,8 +5,6 @@ namespace App\Models;
 /**
  * Class UserModel
  * @package App\Models
- *
- * @property \PDO db
  */
 class UserModel extends Model
 {
@@ -26,6 +24,7 @@ class UserModel extends Model
     /**
      * @param $email
      * @return mixed
+     * @throws \PDOException
      */
     public function getUserByEmail($email)
     {
@@ -39,8 +38,10 @@ class UserModel extends Model
         try {
             $sth->execute();
         } catch (\PDOException $e) {
-            $this->setErrorMessage('PDOException, check errorInfo.',
-                'Impossibile trovare l\'utente o errore generico.');
+            /*$this->setErrorMessage('PDOException, check errorInfo.',
+                'Impossibile trovare l\'utente o errore generico.');*/
+
+            throw $e;
         }
 
         return $sth->fetch();
