@@ -1,0 +1,20 @@
+paths:
+    tests: tests
+    output: tests/_output
+    data: tests/_data
+    support: tests/_support
+    envs: tests/_envs
+actor_suffix: Tester
+extensions:
+    enabled:
+        - Codeception\Extension\RunFailed
+modules:
+    enabled:
+        - Db:
+            dsn: 'mysql:host=localhost;dbname=concaeventi_test_db'
+            user: 'root'
+            password: ''
+            dump: 'tests/_data/concaeventi_test_db.sql'
+            populate: true # run populator before all tests
+            cleanup: false # run populator before each test
+            populator: 'mysql -u $user -h $host $dbname < $dump'
