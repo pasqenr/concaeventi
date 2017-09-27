@@ -14,7 +14,7 @@ $I->submitForm('form', array(
  * =================================
  */
 
-/* Create page: correct */
+/* Create association: correct */
 
 $I->amOnPage('/associations/');
 $I->seeInSource('Comune');
@@ -29,7 +29,7 @@ $I->click('Crea', 'form');
 $I->seeInCurrentUrl('/associations/');
 $I->seeInSource('Z Associazione');
 
-/* Create page: wrong empty name */
+/* Create association: wrong empty name */
 
 $I->amOnPage('/associations/create/');
 $I->fillField('nomeAssociazione', '');
@@ -40,7 +40,7 @@ $I->click('Crea', 'form');
 
 $I->seeInSource('Errore');
 
-/* Create page: wrong empty membri */
+/* Create association: wrong empty membri */
 
 $I->amOnPage('/associations/create/');
 $I->fillField('nomeAssociazione', 'Z Associazione 1');
@@ -50,7 +50,7 @@ $I->click('Crea', 'form');
 
 $I->seeInSource('Errore');
 
-/* Create page: wrong tel number */
+/* Create association: wrong tel number */
 
 $I->amOnPage('/associations/create/');
 $I->fillField('nomeAssociazione', 'Z Associazione 1');
@@ -61,7 +61,7 @@ $I->click('Crea', 'form');
 
 $I->seeInSource('Errore');
 
-/* Create page: wrong tel number - less numbers */
+/* Create association: wrong tel number - less numbers */
 
 $I->amOnPage('/associations/create/');
 $I->fillField('nomeAssociazione', 'Z Associazione 1');
@@ -72,7 +72,7 @@ $I->click('Crea', 'form');
 
 $I->seeInSource('Errore');
 
-/* Create page: wrong tel number - more numbers */
+/* Create association: wrong tel number - more numbers */
 
 $I->amOnPage('/associations/create/');
 $I->fillField('nomeAssociazione', 'Z Associazione 1');
@@ -83,7 +83,7 @@ $I->click('Crea', 'form');
 
 $I->seeInSource('Errore');
 
-/* Create page: wrong hex */
+/* Create association: wrong hex */
 
 $I->amOnPage('/associations/create/');
 $I->fillField('nomeAssociazione', 'Z Associazione 1');
@@ -99,7 +99,7 @@ $I->seeInSource('Errore');
  * =================================
  */
 
-/* Edit page: correct */
+/* Edit association: correct */
 
 $I->amOnPage('/associations/');
 $I->seeInSource('Z Associazione');
@@ -113,7 +113,7 @@ $I->click('Modifica', 'form');
 
 $I->seeInCurrentUrl('/associations/');
 
-/* Edit page: wrong empty name */
+/* Edit association: wrong empty name */
 
 $I->amOnPage('/associations/edit/4');
 $I->fillField('nomeAssociazione', '');
@@ -124,7 +124,7 @@ $I->click('Modifica', 'form');
 
 $I->seeInSource('Errore');
 
-/* Create page: wrong tel number */
+/* Create association: wrong tel number */
 
 $I->amOnPage('/associations/edit/4');
 $I->fillField('nomeAssociazione', 'Z Associazione 2');
@@ -135,7 +135,7 @@ $I->click('Modifica', 'form');
 
 $I->seeInSource('Errore');
 
-/* Create page: wrong tel number - less numbers */
+/* Create association: wrong tel number - less numbers */
 
 $I->amOnPage('/associations/edit/4');
 $I->fillField('nomeAssociazione', 'Z Associazione 2');
@@ -146,7 +146,7 @@ $I->click('Modifica', 'form');
 
 $I->seeInSource('Errore');
 
-/* Create page: wrong tel number - more numbers */
+/* Create association: wrong tel number - more numbers */
 
 $I->amOnPage('/associations/edit/4');
 $I->fillField('nomeAssociazione', 'Z Associazione 2');
@@ -157,7 +157,7 @@ $I->click('Modifica', 'form');
 
 $I->seeInSource('Errore');
 
-/* Create page: wrong hex */
+/* Create association: wrong hex */
 
 $I->amOnPage('/associations/edit/4');
 $I->fillField('nomeAssociazione', 'Z Associazione 2');
