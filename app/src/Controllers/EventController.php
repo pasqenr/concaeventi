@@ -474,7 +474,7 @@ class EventController extends Controller
         $associazioni = $data['associazioni'];
         $idAssPrimaria = $data['assPrimaria'];
 
-        $date_pattern = '^\d{4}-\d{2}-\d{2} (\d{2}(:\d{2}(:\d{2})?)?)?$^';
+        $date_pattern = '/^\d{4}-\d{2}-\d{2} (\d{2}(:\d{2}(:\d{2})?)?)?$/';
 
         if ($titolo === '' || $descrizione === '' || $istanteInizio === '' || $istanteFine === '' ||
             $associazioni === '' || $idAssPrimaria === '') {
