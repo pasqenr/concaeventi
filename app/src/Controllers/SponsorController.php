@@ -196,12 +196,7 @@ class SponsorController extends Controller
 
     private function createSponsor($data): bool
     {
-        $sponsorName = $data['nome'];
-
-        if ($sponsorName === '') {
-            $this->errorHelper->setErrorMessage('Empty field.',
-                'Un campo obbligatorio non è stato inserito.');
-
+        if ($this->checkSponsorData($data) === false) {
             return false;
         }
 
@@ -210,12 +205,7 @@ class SponsorController extends Controller
 
     private function updateSponsor($sponsorID, $data): bool
     {
-        $sponsorName = $data['nome'];
-
-        if ($sponsorName === '') {
-            $this->errorHelper->setErrorMessage('Empty field.',
-                'Un campo obbligatorio non è stato compilato.');
-
+        if ($this->checkSponsorData($data) === false) {
             return false;
         }
 
@@ -225,5 +215,19 @@ class SponsorController extends Controller
     private function deleteSponsor($sponsorID): bool
     {
         return $this->sponsorModel->deleteSponsor($sponsorID);
+    }
+
+    private function checkSponsorData($data): bool
+    {
+        $sponsorName = $data['nome'];
+
+        if ($sponsorName === '') {
+            $this->errorHelper->setErrorMessage('Empty field.',
+                'Un campo obbligatorio non è stato inserito.');
+
+            return false;
+        }
+
+        return true;
     }
 }
