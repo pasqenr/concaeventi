@@ -68,3 +68,277 @@ $I->seeInSource('Descrizione evento modificato.');
 $I->seeInSource($initDate->format('d/m/Y H:i'));
 $I->seeInSource($finishDate->format('d/m/Y H:i'));
 $I->seeInSource('Comune');
+
+/* =================================
+ *              CREATE
+ * =================================
+ */
+
+/* Wrong create event: empty title */
+
+$I->amOnPage('/events/create/');
+
+$I->fillField('titolo', '');
+$I->fillField('descrizione', 'Descrizione evento.');
+$I->fillField('istanteInizio', $initDate->format('Y-m-d H:i:s'));
+$I->fillField('istanteFine', $finishDate->format('Y-m-d H:i:s'));
+$I->selectOption("//select[@name='associazioni[]']", 'Comune');
+$I->checkOption('revisionato');
+$I->click('Crea', 'form');
+
+$I->seeInSource('Errore');
+
+/* Wrong create event: empty description */
+
+$I->amOnPage('/events/create/');
+
+$I->fillField('titolo', 'Titolo evento');
+$I->fillField('descrizione', '');
+$I->fillField('istanteInizio', $initDate->format('Y-m-d H:i:s'));
+$I->fillField('istanteFine', $finishDate->format('Y-m-d H:i:s'));
+$I->selectOption("//select[@name='associazioni[]']", 'Comune');
+$I->checkOption('revisionato');
+$I->click('Crea', 'form');
+
+$I->seeInSource('Errore');
+
+/* Wrong create event: initDate > finishDate */
+
+$I->amOnPage('/events/create/');
+
+$I->fillField('titolo', 'Titolo evento');
+$I->fillField('descrizione', 'Descrizione evento.');
+$I->fillField('istanteInizio', $finishDate->format('Y-m-d H:i:s'));
+$I->fillField('istanteFine', $initDate->format('Y-m-d H:i:s'));
+$I->selectOption("//select[@name='associazioni[]']", 'Comune');
+$I->checkOption('revisionato');
+$I->click('Crea', 'form');
+
+$I->seeInSource('Errore');
+
+/* Wrong create event: empty initDate */
+
+$I->amOnPage('/events/create/');
+
+$I->fillField('titolo', 'Titolo evento');
+$I->fillField('descrizione', '');
+$I->fillField('istanteInizio', '');
+$I->fillField('istanteFine', $finishDate->format('Y-m-d H:i:s'));
+$I->selectOption("//select[@name='associazioni[]']", 'Comune');
+$I->checkOption('revisionato');
+$I->click('Crea', 'form');
+
+$I->seeInSource('Errore');
+
+/* Wrong create event: empty finishDate */
+
+$I->amOnPage('/events/create/');
+
+$I->fillField('titolo', 'Titolo evento');
+$I->fillField('descrizione', '');
+$I->fillField('istanteInizio', $initDate->format('Y-m-d H:i:s'));
+$I->fillField('istanteFine', '');
+$I->selectOption("//select[@name='associazioni[]']", 'Comune');
+$I->checkOption('revisionato');
+$I->click('Crea', 'form');
+
+$I->seeInSource('Errore');
+
+/* Wrong create event: wrong format initDate */
+
+$I->amOnPage('/events/create/');
+
+$I->fillField('titolo', 'Titolo evento');
+$I->fillField('descrizione', '');
+$I->fillField('istanteInizio', $initDate->format('d/m/Y'));
+$I->fillField('istanteFine', $finishDate->format('Y-m-d H:i:s'));
+$I->selectOption("//select[@name='associazioni[]']", 'Comune');
+$I->checkOption('revisionato');
+$I->click('Crea', 'form');
+
+$I->seeInSource('Errore');
+
+/* Wrong create event: wrong format finishDate */
+
+$I->amOnPage('/events/create/');
+
+$I->fillField('titolo', 'Titolo evento');
+$I->fillField('descrizione', '');
+$I->fillField('istanteInizio', $initDate->format('Y-m-d H:i:s'));
+$I->fillField('istanteFine', $finishDate->format('d/m/Y'));
+$I->selectOption("//select[@name='associazioni[]']", 'Comune');
+$I->checkOption('revisionato');
+$I->click('Crea', 'form');
+
+$I->seeInSource('Errore');
+
+/* Wrong create event: empty associazioni */
+
+$I->amOnPage('/events/create/');
+
+$I->fillField('titolo', 'Titolo evento');
+$I->fillField('descrizione', '');
+$I->fillField('istanteInizio', $initDate->format('Y-m-d H:i:s'));
+$I->fillField('istanteFine', $finishDate->format('Y-m-d H:i:s'));
+$I->checkOption('revisionato');
+$I->click('Crea', 'form');
+
+$I->seeInSource('Errore');
+
+/* Correct create event: initDate alternative format #1 */
+
+$I->amOnPage('/events/create/');
+
+$I->fillField('titolo', 'Titolo evento 1');
+$I->fillField('descrizione', 'Descrizione evento.');
+$I->fillField('istanteInizio', $initDate->format('Y-m-d'));
+$I->fillField('istanteFine', $finishDate->format('Y-m-d'));
+$I->selectOption("//select[@name='associazioni[]']", 'Comune');
+$I->checkOption('revisionato');
+$I->click('Crea', 'form');
+
+$I->seeInCurrentUrl('/events/');
+
+/* Correct create event: initDate alternative format #2 */
+
+$I->amOnPage('/events/create/');
+
+$I->fillField('titolo', 'Titolo evento 2');
+$I->fillField('descrizione', 'Descrizione evento.');
+$I->fillField('istanteInizio', $initDate->format('Y-m-d H'));
+$I->fillField('istanteFine', $finishDate->format('Y-m-d H'));
+$I->selectOption("//select[@name='associazioni[]']", 'Comune');
+$I->checkOption('revisionato');
+$I->click('Crea', 'form');
+
+$I->seeInCurrentUrl('/events/');
+
+/* Correct create event: initDate alternative format #3 */
+
+$I->amOnPage('/events/create/');
+
+$I->fillField('titolo', 'Titolo evento 3');
+$I->fillField('descrizione', 'Descrizione evento.');
+$I->fillField('istanteInizio', $initDate->format('Y-m-d H:m'));
+$I->fillField('istanteFine', $finishDate->format('Y-m-d H:m'));
+$I->selectOption("//select[@name='associazioni[]']", 'Comune');
+$I->checkOption('revisionato');
+$I->click('Crea', 'form');
+
+$I->seeInCurrentUrl('/events/');
+
+/* =================================
+ *              EDIT
+ * =================================
+ */
+
+/* Wrong create event: empty title */
+
+$I->amOnPage('/events/edit/1');
+
+$I->fillField('titolo', '');
+$I->fillField('descrizione', 'Descrizione evento.');
+$I->fillField('istanteInizio', $initDate->format('Y-m-d H:i:s'));
+$I->fillField('istanteFine', $finishDate->format('Y-m-d H:i:s'));
+$I->selectOption("//select[@name='associazioni[]']", '1');
+$I->checkOption('revisionato');
+$I->click('Modifica', 'form');
+
+$I->seeInSource('Errore');
+
+/* Wrong create event: empty description */
+
+$I->amOnPage('/events/edit/1');
+
+$I->fillField('titolo', 'Titolo evento');
+$I->fillField('descrizione', '');
+$I->fillField('istanteInizio', $initDate->format('Y-m-d H:i:s'));
+$I->fillField('istanteFine', $finishDate->format('Y-m-d H:i:s'));
+$I->selectOption("//select[@name='associazioni[]']", '1');
+$I->checkOption('revisionato');
+$I->click('Modifica', 'form');
+
+$I->seeInSource('Errore');
+
+/* Wrong create event: initDate > finishDate */
+
+$I->amOnPage('/events/edit/1');
+
+$I->fillField('titolo', 'Titolo evento');
+$I->fillField('descrizione', 'Descrizione evento.');
+$I->fillField('istanteInizio', $finishDate->format('Y-m-d H:i:s'));
+$I->fillField('istanteFine', $initDate->format('Y-m-d H:i:s'));
+$I->selectOption("//select[@name='associazioni[]']", '1');
+$I->checkOption('revisionato');
+$I->click('Modifica', 'form');
+
+$I->seeInSource('Errore');
+
+/* Wrong create event: empty initDate */
+
+$I->amOnPage('/events/edit/1');
+
+$I->fillField('titolo', 'Titolo evento');
+$I->fillField('descrizione', '');
+$I->fillField('istanteInizio', '');
+$I->fillField('istanteFine', $finishDate->format('Y-m-d H:i:s'));
+$I->selectOption("//select[@name='associazioni[]']", '1');
+$I->checkOption('revisionato');
+$I->click('Modifica', 'form');
+
+$I->seeInSource('Errore');
+
+/* Wrong create event: empty finishDate */
+
+$I->amOnPage('/events/edit/1');
+
+$I->fillField('titolo', 'Titolo evento');
+$I->fillField('descrizione', '');
+$I->fillField('istanteInizio', $initDate->format('Y-m-d H:i:s'));
+$I->fillField('istanteFine', '');
+$I->selectOption("//select[@name='associazioni[]']", '1');
+$I->checkOption('revisionato');
+$I->click('Modifica', 'form');
+
+$I->seeInSource('Errore');
+
+/* Wrong create event: wrong format initDate */
+
+$I->amOnPage('/events/edit/1');
+
+$I->fillField('titolo', 'Titolo evento');
+$I->fillField('descrizione', '');
+$I->fillField('istanteInizio', $initDate->format('d/m/Y'));
+$I->fillField('istanteFine', $finishDate->format('Y-m-d H:i:s'));
+$I->selectOption("//select[@name='associazioni[]']", '1');
+$I->checkOption('revisionato');
+$I->click('Modifica', 'form');
+
+$I->seeInSource('Errore');
+
+/* Wrong create event: wrong format finishDate */
+
+$I->amOnPage('/events/edit/1');
+
+$I->fillField('titolo', 'Titolo evento');
+$I->fillField('descrizione', '');
+$I->fillField('istanteInizio', $initDate->format('Y-m-d H:i:s'));
+$I->fillField('istanteFine', $finishDate->format('d/m/Y'));
+$I->selectOption("//select[@name='associazioni[]']", '1');
+$I->checkOption('revisionato');
+$I->click('Modifica', 'form');
+
+$I->seeInSource('Errore');
+
+/* =================================
+ *              DELETE
+ * =================================
+ */
+
+$I->amOnPage('/events/delete/1');
+
+$I->seeInSource('Titolo evento modificato');
+$I->click('Elimina');
+
+$I->seeInCurrentUrl('/events/');
+$I->dontSeeInSource('Titolo evento modificato');
