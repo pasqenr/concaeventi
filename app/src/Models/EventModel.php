@@ -44,7 +44,7 @@ class EventModel extends Model
                 'Recupero eventi: errore nell\'elaborazione dei dati.',
                 $this->db->errorInfo());
 
-            throw new GenericPDOException($e);
+            throw $e;
         }
 
         $events = $this->mergeAssociations($events);
