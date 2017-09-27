@@ -212,6 +212,55 @@ class AssociationController extends Controller
 
     private function createAssociation($data): bool
     {
+        if ($this->checkAssociationData($data) === false) {
+            return false;
+        }
+
+        return $this->associationModel->createAssociation($data);
+    }
+
+    private function getAssociation($associationID): array
+    {
+        return $this->associationModel->getAssociation($associationID);
+    }
+
+    private function updateAssociation($associationID, $data): bool
+    {
+        if ($this->checkAssociationData($data) === false) {
+            return false;
+        }
+
+        return $this->associationModel->updateAssociation($associationID, $data);
+    }
+
+    private function deleteAssociation($associationID): bool
+    {
+        return $this->associationModel->deleteAssociation($associationID);
+    }
+
+    private function getBelongsByAssociation($associationID): array
+    {
+        return $this->associationModel->getBelongsByAssociation($associationID);
+    }
+
+    private function isValidTelephone($telNumber): bool
+    {
+        return preg_match('/^\d{10}$/', $telNumber) === 1;
+    }
+
+    private function isValidHex($hex): bool
+    {
+        return preg_match('/^#(\d|[a-f]){6}$/', $hex) === 1;
+    }
+
+    /**
+     * Check the parameters of create or edit association.
+     *
+     * @param $data
+     * @return bool TRUE if the tests pass, FALSE otherwise. Error message is also set.
+     */
+    private function checkAssociationData($data): bool
+    {
         $associationName = $data['nomeAssociazione'];
         $members = $data['membri'];
         $telephone = $data['telefono'] ?? '';
@@ -234,72 +283,13 @@ class AssociationController extends Controller
         }
 
         if ($style !== '' && $this->isValidHex($style) === false) {
-                $this->errorHelper->setErrorMessage(
-                    'Wrong hex format.',
-                    'Il colore scelto non è nel formato corretto.');
-
-                return false;
-        }
-
-        return $this->associationModel->createAssociation($data);
-    }
-
-    private function getAssociation($associationID): array
-    {
-        return $this->associationModel->getAssociation($associationID);
-    }
-
-    private function updateAssociation($associationID, $data): bool
-    {
-        $associationName = $data['nomeAssociazione'];
-        $members = $data['membri'];
-        $telephone = $data['telefono'] ?? '';
-        $style = $data['stile'] ?? '';
-
-        if ($associationName === '' || empty($members)) {
             $this->errorHelper->setErrorMessage(
-                'Empty field.',
-                'Un campo obbligatorio non è stato inserito.');
+                'Wrong hex format.',
+                'Il colore scelto non è nel formato corretto.');
 
             return false;
         }
 
-        if ($telephone !== '' && $this->isValidTelephone($telephone) === false) {
-            $this->errorHelper->setErrorMessage(
-                'Wrong telephone format.',
-                'Il formato del numero di telefono non è valido.');
-
-            return false;
-        }
-
-        if ($style !== '' && $this->isValidHex($style) === false) {
-                $this->errorHelper->setErrorMessage(
-                    'Wrong hex format.',
-                    'Il colore scelto non è nel formato corretto.');
-
-                return false;
-        }
-
-        return $this->associationModel->updateAssociation($associationID, $data);
-    }
-
-    private function deleteAssociation($associationID): bool
-    {
-        return $this->associationModel->deleteAssociation($associationID);
-    }
-
-    private function getBelongsByAssociation($associationID): array
-    {
-        return $this->associationModel->getBelongsByAssociation($associationID);
-    }
-
-    private function isValidTelephone($telNumber): bool
-    {
-        return preg_match('^\d{10}$', $telNumber) !== 0;
-    }
-
-    private function isValidHex($hex): bool
-    {
-        return preg_match('^#(\d|[a-f]){6}$', $hex) !== 0;
+        return true;
     }
 }
