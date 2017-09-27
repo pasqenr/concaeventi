@@ -221,21 +221,8 @@ class FundingController extends Controller
 
     private function createFunding($data): bool
     {
-        $amount = $data['importo'];
-
-        $amount_pattern = '[0-9]{1,6}.[0-9]{1,2}';
-
-        if ($amount !== '') {
-            $amount = str_replace(',', '.', $amount);
-
-            if (!preg_match($amount_pattern, $amount)) {
-                $this->errorHelper->setErrorMessage('Wrong amount format.',
-                    'Formato valuta errato.');
-
-                return false;
-            }
-
-            $data['importo'] = $amount;
+        if ($this->checkFundingCheck($data) === false) {
+            return false;
         }
 
         return $this->fundingModel->createFunding($data);
@@ -243,19 +230,9 @@ class FundingController extends Controller
 
     private function updateFunding($eventID, $sponsorID, $data): bool
     {
-        $amount = $data['importo'];
-
-        $amount = str_replace(',', '.', $amount);
-        $amount_pattern = '[0-9]{1,6}.[0-9]{1,2}';
-
-        if (!preg_match($amount_pattern, $amount)) {
-            $this->errorHelper->setErrorMessage('Wrong amount format.',
-                'Formato valuta errato.');
-
+        if ($this->checkFundingCheck($data) === false) {
             return false;
         }
-
-        $data['importo'] = $amount;
 
         return $this->fundingModel->updateFunding($eventID, $sponsorID, $data);
     }
@@ -273,14 +250,6 @@ class FundingController extends Controller
      */
     private function getEvents(): array
     {
-        /*$sth = $this->db->query('
-            SELECT E.idEvento, E.titolo
-            FROM Evento E
-            WHERE DATEDIFF(E.istanteFine, CURRENT_TIMESTAMP) > 0
-        ');
-
-        return $sth->fetchAll();*/
-
         return $this->eventModel->getEvents();
     }
 
@@ -289,13 +258,30 @@ class FundingController extends Controller
      */
     private function getSponsors(): array
     {
-        /*$sth = $this->db->query('
-            SELECT S.idSponsor, S.nome
-            FROM Sponsor S
-        ');
-
-        return $sth->fetchAll();*/
-
         return $this->sponsorModel->getSponsors();
+    }
+
+    private function checkFundingCheck($data): bool
+    {
+        $amount = $data['importo'];
+
+        $amount_pattern = '/^\d{1,6}[.]?\d{1,2}$/';
+
+        if ($amount !== '') {
+            $amount = str_replace(',', '.', $amount);
+
+            if (preg_match($amount_pattern, $amount) !== 1) {
+                $this->errorHelper->setErrorMessage('Wrong amount format.',
+                    'Formato valuta errato.');
+
+                return false;
+            }
+
+            $data['importo'] = $amount;
+        } else {
+            $data['importo'] = '';
+        }
+
+        return true;
     }
 }
