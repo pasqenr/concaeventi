@@ -331,27 +331,7 @@ class EventController extends Controller
 
     private function createEvent($userID, $data): bool
     {
-        $titolo = $data['titolo'];
-        $descrizione = $data['descrizione'];
-        $istanteInizio = $data['istanteInizio'];
-        $istanteFine = $data['istanteFine'];
-        $associazioni = $data['associazioni'];
-        $idAssPrimaria = $data['assPrimaria'];
-
-        $date_pattern = '^\d{4}-\d{2}-\d{2} (\d{2}(:\d{2}(:\d{2})?)?)?$^';
-
-        if ($titolo === '' || $descrizione === '' || $istanteInizio === '' || $istanteFine === '' ||
-            $associazioni === '' || $idAssPrimaria === '') {
-            $this->errorHelper->setErrorMessage('createEvent(): Empty field.',
-                'Creazione evento: un campo obbligatorio non è stato compilato.');
-
-            return false;
-        }
-
-        if (!preg_match($date_pattern, $istanteInizio) || !preg_match($date_pattern, $istanteFine)) {
-            $this->errorHelper->setErrorMessage('createEvent(): Wrong date match.',
-                'Creazione evento: formato data errato.');
-
+        if ($this->checkEventData($data) === false) {
             return false;
         }
 
@@ -370,24 +350,7 @@ class EventController extends Controller
 
     private function updateEvent($update): bool
     {
-        $titolo = $update['titolo'];
-        $descrizione = $update['descrizione'];
-        $istanteInizio = $update['istanteInizio'];
-        $istanteFine = $update['istanteFine'];
-
-        $date_pattern = '^\d{4}-\d{2}-\d{2} (\d{2}(:\d{2}(:\d{2})?)?)?$^';
-
-        if ($titolo === '' || $descrizione === '' || $istanteInizio === '' || $istanteFine === '') {
-            $this->errorHelper->setErrorMessage('updateEvent(): Empty field.',
-                'Modifica evento: un campo obbligatorio non è stato compilato.');
-
-            return false;
-        }
-
-        if (!preg_match($date_pattern, $istanteInizio) || !preg_match($date_pattern, $istanteFine)) {
-            $this->errorHelper->setErrorMessage('updateEvent(): Wrong date match.',
-                'Modifica evento: formato data errato.');
-
+        if ($this->checkEventData($update) === false) {
             return false;
         }
 
@@ -494,5 +457,51 @@ class EventController extends Controller
     private function isValidImage($image): bool
     {
         return !(strrpos($image->getClientMediaType(), 'image') === false);
+    }
+
+    /**
+     * Check the parameters of create or edit event.
+     *
+     * @param $data
+     * @return bool TRUE if the tests pass, FALSE otherwise. Error message is also set.
+     */
+    private function checkEventData($data): bool
+    {
+        $titolo = $data['titolo'];
+        $descrizione = $data['descrizione'];
+        $istanteInizio = $data['istanteInizio'];
+        $istanteFine = $data['istanteFine'];
+        $associazioni = $data['associazioni'];
+        $idAssPrimaria = $data['assPrimaria'];
+
+        $date_pattern = '^\d{4}-\d{2}-\d{2} (\d{2}(:\d{2}(:\d{2})?)?)?$^';
+
+        if ($titolo === '' || $descrizione === '' || $istanteInizio === '' || $istanteFine === '' ||
+            $associazioni === '' || $idAssPrimaria === '') {
+            $this->errorHelper->setErrorMessage('checkEventData(): Empty field.',
+                'Un campo obbligatorio non è stato compilato.');
+
+            return false;
+        }
+
+        if (!preg_match($date_pattern, $istanteInizio) || !preg_match($date_pattern, $istanteFine)) {
+            $this->errorHelper->setErrorMessage('checkEventData(): Wrong date match.',
+                'Formato data errato.');
+
+            return false;
+        }
+
+        $initDate = new \DateTime($istanteInizio);
+        $finishDate = new \DateTime($istanteFine);
+
+        if ($initDate > $finishDate) {
+            $this->errorHelper->setErrorMessage(
+                'checkEventData(): Strarting date greater than finish date.',
+                'Orario d\'inizio viene dopo quello di fine.');
+
+            return false;
+        }
+
+        return true;
     }
 }
