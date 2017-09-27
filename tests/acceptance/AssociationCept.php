@@ -1,11 +1,8 @@
 <?php
 
 $I = new AcceptanceTester($scenario);
+
 $I->resetCookie('ConcaEventi');
-
-$I->amOnPage('/events/');
-$I->seeInCurrentUrl('auth-error');
-
 $I->amOnPage('/login/');
 $I->submitForm('form', array(
     'email' => 'mail@mail.com',
@@ -26,7 +23,7 @@ $I->amOnPage('/associations/create/');
 $I->fillField('nomeAssociazione', 'Z Associazione');
 $I->selectOption("//select[@name='membri[]']", '1');
 $I->fillField('telefono', '1234567890');
-//$I->fillField('stile', '#ff0000');
+$I->fillField('stile', '#ff0000');
 $I->click('Crea', 'form');
 
 $I->seeInCurrentUrl('/associations/');

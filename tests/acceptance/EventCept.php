@@ -1,11 +1,8 @@
 <?php
 
 $I = new AcceptanceTester($scenario);
+
 $I->resetCookie('ConcaEventi');
-
-$I->amOnPage('/events/');
-$I->seeInCurrentUrl('auth-error');
-
 $I->amOnPage('/login/');
 $I->submitForm('form', array(
     'email' => 'mail@mail.com',
@@ -14,9 +11,9 @@ $I->submitForm('form', array(
 
 $I->seeInSource('Non ci sono eventi programmati.');
 
+/* Create correct event */
 $I->amOnPage('/events/create/');
 
-/* Create correct event */
 $today = new DateTime();
 $initDate = $today->add(new DateInterval('P1D'))->format('Y-m-d H:i:s');
 
