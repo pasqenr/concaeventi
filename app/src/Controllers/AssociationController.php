@@ -233,18 +233,6 @@ class AssociationController extends Controller
             return false;
         }
 
-        /*$associationID = $this->getLastAssociationID() + 1;
-        $styleCreated = $this->setStyle($associationID, $style);
-        $style_path = WWW_PATH . '/assets/css/ass/' . $associationID . '.css';
-
-        if ($styleCreated === false) {
-            $this->errorHelper->setErrorMessage(
-                'Impossible to write the new style CSS file.',
-                'Impossibile creare lo stile associato.');
-
-            return false;
-        }*/
-
         if ($style !== '' && $this->isValidHex($style) === false) {
                 $this->errorHelper->setErrorMessage(
                     'Wrong hex format.',
@@ -284,17 +272,6 @@ class AssociationController extends Controller
             return false;
         }
 
-        /*$styleCreated = $this->setStyle($associationID, $style);
-        $style_path = WWW_PATH . '/assets/css/ass/' . $associationID . '.css';
-
-        if ($styleCreated === false) {
-            $this->errorHelper->setErrorMessage(
-                'Impossible to write the style CSS file.',
-                'Impossibile modificare lo stile associato.');
-
-            return false;
-        }*/
-
         if ($style !== '' && $this->isValidHex($style) === false) {
                 $this->errorHelper->setErrorMessage(
                     'Wrong hex format.',
@@ -315,15 +292,6 @@ class AssociationController extends Controller
     {
         return $this->associationModel->getBelongsByAssociation($associationID);
     }
-
-    /*private function setStyle($associationID, $style): bool
-    {
-        $style_path = WWW_PATH . '/assets/css/ass/' . $associationID . '.css';
-
-        $good = file_put_contents($style_path, $style, LOCK_EX);
-
-        return $good !== false;
-    }*/
 
     private function isValidTelephone($telNumber): bool
     {
