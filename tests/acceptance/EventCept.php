@@ -44,9 +44,9 @@ $I->assertEquals($date, $initDate);
 $date = $I->grabValueFrom("//input[@name='istanteFine']");
 $I->assertEquals($date, $finishDate);
 $option = $I->grabTextFrom("//select[@name='associazioni[]']");
-$I->assertEquals(trim($option), 'Comune');
+$I->assertEquals(substr(trim($option),  0, 6), 'Comune');
 $option = $I->grabTextFrom("//select[@name='assPrimaria']", 'Comune');
-$I->assertEquals(trim($option), 'Comune');
+$I->assertEquals(substr(trim($option),  0, 6), 'Comune');
 $I->seeCheckboxIsChecked('revisionato');
 
 $initDate = $today->add(new DateInterval('P1D'))->format('Y-m-d H:i:s');
