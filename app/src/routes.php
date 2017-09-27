@@ -69,11 +69,11 @@ $app->get('/history/', 'App\Controllers\FrontController:history')
 
 /* Associations */
 
-$app->get('/associations/create', 'App\Controllers\AssociationController:create')
+$app->get('/associations/create/', 'App\Controllers\AssociationController:create')
     ->setName('associationsCreate')
     ->add($container->get('csrf'));
 
-$app->post('/associations/create', 'App\Controllers\AssociationController:doCreate')
+$app->post('/associations/create/', 'App\Controllers\AssociationController:doCreate')
     ->setName('associationsDoCreate')
     ->add($container->get('csrf'));
 
@@ -129,11 +129,11 @@ $app->post('/events/page/{id}', 'App\Controllers\EventController:doPage')
 
 /* Sponsors */
 
-$app->get('/sponsors/create', 'App\Controllers\SponsorController:create')
+$app->get('/sponsors/create/', 'App\Controllers\SponsorController:create')
     ->setName('sponsorsCreate')
     ->add($container->get('csrf'));
 
-$app->post('/sponsors/create', 'App\Controllers\SponsorController:doCreate')
+$app->post('/sponsors/create/', 'App\Controllers\SponsorController:doCreate')
     ->setName('sponsorsDoCreate')
     ->add($container->get('csrf'));
 
@@ -155,11 +155,11 @@ $app->post('/sponsors/delete/{id}', 'App\Controllers\SponsorController:doDelete'
 
 /* Funding */
 
-$app->get('/funding/create', 'App\Controllers\FundingController:create')
+$app->get('/funding/create/', 'App\Controllers\FundingController:create')
     ->setName('fundingCreate')
     ->add($container->get('csrf'));
 
-$app->post('/funding/create', 'App\Controllers\FundingController:doCreate')
+$app->post('/funding/create/', 'App\Controllers\FundingController:doCreate')
     ->setName('fundingDoCreate')
     ->add($container->get('csrf'));
 
