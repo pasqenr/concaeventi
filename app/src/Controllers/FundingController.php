@@ -261,7 +261,7 @@ class FundingController extends Controller
         return $this->sponsorModel->getSponsors();
     }
 
-    private function checkFundingCheck($data): bool
+    private function checkFundingCheck(&$data): bool
     {
         $amount = $data['importo'];
 
