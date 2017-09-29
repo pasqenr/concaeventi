@@ -44,7 +44,7 @@ class EventModel extends Model
                 'Recupero eventi: errore nell\'elaborazione dei dati.',
                 $this->db->errorInfo());
 
-            throw new GenericPDOException($e);
+            throw $e;
         }
 
         $events = $this->mergeAssociations($events);
@@ -558,7 +558,7 @@ class EventModel extends Model
         $eventsWithFundings = [];
         $fundingsCount = count($fundings);
 
-        for ($i = $j = $k = 0; $i <= $fundingsCount; $i += $j, $j = $i, $k = 0) {
+        for ($i = $j = $k = 0; $i < $fundingsCount; $i += $j, $j = $i, $k = 0) {
             $eventsWithFundings[$i]['idEvento'] = $fundings[$i]['idEvento'];
             $eventsWithFundings[$i]['titolo'] = $fundings[$i]['titolo'];
 

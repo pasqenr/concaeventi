@@ -23,10 +23,10 @@ class FundingModel extends Model
         $sth = $this->db->prepare('
             SELECT F.idEvento, F.idSponsor, F.importo, F.dataFinanziamento, E.titolo, S.nome
             FROM Finanziamento F
-            JOIN Evento E
-            ON (F.idEvento)
-            JOIN Sponsor S
-            ON (F.idSponsor)
+                JOIN Evento E
+                USING (idEvento)
+                JOIN Sponsor S
+                USING (idSponsor)
             WHERE F.idEvento = :idEvento
               AND F.idSponsor = :idSponsor
         ');

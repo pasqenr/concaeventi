@@ -212,6 +212,55 @@ class AssociationController extends Controller
 
     private function createAssociation($data): bool
     {
+        if ($this->checkAssociationData($data) === false) {
+            return false;
+        }
+
+        return $this->associationModel->createAssociation($data);
+    }
+
+    private function getAssociation($associationID): array
+    {
+        return $this->associationModel->getAssociation($associationID);
+    }
+
+    private function updateAssociation($associationID, $data): bool
+    {
+        if ($this->checkAssociationData($data) === false) {
+            return false;
+        }
+
+        return $this->associationModel->updateAssociation($associationID, $data);
+    }
+
+    private function deleteAssociation($associationID): bool
+    {
+        return $this->associationModel->deleteAssociation($associationID);
+    }
+
+    private function getBelongsByAssociation($associationID): array
+    {
+        return $this->associationModel->getBelongsByAssociation($associationID);
+    }
+
+    private function isValidTelephone($telNumber): bool
+    {
+        return preg_match('/^\d{10}$/', $telNumber) === 1;
+    }
+
+    private function isValidHex($hex): bool
+    {
+        return preg_match('/^#(\d|[a-f]){6}$/', $hex) === 1;
+    }
+
+    /**
+     * Check the parameters of create or edit association.
+     *
+     * @param $data
+     * @return bool TRUE if the tests pass, FALSE otherwise. Error message is also set.
+     */
+    private function checkAssociationData($data): bool
+    {
         $associationName = $data['nomeAssociazione'];
         $members = $data['membri'];
         $telephone = $data['telefono'] ?? '';
@@ -233,105 +282,14 @@ class AssociationController extends Controller
             return false;
         }
 
-        /*$associationID = $this->getLastAssociationID() + 1;
-        $styleCreated = $this->setStyle($associationID, $style);
-        $style_path = WWW_PATH . '/assets/css/ass/' . $associationID . '.css';
-
-        if ($styleCreated === false) {
-            $this->errorHelper->setErrorMessage(
-                'Impossible to write the new style CSS file.',
-                'Impossibile creare lo stile associato.');
-
-            return false;
-        }*/
-
         if ($style !== '' && $this->isValidHex($style) === false) {
-                $this->errorHelper->setErrorMessage(
-                    'Wrong hex format.',
-                    'Il colore scelto non è nel formato corretto.');
-
-                return false;
-        }
-
-        return $this->associationModel->createAssociation($data);
-    }
-
-    private function getAssociation($associationID): array
-    {
-        return $this->associationModel->getAssociation($associationID);
-    }
-
-    private function updateAssociation($associationID, $data): bool
-    {
-        $associationName = $data['nomeAssociazione'];
-        $members = $data['membri'];
-        $telephone = $data['telefono'] ?? '';
-        $style = $data['stile'] ?? '';
-
-        if ($associationName === '' || empty($members)) {
             $this->errorHelper->setErrorMessage(
-                'Empty field.',
-                'Un campo obbligatorio non è stato inserito.');
+                'Wrong hex format.',
+                'Il colore scelto non è nel formato corretto.');
 
             return false;
         }
 
-        if ($telephone !== '' && $this->isValidTelephone($telephone) === false) {
-            $this->errorHelper->setErrorMessage(
-                'Wrong telephone format.',
-                'Il formato del numero di telefono non è valido.');
-
-            return false;
-        }
-
-        /*$styleCreated = $this->setStyle($associationID, $style);
-        $style_path = WWW_PATH . '/assets/css/ass/' . $associationID . '.css';
-
-        if ($styleCreated === false) {
-            $this->errorHelper->setErrorMessage(
-                'Impossible to write the style CSS file.',
-                'Impossibile modificare lo stile associato.');
-
-            return false;
-        }*/
-
-        if ($style !== '' && $this->isValidHex($style) === false) {
-                $this->errorHelper->setErrorMessage(
-                    'Wrong hex format.',
-                    'Il colore scelto non è nel formato corretto.');
-
-                return false;
-        }
-
-        return $this->associationModel->updateAssociation($associationID, $data);
-    }
-
-    private function deleteAssociation($associationID): bool
-    {
-        return $this->associationModel->deleteAssociation($associationID);
-    }
-
-    private function getBelongsByAssociation($associationID): array
-    {
-        return $this->associationModel->getBelongsByAssociation($associationID);
-    }
-
-    /*private function setStyle($associationID, $style): bool
-    {
-        $style_path = WWW_PATH . '/assets/css/ass/' . $associationID . '.css';
-
-        $good = file_put_contents($style_path, $style, LOCK_EX);
-
-        return $good !== false;
-    }*/
-
-    private function isValidTelephone($telNumber): bool
-    {
-        return preg_match('^\d{10}$', $telNumber) !== 0;
-    }
-
-    private function isValidHex($hex): bool
-    {
-        return preg_match('^#(\d|[a-f]){6}$', $hex) !== 0;
+        return true;
     }
 }
