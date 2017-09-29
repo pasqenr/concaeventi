@@ -491,6 +491,9 @@ class EventController extends Controller
             return false;
         }
 
+        $istanteInizio = $this->addTimeZeros($istanteInizio);
+        $istanteFine = $this->addTimeZeros($istanteFine);
+
         $initDate = new \DateTime($istanteInizio);
         $finishDate = new \DateTime($istanteFine);
 
@@ -503,5 +506,18 @@ class EventController extends Controller
         }
 
         return true;
+    }
+
+    private function addTimeZeros(&$datetime): string
+    {
+        if (strpos($datetime, ':') === false) {
+            $datetime .= ':00';
+        }
+
+        if (strpos($datetime, ':', 16) === false) {
+            $datetime .= ':00';
+        }
+
+        return $datetime;
     }
 }
