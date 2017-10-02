@@ -11,11 +11,11 @@ use RKA\Session;
  * @package App\Helpers
  */
 class SessionHelper {
-    const ALL = '';
-    const EDITORE = 'Editore';
-    const PUBLISHER = 'Publisher';
-    const DIRETTORE = 'Direttore';
-    const AMMINISTRATORE = 'Amministratore';
+    const ALL = 0;
+    const EDITORE = 1;
+    const PUBLISHER = 2;
+    const DIRETTORE = 4;
+    const AMMINISTRATORE = 8;
     
     private $session;
 
@@ -35,44 +35,36 @@ class SessionHelper {
         return $this->session->get('idUtente') !== null;
     }
 
+    /**
+     * @param int $level
+     * @return bool
+     */
     public function auth($level = self::ALL): bool
     {
         if (!$this->isLogged()) {
             return false;
         }
 
-        if ($level === self::ALL) {
-            return true;
-        }
+        $userLevel = $this->session->get('ruolo') ?? 0;
 
-        switch ($this->session->get('ruolo')) {
-            case self::AMMINISTRATORE:
-                break;
-            case self::DIRETTORE:
-                break;
-            case self::PUBLISHER:
-                break;
-            case self::EDITORE:
-                break;
-            case self::ALL;
-                break;
-
-            default:
-                return false;
-        }
-
-        return true;
+        return $userLevel >= $level;
     }
 
+    /**
+     * @param $user
+     */
     public function setUserData(&$user)
     {
         $this->session->idUtente      = $user['idUtente'];
         $this->session->nomeUtente    = $user['nome'];
         $this->session->cognomeUtente = $user['cognome'];
         $this->session->email         = $user['email'];
-        $this->session->ruolo         = $user['ruolo'];
+        $this->session->ruolo         = $this->ruoloFromString($user['ruolo']);
     }
 
+    /**
+     * @return array
+     */
     public function getUser(): array
     {
         if (!$this->isLogged()) {
@@ -83,11 +75,73 @@ class SessionHelper {
         $user['nome']     = $this->session->nomeUtente;
         $user['cognome']  = $this->session->cognomeUtente;
         $user['email']    = $this->session->email;
-        $user['ruolo']    = $this->session->ruolo;
+        $user['ruolo']    = $this->ruoloToString($this->session->ruolo);
 
         return $user;
     }
 
+    /**
+     * @param string $level
+     * @return int
+     * @throws \InvalidArgumentException
+     */
+    public function ruoloFromString(string $level = 'All'): int
+    {
+        switch ($level) {
+            case 'Amministratore':
+                return self::AMMINISTRATORE;
+                break;
+            case 'Direttore':
+                return self::DIRETTORE;
+                break;
+            case 'Publisher':
+                return self::PUBLISHER;
+                break;
+            case 'Editore':
+                return self::EDITORE;
+                break;
+            case 'All';
+                self::ALL;
+                break;
+
+            default:
+                throw new \InvalidArgumentException('Wrong level name');
+        }
+
+        throw new \InvalidArgumentException('Wrong level name');
+    }
+
+    /**
+     * @param int $level
+     * @return string
+     */
+    public function ruoloToString($level = self::ALL)
+    {
+        switch ($level) {
+            case self::AMMINISTRATORE:
+                return 'Amministratore';
+                break;
+            case self::DIRETTORE:
+                return 'Direttore';
+                break;
+            case self::PUBLISHER:
+                return 'Publisher';
+                break;
+            case self::EDITORE:
+                return 'Editore';
+                break;
+            case self::ALL;
+                return 'All';
+                break;
+
+            default:
+                throw new \InvalidArgumentException('Wrong level code');
+        }
+    }
+
+    /**
+     *
+     */
     public function destroySession()
     {
         Session::destroy();
