@@ -35,6 +35,48 @@ class EventModel extends Model
             LEFT JOIN Associazione A2
             ON (E.idAssPrimaria = A2.idAssociazione)
             WHERE DATEDIFF(E.istanteFine, CURRENT_TIMESTAMP) > 0
+            ORDER BY E.istanteCreazione
+        ');
+        try {
+            $events = $sth->fetchAll();
+        } catch (\PDOException $e) {
+            $this->errorHelper->setErrorMessage('getEvents(): PDOException, check errorInfo.',
+                'Recupero eventi: errore nell\'elaborazione dei dati.',
+                $this->db->errorInfo());
+
+            throw $e;
+        }
+
+        $events = $this->mergeAssociations($events);
+
+        return $events;
+    }
+
+    /**
+     * Get all the events that are available before the current timestamp and order them by timestamp that
+     * are been reviewed.
+     *
+     * @return array The events.
+     * @throws \PDOException
+     */
+    public function getReviewedEvents(): array
+    {
+        $sth = $this->db->query('
+            SELECT U.idUtente, A.idAssociazione, E.idEvento, E.titolo, E.immagine, E.descrizione, E.istanteCreazione,
+                   E.istanteInizio, E.istanteFine, E.pagina, E.revisionato, A2.nomeAssociazione AS nomeAssPrimaria,
+                   A.nomeAssociazione, A.logo, U.nome AS nomeUtente, U.cognome AS cognomeUtente, U.email, U.ruolo,
+                   A2.logo AS logoPrimario
+            FROM Evento E
+            LEFT JOIN Proporre P
+            USING (idEvento)
+            LEFT JOIN Associazione A
+            USING (idAssociazione)
+            LEFT JOIN Utente U
+            USING (idUtente)
+            LEFT JOIN Associazione A2
+            ON (E.idAssPrimaria = A2.idAssociazione)
+            WHERE DATEDIFF(E.istanteFine, CURRENT_TIMESTAMP) > 0
+              AND E.revisionato = TRUE
             ORDER BY E.istanteInizio
         ');
         try {
