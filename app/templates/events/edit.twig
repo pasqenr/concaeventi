@@ -80,6 +80,7 @@
                             </p>
                         </div>
 
+                        {% if associazioni|length > 0 %}
                         <div class="select is-multiple">
                             <label class="label">Associazioni</label>
                             <select multiple size="5" name="associazioni[]">
@@ -96,9 +97,11 @@
                                 {% endfor %}
                             </select>
                         </div>
+                        {% endif %}
 
                         <div class="is-small">&nbsp;</div>
 
+                        {% if associazioni|length > 0 %}
                         <label class="label">Associazione primaria</label>
                         <div class="select">
                             <select name="assPrimaria">
@@ -115,6 +118,7 @@
                         </div>
 
                         <div class="is-small">&nbsp;</div>
+                        {% endif %}
 
                         {% if utente.ruolo == 'Amministratore' or
                         utente.ruolo == 'Direttore' or utente.ruolo == 'Publisher' %}
