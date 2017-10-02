@@ -27,7 +27,7 @@ class FrontController extends Controller
     public function home(/** @noinspection PhpUnusedParameterInspection */
         Request $request, Response $response, $args)
     {
-        $events = $this->getEvents();
+        $events = $this->getReviewedEvents();
 
         /** @noinspection PhpVoidFunctionResultUsedInspection */
         return $this->render($response, 'front/home.twig', [
@@ -54,9 +54,9 @@ class FrontController extends Controller
      * @return array The events.
      * @throws \PDOException
      */
-    private function getEvents(): array
+    private function getReviewedEvents(): array
     {
-        return $this->eventModel->getEvents();
+        return $this->eventModel->getReviewedEvents();
     }
 
     /**
