@@ -2,6 +2,7 @@
 
 namespace App\Controllers;
 
+use App\Exceptions\AuthException;
 use \App\Helpers\SessionHelper;
 use \App\Helpers\ErrorHelper;
 use \App\Models\EventModel;
@@ -51,7 +52,7 @@ class EventController extends Controller
     public function create(/** @noinspection PhpUnusedParameterInspection */
         Request $request, Response $response, $args)
     {
-        $authorized = $this->session->auth(SessionHelper::PUBLISHER);
+        $authorized = $this->session->auth(SessionHelper::EDITORE);
 
         if (!$authorized) {
             return $response->withRedirect($this->router->pathFor('auth-error'));
@@ -150,7 +151,7 @@ class EventController extends Controller
     public function edit(/** @noinspection PhpUnusedParameterInspection */
         Request $request, Response $response, $args)
     {
-        $authorized = $this->session->auth(SessionHelper::PUBLISHER);
+        $authorized = $this->session->auth(SessionHelper::EDITORE);
 
         if (!$authorized) {
             return $response->withRedirect($this->router->pathFor('auth-error'));
@@ -201,7 +202,7 @@ class EventController extends Controller
     public function doEdit(/** @noinspection PhpUnusedParameterInspection */
         Request $request, Response $response, $args)
     {
-        $authorized = $this->session->auth(SessionHelper::PUBLISHER);
+        $authorized = $this->session->auth(SessionHelper::EDITORE);
 
         if (!$authorized) {
             return $response->withRedirect($this->router->pathFor('auth-error'));
@@ -224,12 +225,7 @@ class EventController extends Controller
     public function showPage(/** @noinspection PhpUnusedParameterInspection */
         Request $request, Response $response, $args)
     {
-        $authorized = $this->session->auth($response);
         $eventID = (int)$args['id'];
-
-        if (!$authorized) {
-            return $response->withRedirect($this->router->pathFor('auth-error'));
-        }
 
         try {
             $event = $this->getEvent($eventID);
@@ -465,7 +461,7 @@ class EventController extends Controller
      * @param $data
      * @return bool TRUE if the tests pass, FALSE otherwise. Error message is also set.
      */
-    private function checkEventData($data): bool
+    private function checkEventData(&$data): bool
     {
         $titolo = $data['titolo'];
         $descrizione = $data['descrizione'];
@@ -473,6 +469,7 @@ class EventController extends Controller
         $istanteFine = $data['istanteFine'];
         $associazioni = $data['associazioni'];
         $idAssPrimaria = $data['assPrimaria'];
+        $approvato = $data['revisionato'] ?? null;
 
         $date_pattern = '/^\d{4}-\d{2}-\d{2} (\d{2}(:\d{2}(:\d{2})?)?)?$/';
 
@@ -505,6 +502,19 @@ class EventController extends Controller
             return false;
         }
 
+        try {
+            $data['revisionato'] = $this->changeApproval($approvato);
+        } catch (AuthException $e) {
+            $this->errorHelper->setErrorMessage(
+                'checkEventData(): Can\'t change approvation because of user authorization.',
+                'Non disponi dei permessi necessari per cambiare l\'approvazione dell\'evento.'
+            );
+
+            $data['revisionato'] = 'off';
+
+            return false;
+        }
+
         return true;
     }
 
@@ -519,5 +529,23 @@ class EventController extends Controller
         }
 
         return $datetime;
+    }
+
+    /**
+     * @param $approved
+     * @return string
+     * @throws \App\Exceptions\AuthException
+     */
+    private function changeApproval($approved): string
+    {
+        if ($approved === null || $approved === '') {
+            return 'off';
+        }
+
+        if ($this->session->auth(SessionHelper::PUBLISHER) === false) {
+            throw new AuthException('The user doesn\'t have the permission level to do the action.');
+        }
+
+        return $approved;
     }
 }
