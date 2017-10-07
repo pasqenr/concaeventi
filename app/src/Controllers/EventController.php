@@ -2,7 +2,7 @@
 
 namespace App\Controllers;
 
-use App\Exceptions\AuthException;
+use \App\Exceptions\AuthException;
 use \App\Helpers\SessionHelper;
 use \App\Helpers\ErrorHelper;
 use \App\Models\EventModel;
