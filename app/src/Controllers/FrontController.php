@@ -49,6 +49,48 @@ class FrontController extends Controller
     }
 
     /**
+     * Show the event page identified by $args['id'].
+     *
+     * @param Request $request
+     * @param Response $response
+     * @param $args
+     * @return mixed The rendered page.
+     * @throws \RuntimeException
+     * @throws \InvalidArgumentException
+     */
+    public function showPage(/** @noinspection PhpUnusedParameterInspection */
+        Request $request, Response $response, $args)
+    {
+        $eventID = (int)$args['id'];
+
+        try {
+            $event = $this->getEvent($eventID);
+        } catch (\PDOException $e) {
+            $this->errorHelper->setErrorMessage('PDOException, check errorInfo.',
+                'Impossibile trovare l\'evento.');
+
+            /** @noinspection PhpVoidFunctionResultUsedInspection */
+            return $this->render($response, 'errors/error.twig', [
+                'utente' => $this->user,
+                'err' => $this->errorHelper->getErrorMessage()
+            ]);
+        }
+
+        $associations = $this->getEventAssociations($event);
+
+        if (empty($event)) {
+            return $response->withRedirect($this->router->pathFor('not-found'));
+        }
+
+        /** @noinspection PhpVoidFunctionResultUsedInspection */
+        return $this->render($response, 'front/page.twig', [
+            'utente' => $this->user,
+            'evento' => $event,
+            'associazioni' => $associations
+        ]);
+    }
+
+    /**
      * Get all the events that are available before the current timestamp and order them by timestamp.
      *
      * @return array The events.
@@ -68,5 +110,39 @@ class FrontController extends Controller
     private function getEventsHistory(): array
     {
         return $this->eventModel->getEventsHistory();
+    }
+
+    /**
+     * Return the event identified by $eventID.
+     *
+     * @param int $eventID The unique event identifier.
+     * @return array The event.
+     * @throws \PDOException
+     */
+    private function getEvent($eventID): array
+    {
+        return $this->eventModel->getEvent($eventID);
+    }
+
+    /**
+     * Return the associations of the event $event.
+     *
+     * @param array $event The event array, at list with 'nomeAssociazione' and 'logo' fields.
+     * @return array An array with the event associations and fields 'nome' and 'logo'.
+     */
+    private function getEventAssociations($event): array
+    {
+        $associationNames = explode(', ', $event['nomeAssociazione']);
+        $associationLogos = explode(', ', $event['logo']);
+        $associations = [];
+        $assCount = count($associationNames);
+
+        /** @noinspection ForeachInvariantsInspection */
+        for ($i = 0; $i < $assCount; $i++) {
+            $associations[$i]['nome'] = $associationNames[$i];
+            $associations[$i]['logo'] = $associationLogos[$i];
+        }
+
+        return $associations;
     }
 }

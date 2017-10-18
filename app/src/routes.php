@@ -49,7 +49,7 @@ $app->get('/logout/', 'App\Controllers\LoginController:logout')
 $app->get('/panel/', 'App\Controllers\PanelController:panel')
     ->setName('panel');
 
-$app->get('/page/{id}', 'App\Controllers\EventController:showPage')
+$app->get('/page/{id}', 'App\Controllers\FrontController:showPage')
     ->setName('page');
 
 $app->get('/events/', 'App\Controllers\EventController:showEvents')

@@ -300,48 +300,6 @@ class EventController extends Controller
     }
 
     /**
-     * Show the event page identified by $args['id'].
-     *
-     * @param Request $request
-     * @param Response $response
-     * @param $args
-     * @return mixed The rendered page.
-     * @throws \RuntimeException
-     * @throws \InvalidArgumentException
-     */
-    public function showPage(/** @noinspection PhpUnusedParameterInspection */
-        Request $request, Response $response, $args)
-    {
-        $eventID = (int)$args['id'];
-
-        try {
-            $event = $this->getEvent($eventID);
-        } catch (\PDOException $e) {
-            $this->errorHelper->setErrorMessage('PDOException, check errorInfo.',
-                'Impossibile trovare l\'evento.');
-
-            /** @noinspection PhpVoidFunctionResultUsedInspection */
-            return $this->render($response, 'errors/error.twig', [
-                'utente' => $this->user,
-                'err' => $this->errorHelper->getErrorMessage()
-            ]);
-        }
-
-        $associations = $this->getEventAssociations($event);
-
-        if (empty($event)) {
-            return $response->withRedirect($this->router->pathFor('not-found'));
-        }
-
-        /** @noinspection PhpVoidFunctionResultUsedInspection */
-        return $this->render($response, 'front/page.twig', [
-            'utente' => $this->user,
-            'evento' => $event,
-            'associazioni' => $associations
-        ]);
-    }
-
-    /**
      * Edit the event's page page.
      *
      * @param Request $request
