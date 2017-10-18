@@ -54,6 +54,7 @@ class FrontController extends Controller
      * @param Request $request
      * @param Response $response
      * @param $args
+     * @throws \PDOException
      */
     public function history(/** @noinspection PhpUnusedParameterInspection */
         Request $request, Response $response, $args)
