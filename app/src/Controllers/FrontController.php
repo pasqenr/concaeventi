@@ -17,6 +17,10 @@ class FrontController extends Controller
     private $eventModel;
     private $errorHelper;
 
+    /**
+     * FrontController constructor.
+     * @param \Slim\Container $container
+     */
     public function __construct($container)
     {
         parent::__construct($container);
@@ -24,6 +28,14 @@ class FrontController extends Controller
         $this->eventModel = new EventModel($this->db, $this->errorHelper);
     }
 
+    /**
+     * The home page with only the upcoming reviewed events.
+     *
+     * @param Request $request
+     * @param Response $response
+     * @param $args
+     * @throws \PDOException
+     */
     public function home(/** @noinspection PhpUnusedParameterInspection */
         Request $request, Response $response, $args)
     {
@@ -36,6 +48,13 @@ class FrontController extends Controller
         ]);
     }
 
+    /**
+     * The history page with reviewed events, old and upcoming.
+     *
+     * @param Request $request
+     * @param Response $response
+     * @param $args
+     */
     public function history(/** @noinspection PhpUnusedParameterInspection */
         Request $request, Response $response, $args)
     {
