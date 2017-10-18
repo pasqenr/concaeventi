@@ -23,6 +23,10 @@ class EventController extends Controller
     private $associationModel;
     private $errorHelper;
 
+    /**
+     * EventController constructor.
+     * @param \Slim\Container $container
+     */
     public function __construct($container)
     {
         parent::__construct($container);
@@ -31,6 +35,17 @@ class EventController extends Controller
         $this->associationModel = new AssociationModel($this->db, $this->errorHelper);
     }
 
+    /**
+     * Show all the events even if not approved.
+     *
+     * @param Request $request
+     * @param Response $response
+     * @param $args
+     * @return mixed The rendered page.
+     * @throws \PDOException
+     * @throws \RuntimeException
+     * @throws \InvalidArgumentException
+     */
     public function showEvents(/** @noinspection PhpUnusedParameterInspection */
         Request $request, Response $response, $args)
     {
@@ -49,6 +64,17 @@ class EventController extends Controller
         ]);
     }
 
+    /**
+     * Create page for a new event.
+     *
+     * @param Request $request
+     * @param Response $response
+     * @param $args
+     * @return mixed The rendered page.
+     * @throws \PDOException
+     * @throws \RuntimeException
+     * @throws \InvalidArgumentException
+     */
     public function create(/** @noinspection PhpUnusedParameterInspection */
         Request $request, Response $response, $args)
     {
@@ -67,6 +93,16 @@ class EventController extends Controller
         ]);
     }
 
+    /**
+     * Event creation action.
+     *
+     * @param Request $request
+     * @param Response $response
+     * @param $args
+     * @return mixed The rendered page.
+     * @throws \RuntimeException
+     * @throws \InvalidArgumentException
+     */
     public function doCreate(/** @noinspection PhpUnusedParameterInspection */
         Request $request, Response $response, $args)
     {
@@ -90,6 +126,16 @@ class EventController extends Controller
         return $response->withRedirect($this->router->pathFor('events'));
     }
 
+    /**
+     * Delete page for an event.
+     *
+     * @param Request $request
+     * @param Response $response
+     * @param $args
+     * @return mixed The rendered page.
+     * @throws \RuntimeException
+     * @throws \InvalidArgumentException
+     */
     public function delete(/** @noinspection PhpUnusedParameterInspection */
         Request $request, Response $response, $args)
     {
@@ -125,6 +171,16 @@ class EventController extends Controller
         ]);
     }
 
+    /**
+     * Delete event action.
+     *
+     * @param Request $request
+     * @param Response $response
+     * @param $args
+     * @return mixed The rendered page.
+     * @throws \RuntimeException
+     * @throws \InvalidArgumentException
+     */
     public function doDelete(/** @noinspection PhpUnusedParameterInspection */
         Request $request, Response $response, $args)
     {
@@ -148,6 +204,17 @@ class EventController extends Controller
         return $response->withRedirect($this->router->pathFor('events'));
     }
 
+    /**
+     * Edit page for an event.
+     *
+     * @param Request $request
+     * @param Response $response
+     * @param $args
+     * @return mixed The rendered page.
+     * @throws \PDOException
+     * @throws \RuntimeException
+     * @throws \InvalidArgumentException
+     */
     public function edit(/** @noinspection PhpUnusedParameterInspection */
         Request $request, Response $response, $args)
     {
@@ -199,6 +266,16 @@ class EventController extends Controller
         ]);
     }
 
+    /**
+     * Edit event action.
+     *
+     * @param Request $request
+     * @param Response $response
+     * @param $args
+     * @return mixed The rendered page.
+     * @throws \RuntimeException
+     * @throws \InvalidArgumentException
+     */
     public function doEdit(/** @noinspection PhpUnusedParameterInspection */
         Request $request, Response $response, $args)
     {
@@ -222,6 +299,16 @@ class EventController extends Controller
         return $response->withRedirect($this->router->pathFor('events'));
     }
 
+    /**
+     * Show the event page identified by $args['id'].
+     *
+     * @param Request $request
+     * @param Response $response
+     * @param $args
+     * @return mixed The rendered page.
+     * @throws \RuntimeException
+     * @throws \InvalidArgumentException
+     */
     public function showPage(/** @noinspection PhpUnusedParameterInspection */
         Request $request, Response $response, $args)
     {
@@ -254,6 +341,16 @@ class EventController extends Controller
         ]);
     }
 
+    /**
+     * Edit the event's page page.
+     *
+     * @param Request $request
+     * @param Response $response
+     * @param $args
+     * @return mixed The rendered page.
+     * @throws \RuntimeException
+     * @throws \InvalidArgumentException
+     */
     public function page(/** @noinspection PhpUnusedParameterInspection */
         Request $request, Response $response, $args)
     {
@@ -291,6 +388,16 @@ class EventController extends Controller
         ]);
     }
 
+    /**
+     * Edit the event page.
+     *
+     * @param Request $request
+     * @param Response $response
+     * @param $args
+     * @return mixed The rendered page.
+     * @throws \RuntimeException
+     * @throws \InvalidArgumentException
+     */
     public function doPage(/** @noinspection PhpUnusedParameterInspection */
         Request $request, Response $response, $args)
     {
@@ -315,16 +422,36 @@ class EventController extends Controller
         return $response->withRedirect($this->router->pathFor('events'));
     }
 
+    /**
+     * Return the event identified by $eventID.
+     *
+     * @param int $eventID The unique event identifier.
+     * @return array The event.
+     * @throws \PDOException
+     */
     private function getEvent($eventID): array
     {
         return $this->eventModel->getEvent($eventID);
     }
 
+    /**
+     * Get all the events that are available before the current timestamp and ordered by timestamp.
+     *
+     * @return array
+     * @throws \PDOException
+     */
     private function getEvents(): array
     {
         return $this->eventModel->getEvents();
     }
 
+    /**
+     * Create a new event created by the user with $userID and with the $data array.
+     *
+     * @param int $userID The unique user identifier that created the event.
+     * @param array $data The event fields.
+     * @return bool TRUE if the events was created, FALSE if not. Errors are set internally.
+     */
     private function createEvent($userID, $data): bool
     {
         if ($this->checkEventData($data) === false) {
@@ -334,16 +461,37 @@ class EventController extends Controller
         return $this->eventModel->createEvent($userID, $data);
     }
 
+    /**
+     * Return an array of the associations associated to the user $userID.
+     *
+     * @param int $userID The user unique identifier.
+     * @return array The array of the associations.
+     * @throws \PDOException
+     */
     private function getUserAssociations($userID): array
     {
         return $this->associationModel->getUserAssociations($userID);
     }
 
+    /**
+     * Delete the event identified by $eventID.
+     *
+     * @param int $eventID The unique event identifier.
+     * @return bool
+     */
     private function deleteEvent($eventID): bool
     {
         return $this->eventModel->deleteEvent($eventID);
     }
 
+    /**
+     * Edit an event identified by $update['id'] and the data in $update.
+     *
+     * WARNING: This function is NOT secure. The user can send a different event ID.
+     *
+     * @param array $update The array with the changed fields.
+     * @return bool TRUE if the event was updated, FALSE otherwise.
+     */
     private function updateEvent($update): bool
     {
         if ($this->checkEventData($update) === false) {
@@ -353,6 +501,14 @@ class EventController extends Controller
         return $this->eventModel->updateEvent($update);
     }
 
+    /**
+     * Take a string of associations separated by comma and returns an array of the associations IDs.
+     * This function is expensive because for every association a query is executed.
+     *
+     * @param string $ass A string of valid association names separated by comma.
+     * @return array An array of associations IDs.
+     * @throws \PDOException
+     */
     private function getEventAssociationsIds($ass): array
     {
         $associationNames = explode(', ', $ass);
@@ -373,11 +529,24 @@ class EventController extends Controller
         return $associations;
     }
 
+    /**
+     * Return an association ID given a valid association name $assName.
+     *
+     * @param string $assName A valid association name.
+     * @return string The associated association ID as string.
+     * @throws \PDOException
+     */
     private function getAssociationIdByName($assName): string
     {
         return $this->associationModel->getAssociationIdByName($assName);
     }
 
+    /**
+     * Return the associations of the event $event.
+     *
+     * @param array $event The event array, at list with 'nomeAssociazione' and 'logo' fields.
+     * @return array An array with the event associations and fields 'nome' and 'logo'.
+     */
     private function getEventAssociations($event): array
     {
         $associationNames = explode(', ', $event['nomeAssociazione']);
@@ -394,6 +563,15 @@ class EventController extends Controller
         return $associations;
     }
 
+    /**
+     * Update a page of the event identified by $eventID with $update data. The $files are stored
+     * internally.
+     *
+     * @param int $eventID The unique event identifier.
+     * @param array $update The array with the new fields data.
+     * @param array $files The files uploaded.
+     * @return bool TRUE if the event was changed, FALSE otherwise. Errors are set internally.
+     */
     private function updatePage($eventID, $update, $files): bool
     {
         $id = (int)$eventID;
@@ -446,9 +624,12 @@ class EventController extends Controller
     }
 
     /**
+     * Check if $image is a valid image file.
+     *
+     * WARNING: This function is NOT secure.
+     *
      * @var $image \Slim\Http\UploadedFile
      * @return bool TRUE if the file have an image format, FALSE otherwise.
-     *         WARNING: This function is NOT secure.
      */
     private function isValidImage($image): bool
     {
@@ -518,6 +699,12 @@ class EventController extends Controller
         return true;
     }
 
+    /**
+     * Adjust the $datetime format adding leading zeros.
+     *
+     * @param string $datetime A string with the datetime inserted by the user.
+     * @return string A datetime string with the correct format on minutes and seconds.
+     */
     private function addTimeZeros(&$datetime): string
     {
         if (strpos($datetime, ':') === false) {
@@ -532,9 +719,12 @@ class EventController extends Controller
     }
 
     /**
-     * @param $approved
-     * @return string
-     * @throws \App\Exceptions\AuthException
+     * Change the approve of an event. If the user is not a PUBLISHER then a exception is throw.
+     *
+     * @param string $approved If the parameter is null or empty then the approve is set to 'off'.
+     *               Otherwise the parameter is returned unchanged.
+     * @return string 'off' if the parameter was null or an empty string, otherwise unchanged.
+     * @throws \App\Exceptions\AuthException If the user is not a PUBLISHER the exception is thrown.
      */
     private function changeApproval($approved): string
     {
