@@ -17,6 +17,10 @@ class LoginController extends Controller
     private $userModel;
     private $errorHelper;
 
+    /**
+     * LoginController constructor.
+     * @param \Slim\Container $container
+     */
     public function __construct($container)
     {
         parent::__construct($container);
@@ -24,6 +28,16 @@ class LoginController extends Controller
         $this->userModel = new UserModel($this->db, $this->errorHelper);
     }
 
+    /**
+     * The login page.
+     *
+     * @param Request $request
+     * @param Response $response
+     * @param $args
+     * @return mixed The rendered page.
+     * @throws \RuntimeException
+     * @throws \InvalidArgumentException
+     */
     public function login(/** @noinspection PhpUnusedParameterInspection */
         Request $request, Response $response, $args)
     {
@@ -39,6 +53,17 @@ class LoginController extends Controller
         ]);
     }
 
+    /**
+     * Login action.
+     *
+     * @param Request $request
+     * @param Response $response
+     * @param $args
+     * @return mixed The rendered page.
+     * @throws \PDOException
+     * @throws \RuntimeException
+     * @throws \InvalidArgumentException
+     */
     public function doLogin(/** @noinspection PhpUnusedParameterInspection */
         Request $request, Response $response, $args)
     {
@@ -75,6 +100,17 @@ class LoginController extends Controller
         return $response->withRedirect($this->router->pathFor('home'));
     }
 
+    /**
+     * Logout action.
+     *
+     * @param Request $request
+     * @param Response $response
+     * @param $args
+     * @return mixed The rendered page.
+     *
+     * @throws \RuntimeException
+     * @throws \InvalidArgumentException
+     */
     public function logout(/** @noinspection PhpUnusedParameterInspection */
         Request $request, Response $response, $args)
     {
@@ -83,6 +119,13 @@ class LoginController extends Controller
         return $response->withRedirect($this->router->pathFor('home'));
     }
 
+    /**
+     * Return the user with the (unique) email $email.
+     *
+     * @param $email string The user's email.
+     * @return mixed The user with the email $email.
+     * @throws \PDOException
+     */
     private function getUserByEmail($email)
     {
         return $this->userModel->getUserByEmail($email);
