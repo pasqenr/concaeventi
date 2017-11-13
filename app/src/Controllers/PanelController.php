@@ -13,6 +13,16 @@ use Slim\Router;
  */
 class PanelController extends Controller
 {
+    /**
+     * The panel page.
+     *
+     * @param Request $request
+     * @param Response $response
+     * @param $args
+     * @return mixed The rendered page.
+     * @throws \RuntimeException
+     * @throws \InvalidArgumentException
+     */
     public function panel(/** @noinspection PhpUnusedParameterInspection */
         Request $request, Response $response, $args)
     {
