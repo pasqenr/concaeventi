@@ -16,19 +16,21 @@ class SessionHelper {
     const PUBLISHER = 2;
     const DIRETTORE = 4;
     const AMMINISTRATORE = 8;
-    
+
     private $session;
 
+    /**
+     * SessionHelper constructor.
+     */
     public function __construct()
     {
-        $this->session = new \RKA\Session();
+        $this->session = new Session();
     }
 
     /**
-     * Check if the idUtente variable in the session is setted.
+     * Check if the idUtente variable in the session is set.
      *
-     * @param $session \RKA\Session The user session.
-     * @return bool True if the user is logged, false otherwise.
+     * @return bool TRUE if the user is logged, FALSE otherwise.
      */
     public function isLogged(): bool
     {
@@ -36,8 +38,10 @@ class SessionHelper {
     }
 
     /**
-     * @param int $level
-     * @return bool
+     * Check if the user is authorized to the level defined by $level.
+     *
+     * @param int $level The level of authorization.
+     * @return bool TRUE if the user is authorized, FALSE otherwise.
      */
     public function auth($level = self::ALL): bool
     {
@@ -51,19 +55,25 @@ class SessionHelper {
     }
 
     /**
-     * @param $user
+     * Set the in-memory session information about the logged user.
+     *
+     * @param array $user The logged user data.
+     * @throws \InvalidArgumentException
      */
     public function setUserData(&$user)
     {
-        $this->session->idUtente      = $user['idUtente'];
-        $this->session->nomeUtente    = $user['nome'];
-        $this->session->cognomeUtente = $user['cognome'];
-        $this->session->email         = $user['email'];
-        $this->session->ruolo         = $this->ruoloFromString($user['ruolo']);
+        $this->session->set('idUtente', $user['idUtente']);
+        $this->session->set('nomeUtente', $user['nome']);
+        $this->session->set('cognomeUtente', $user['cognome']);
+        $this->session->set('email', $user['email']);
+        $this->session->set('ruolo', $this->roleFromString($user['ruolo']));
     }
 
     /**
-     * @return array
+     * Return an array with the user data stored in the session memory.
+     *
+     * @return array The user data.
+     * @throws \InvalidArgumentException
      */
     public function getUser(): array
     {
@@ -71,36 +81,40 @@ class SessionHelper {
             return [];
         }
 
-        $user['idUtente'] = $this->session->idUtente;
-        $user['nome']     = $this->session->nomeUtente;
-        $user['cognome']  = $this->session->cognomeUtente;
-        $user['email']    = $this->session->email;
-        $user['ruolo']    = $this->ruoloToString($this->session->ruolo);
+        $user['idUtente'] = $this->session->get('idUtente');
+        $user['nome']     = $this->session->get('nomeUtente');
+        $user['cognome']  = $this->session->get('cognomeUtente');
+        $user['email']    = $this->session->get('email');
+        $user['ruolo']    = $this->roleToString($this->session->get('ruolo'));
 
         return $user;
     }
 
     /**
-     * @param string $level
-     * @return int
+     * Return the role const from a string.
+     *
+     * @param string $level A string that represent a level.
+     * @return int The value for the role.
      * @throws \InvalidArgumentException
      */
-    public function ruoloFromString(string $level = 'All'): int
+    public function roleFromString(string $level = 'all'): int
     {
+        $level = strtolower(trim($level));
+
         switch ($level) {
-            case 'Amministratore':
+            case 'amministratore':
                 return self::AMMINISTRATORE;
                 break;
-            case 'Direttore':
+            case 'direttore':
                 return self::DIRETTORE;
                 break;
-            case 'Publisher':
+            case 'publisher':
                 return self::PUBLISHER;
                 break;
-            case 'Editore':
+            case 'editore':
                 return self::EDITORE;
                 break;
-            case 'All';
+            case 'all';
                 self::ALL;
                 break;
 
@@ -112,10 +126,14 @@ class SessionHelper {
     }
 
     /**
-     * @param int $level
-     * @return string
+     * Return the string associated to the value in $level.
+     *
+     * @param int $level The value that represent a level. Use the internal
+     *        const constants.
+     * @return string The string associated to the $level.
+     * @throws \InvalidArgumentException
      */
-    public function ruoloToString($level = self::ALL)
+    public function roleToString($level = self::ALL)
     {
         switch ($level) {
             case self::AMMINISTRATORE:
@@ -140,7 +158,7 @@ class SessionHelper {
     }
 
     /**
-     *
+     * Destroy the user session.
      */
     public function destroySession()
     {
