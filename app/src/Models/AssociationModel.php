@@ -13,7 +13,9 @@ use \App\Helpers\ErrorHelper;
 class AssociationModel extends Model
 {
     /**
-     * @return array
+     * Get all the associations.
+     *
+     * @return array The associations.
      */
     public function getAssociations(): array
     {
@@ -33,8 +35,10 @@ class AssociationModel extends Model
     }
 
     /**
-     * @param $associationID
-     * @return array
+     * Get the association identified by $associationID.
+     *
+     * @param int $associationID A valid association identifier.
+     * @return array The association with its information.
      * @throws \PDOException
      */
     public function getAssociation($associationID): array
@@ -57,8 +61,10 @@ class AssociationModel extends Model
     }
 
     /**
-     * @param $assName
-     * @return string
+     * Return an association ID given a valid association name $assName.
+     *
+     * @param string $assName A valid association name.
+     * @return string The associated association ID as string.
      * @throws \PDOException
      */
     public function getAssociationIdByName($assName): string
@@ -82,8 +88,10 @@ class AssociationModel extends Model
     }
 
     /**
-     * @param $userID
-     * @return array
+     * Return an array of the associations associated to the user $userID.
+     *
+     * @param int $userID The user unique identifier.
+     * @return array The array of the associations.
      * @throws \PDOException
      */
     public function getUserAssociations($userID): array
@@ -107,8 +115,10 @@ class AssociationModel extends Model
     }
 
     /**
-     * @param $data
-     * @return bool
+     * Create a new entry for the association.
+     *
+     * @param array $data The array with the required fields to create a new association.
+     * @return bool TRUE if the association has been created, FALSE otherwise.
      */
     public function createAssociation($data): bool
     {
@@ -178,9 +188,12 @@ class AssociationModel extends Model
     }
 
     /**
-     * @param $associationID
-     * @param $data
-     * @return bool
+     * Update all the fields in the association identified by $associationID with the fields in
+     * $data.
+     *
+     * @param int $associationID A valid association identifier.
+     * @param array $data The array with the required fields to update the association.
+     * @return bool TRUE if the association has been updated, FALSE otherwise.
      */
     public function updateAssociation($associationID, $data): bool
     {
@@ -247,8 +260,10 @@ class AssociationModel extends Model
     }
 
     /**
-     * @param $associationID
-     * @return bool
+     * Delete an association identified by $associationID.
+     *
+     * @param int $associationID A valid association identifier.
+     * @return bool TRUE if the association has been deleted, FALSE otherwise.
      * @throws \PDOException
      */
     public function deleteAssociation($associationID): bool
@@ -289,7 +304,10 @@ class AssociationModel extends Model
     }
 
     /**
-     * @return int
+     * Get the identifier of the last inserted association, that is, the larger
+     * identifier.
+     *
+     * @return int The identifier of the last inserted association.
      * @throws \PDOException
      */
     public function getLastAssociationID(): int
@@ -311,12 +329,16 @@ class AssociationModel extends Model
     }
 
     /**
-     * @param $associationID
-     * @param $membro
-     * @return bool
+     * Create an association between an association identified by
+     * $associationID and a user identified by $memberID.
+     *
+     * @param int $associationID A valid association identifier.
+     * @param int $memberID A valid user identifier.
+     * @return bool TRUE if the association and user are been associated, FALSE
+     *         otherwise.
      * @throws \PDOException
      */
-    private function addBelong($associationID, $membro): bool
+    private function addBelong($associationID, $memberID): bool
     {
         $sth = $this->db->prepare('
             INSERT INTO Appartiene (
@@ -325,7 +347,7 @@ class AssociationModel extends Model
                 :idUtente, :idAssociazione
             )
         ');
-        $sth->bindParam(':idUtente', $membro, \PDO::PARAM_INT);
+        $sth->bindParam(':idUtente', $memberID, \PDO::PARAM_INT);
         $sth->bindParam(':idAssociazione', $associationID, \PDO::PARAM_INT);
 
         try {
@@ -338,8 +360,12 @@ class AssociationModel extends Model
     }
 
     /**
-     * @param $associationID
-     * @return array
+     * Get all the members associated by an association identified by
+     * $associationID.
+     *
+     * @param int $associationID A valid association identifier.
+     * @return array An array of user identifier and them association
+     *         identifier.
      * @throws \PDOException
      */
     public function getBelongsByAssociation($associationID): array
@@ -361,8 +387,11 @@ class AssociationModel extends Model
     }
 
     /**
-     * @param $associationID
-     * @return bool
+     * Remove the user(s) associated to the association identified by
+     * $associationID.
+     *
+     * @param int $associationID A valid association identifier.
+     * @return bool TRUE if the associations have been delete, FALSE otherwise.
      * @throws \PDOException
      */
     private function deleteOldBelongs($associationID): bool
@@ -384,9 +413,13 @@ class AssociationModel extends Model
     }
 
     /**
-     * @param $associationID
-     * @param $members
-     * @return bool
+     * Create associations between the users in $members (that stores
+     * identifiers) and the association identified by $associationID.
+     *
+     * @param int $associationID A valid association ID.
+     * @param array $members An array of member identifiers.
+     * @return bool TRUE if the associations have been created, FALSE
+     *         otherwise.
      * @throws \PDOException
      */
     private function createBelongs($associationID, $members): bool
@@ -417,8 +450,12 @@ class AssociationModel extends Model
     }
 
     /**
-     * @param $associationID
-     * @return bool
+     * Delete all the associations by users and the association identified by
+     * $associationID.
+     *
+     * @param int $associationID A valid association identifier.
+     * @return bool TRUE if the associations have been deleted, FALSE
+     *         otherwise.
      * @throws \PDOException
      */
     private function deleteFromBelongs($associationID): bool
@@ -445,8 +482,11 @@ class AssociationModel extends Model
     }
 
     /**
-     * @param $associations
-     * @return array
+     * Return an array of associations with, for every one, a list of the
+     * associated users separated by comma.
+     *
+     * @param array $associations An array of associations and users.
+     * @return array An array with associations and their list of users.
      */
     private function mergeAssociations($associations): array
     {
@@ -456,7 +496,7 @@ class AssociationModel extends Model
 
         $associationsWithMergedNames = [];
         $old = $associations[0];
-        $assCount = count($associations);
+        $assCount = \count($associations);
 
         /** @noinspection ForeachInvariantsInspection */
         for ($i = 0, $j = 0; $i < $assCount; $i++, $j++) {
