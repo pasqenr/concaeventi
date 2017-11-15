@@ -2,7 +2,6 @@
 
 namespace App\Controllers;
 
-use Psr\Http\Message\ResponseInterface;
 use Slim\Container;
 use \App\Helpers\SessionHelper;
 
@@ -10,13 +9,10 @@ use \App\Helpers\SessionHelper;
  * Class Controller
  * @package App\Controllers
  *
- * @property
+ * @property \Slim\Container container
  */
 class Controller
 {
-    /**
-     * @var Container
-     */
     private $container;
 
     protected $user;
@@ -24,6 +20,7 @@ class Controller
 
     /**
      * @param Container $container
+     * @throws \InvalidArgumentException
      */
     public function __construct(Container $container)
     {
@@ -33,15 +30,16 @@ class Controller
     }
 
     /**
-     * @param ResponseInterface $response
+     * @param $response
      * @param string $template
      * @param array $data
      */
     public function render(
-        ResponseInterface $response,
+        $response,
         $template,
         array $data = []
-    ) {
+    ): void {
+        /** @noinspection PhpUndefinedFieldInspection */
         $this->container->view->render($response, $template, $data);
     }
 
