@@ -13,7 +13,9 @@ use \App\Helpers\ErrorHelper;
 class UserModel extends Model
 {
     /**
-     * @return array
+     * Return all the users.
+     *
+     * @return array The users.
      */
     public function getAllMembers(): array
     {
@@ -26,8 +28,10 @@ class UserModel extends Model
     }
 
     /**
-     * @param $email
-     * @return mixed
+     * Return the user with the (unique) email $email.
+     *
+     * @param $email string The user's email.
+     * @return mixed The user with the email $email.
      * @throws \PDOException
      */
     public function getUserByEmail($email)
