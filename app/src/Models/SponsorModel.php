@@ -13,7 +13,9 @@ use \App\Helpers\ErrorHelper;
 class SponsorModel extends Model
 {
     /**
-     * @return array
+     * Return all sponsor.
+     *
+     * @return array All the sponsor.
      */
     public function getSponsors(): array
     {
@@ -26,8 +28,10 @@ class SponsorModel extends Model
     }
 
     /**
-     * @param $sponsorID
-     * @return array
+     * Return the sponsor identified by $sponsorID.
+     *
+     * @param $sponsorID int A valid sponsor identifier.
+     * @return array The sponsor identified by $sponsorID.
      */
     public function getSponsor($sponsorID): array
     {
@@ -43,8 +47,10 @@ class SponsorModel extends Model
     }
 
     /**
-     * @param $data
-     * @return bool
+     * Create a new sponsor using $data as values.
+     *
+     * @param $data array The values to insert in the new sponsor.
+     * @return bool TRUE if the sponsor is created, FALSE otherwise.
      */
     public function createSponsor($data): bool
     {
@@ -74,9 +80,12 @@ class SponsorModel extends Model
     }
 
     /**
-     * @param $sponsorID
-     * @param $data
-     * @return bool
+     * Update an already existent sponsor identified by $sponsorID with the
+     * values in $data.
+     *
+     * @param $sponsorID int The sponsor identifier.
+     * @param $data array The new values.
+     * @return bool TRUE if the funding was updated, FALSE otherwise.
      */
     public function updateSponsor($sponsorID, $data): bool
     {
@@ -105,8 +114,10 @@ class SponsorModel extends Model
     }
 
     /**
-     * @param $sponsorID
-     * @return bool
+     * Delete the event identified by $sponsorID.
+     *
+     * @param $sponsorID int The sponsor identifier.
+     * @return bool TRUE if the funding was deleted, FALSE otherwise.
      */
     public function deleteSponsor($sponsorID): bool
     {
