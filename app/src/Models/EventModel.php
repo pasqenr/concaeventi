@@ -95,7 +95,9 @@ class EventModel extends Model
     }
 
     /**
-     * @return array
+     * Get all the events that are available and approved, even before the current time-date.
+     *
+     * @return array The events.
      * @throws \PDOException
      */
     public function getEventsHistory(): array
@@ -181,7 +183,10 @@ class EventModel extends Model
     }
 
     /**
-     * @return int
+     * Return the identifier of the last event inserted, that is, the larger
+     * identifier.
+     *
+     * @return int The identifier of the last event inserted.
      * @throws \PDOException
      */
     public function getLastEventID(): int
@@ -203,9 +208,11 @@ class EventModel extends Model
     }
 
     /**
-     * @param $userID
-     * @param $data
-     * @return bool
+     * Create a new event created by the user with $userID and with the $data array.
+     *
+     * @param int $userID The unique user identifier that created the event.
+     * @param array $data The event fields.
+     * @return bool TRUE if the events was created, FALSE if not. Errors are set internally.
      */
     public function createEvent($userID, $data): bool
     {
@@ -286,8 +293,10 @@ class EventModel extends Model
     }
 
     /**
-     * @param $update
-     * @return bool
+     * Edit an event identified by $update['id'] and the data in $update.
+     *
+     * @param array $update The array with the changed fields.
+     * @return bool TRUE if the event was updated, FALSE otherwise.
      */
     public function updateEvent($update): bool
     {
@@ -335,7 +344,7 @@ class EventModel extends Model
         }
 
         try {
-            $this->deleteOldProposes($eventID);
+            $this->deleteFromProposes($eventID);
         } catch (\PDOException $e) {
             $this->errorHelper->setErrorMessage('PDOException, check errorInfo.',
                 'Impossibile modificare le precedenti associazioni collegate all\'evento.');
@@ -362,7 +371,9 @@ class EventModel extends Model
     }
 
     /**
-     * @param $eventID
+     * Delete the event identified by $eventID.
+     *
+     * @param int $eventID The unique event identifier.
      * @return bool
      */
     public function deleteEvent($eventID): bool
@@ -405,9 +416,12 @@ class EventModel extends Model
     }
 
     /**
-     * @param $eventID
-     * @param $data
-     * @return bool
+     * Update an event page data, identified by $eventID an using the data
+     * in $data.
+     *
+     * @param int $eventID A valid event identifier.
+     * @param array $data New values for the event page.
+     * @return bool TRUE if the page have been changed, FALSE otherwise.
      */
     public function updatePage($eventID, $data): bool
     {
@@ -435,7 +449,10 @@ class EventModel extends Model
     }
 
     /**
-     * @return array
+     * Return the all the events with the relative funding in the column
+     * 'finanziamento'.
+     *
+     * @return array The events with them funding.
      */
     public function getEventsWithFunding(): array
     {
@@ -476,7 +493,7 @@ class EventModel extends Model
 
         $eventsWithAssociations = [];
         $old = $events[0];
-        $eventsCount = count($events);
+        $eventsCount = \count($events);
 
         /** @noinspection ForeachInvariantsInspection */
         for ($i = 0, $j = 0; $i < $eventsCount; $i++, $j++) {
@@ -499,9 +516,12 @@ class EventModel extends Model
     }
 
     /**
-     * @param $eventID
-     * @param $associationID
-     * @return bool
+     * Add a propose for the event identified by $eventID by the association
+     * identified by $associationID.
+     *
+     * @param int $eventID A valid event identifier.
+     * @param int $associationID A valid association identifier.
+     * @return bool TRUE if the propose have been added, FALSE otherwise.
      * @throws \PDOException
      */
     private function addPropose($eventID, $associationID): bool
@@ -526,6 +546,13 @@ class EventModel extends Model
         return true;
     }
 
+    /**
+     * Delete all the proposes to the event identified by $eventID.
+     *
+     * @param int $eventID A valid event identifier.
+     * @return bool TRUE if the proposes have been deleted, FALSE otherwise.
+     * @throws \PDOException
+     */
     private function deleteFromProposes($eventID): bool
     {
 
@@ -545,52 +572,36 @@ class EventModel extends Model
         return true;
     }
 
-    private function deleteOldProposes($eventID): bool
-    {
-        $sth = $this->db->prepare('
-            DELETE
-            FROM Proporre
-            WHERE idEvento = :idEvento
-        ');
-        $sth->bindParam(':idEvento', $eventID, \PDO::PARAM_INT);
-
-        try {
-            $sth->execute();
-        } catch (\PDOException $e) {
-            throw $e;
-        }
-
-        return true;
-    }
-
+    /**
+     * Add a propose to the event identified by $eventID for every
+     * association identifier in $event.
+     *
+     * @param int $eventID A valid event identifier.
+     * @param array $event The event with the column 'associazioni' that
+     *        contains a list of associations ids.
+     * @return bool TRUE if the proposes have been created, FALSE otherwise.
+     * @throws \PDOException
+     */
     private function createProposes($eventID, $event): bool
     {
         $associationsIds = $event['associazioni'];
 
         /** @var $associationsIds int[] */
         foreach ($associationsIds as $associationsID) {
-            $sth = $this->db->prepare('
-                INSERT INTO Proporre (
-                    idEvento, idAssociazione
-                )
-                VALUES (
-                    :idEvento, :idAssociazione
-                )
-            ');
-            $sth->bindParam(':idEvento', $eventID, \PDO::PARAM_INT);
-            $sth->bindParam(':idAssociazione', $associationsID, \PDO::PARAM_INT);
-
-
-            try {
-                $sth->execute();
-            } catch (\PDOException $e) {
-                throw $e;
-            }
+            $this->addPropose($eventID, $associationsID);
         }
 
         return true;
     }
 
+    /**
+     * Return an array of events with each of them that contains a sub-array
+     * in the column 'finanziamento' with the funding data.
+     *
+     * @param array $fundings Repeated events with a different funding for
+     *        each row.
+     * @return array A list of events with funding information as sub-list.
+     */
     private function moveFundingInEvents($fundings): array
     {
         if ($fundings === []) {
@@ -598,7 +609,7 @@ class EventModel extends Model
         }
 
         $eventsWithFundings = [];
-        $fundingsCount = count($fundings);
+        $fundingsCount = \count($fundings);
 
         for ($i = $j = $k = 0; $i < $fundingsCount; $i += $j, $j = $i, $k = 0) {
             $eventsWithFundings[$i]['idEvento'] = $fundings[$i]['idEvento'];
