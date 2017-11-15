@@ -13,9 +13,13 @@ use \App\Helpers\ErrorHelper;
 class FundingModel extends Model
 {
     /**
-     * @param $eventID
-     * @param $sponsorID
-     * @return array
+     * Return the all the funding of the event identified by $eventID
+     * sponsored by the sponsor identified by $sponsorID.
+     *
+     * @param $eventID int A valid event identifier.
+     * @param $sponsorID int A valid sponsor identifier.
+     * @return array The funding to the event $eventID by the sponsor
+     *         $sponsorID.
      * @throws \PDOException
      */
     public function getFunding($eventID, $sponsorID): array
@@ -43,8 +47,10 @@ class FundingModel extends Model
     }
 
     /**
-     * @param $data
-     * @return bool
+     * Create a new funding using $data as values.
+     *
+     * @param $data array The values to insert in the new funding.
+     * @return bool TRUE if the funding is created, FALSE otherwise.
      */
     public function createFunding($data): bool
     {
@@ -87,10 +93,13 @@ class FundingModel extends Model
     }
 
     /**
-     * @param $eventID
-     * @param $sponsorID
-     * @param $data
-     * @return bool
+     * Update an already existent funding identified by $eventID and $sponsorID
+     * with the values in $data.
+     *
+     * @param $eventID int The event identifier.
+     * @param $sponsorID int The sponsor identifier.
+     * @param $data array The new values.
+     * @return bool TRUE if the funding was updated, FALSE otherwise.
      */
     public function updateFunding($eventID, $sponsorID, $data): bool
     {
@@ -121,9 +130,11 @@ class FundingModel extends Model
     }
 
     /**
-     * @param $eventID
-     * @param $sponsorID
-     * @return bool
+     * Delete the event identified by $eventID and $sponsorID.
+     *
+     * @param $eventID int The event identifier.
+     * @param $sponsorID int The sponsor identifier.
+     * @return bool TRUE if the funding was deleted, FALSE otherwise.
      */
     public function deleteFunding($eventID, $sponsorID): bool
     {
