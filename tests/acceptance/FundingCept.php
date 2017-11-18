@@ -9,16 +9,25 @@ $I->submitForm('form', array(
     'password' => 'qwerty'
 ));
 
-$today = new DateTime();
-$initDate = $today->format('Y-m-d H:i:s');
-$finishDate = $today->add(new DateInterval('P1D'))->format('Y-m-d H:i:s');
+$initDateTime = new DateTime('now');
+$initDateTime->add(new DateInterval('P1D'));
+$finishDateTime = new DateTime('now');
+$finishDateTime->add(new DateInterval('P2D'));
 
 $I->amOnPage('/events/create/');
 $I->submitForm('form', array(
     'titolo' => 'Evento_Funding',
     'descrizione' => 'Evento descrizione.',
-    'istanteInizio' => $initDate,
-    'istanteFine' => $finishDate,
+    'giornoInizio' => $initDateTime->format('d'),
+    'meseInizio' => $initDateTime->format('m'),
+    'annoInizio' => $initDateTime->format('Y'),
+    'oraInizio' => $initDateTime->format('H'),
+    'minutoInizio' => $initDateTime->format('i'),
+    'giornoFine' => $finishDateTime->format('d'),
+    'meseFine' => $finishDateTime->format('m'),
+    'annoFine' => $finishDateTime->format('Y'),
+    'oraFine' => $finishDateTime->format('H'),
+    'minutoFine' => $finishDateTime->format('i'),
     'associazioni[]' => '1',
     'revisionato' => 'on'
 ));
@@ -53,10 +62,10 @@ $I->fillField('importo', '15.00');
 $I->click('Finanzia', 'form');
 
 $I->seeInCurrentUrl('/funding/');
-$I->seeInSource('"&#x2F;funding&#x2F;edit&#x2F;4,1"');
-$I->seeInSource('"&#x2F;funding&#x2F;delete&#x2F;4,1"');
+$I->seeInSource('"&#x2F;funding&#x2F;edit&#x2F;2,1"');
+$I->seeInSource('"&#x2F;funding&#x2F;delete&#x2F;2,1"');
 $I->dontSeeInSource('"&#x2F;funding&#x2F;edit&#x2F;,"');
-$I->dontSeeInSource('"&#x2F;funding&#x2F;edit&#x2F;4,"');
+$I->dontSeeInSource('"&#x2F;funding&#x2F;edit&#x2F;2,"');
 $I->dontSeeInSource('"&#x2F;funding&#x2F;edit&#x2F;,1"');
 
 /* Create funding: wrong import length */
@@ -81,7 +90,7 @@ $I->seeInSource('Errore');
 
 /* Create funding correct: import with comma */
 
-$I->amOnPage('/funding/delete/4,1');
+$I->amOnPage('/funding/delete/2,1');
 $I->seeInSource('Evento_Funding');
 $I->seeInSource('Sponsor_Funding');
 $I->click('Elimina');
@@ -103,7 +112,7 @@ $I->dontSeeInSource('Errore');
 
 /* Create funding correct: only integer part */
 
-$I->amOnPage('/funding/delete/4,1');
+$I->amOnPage('/funding/delete/2,1');
 $I->seeInSource('Evento_Funding');
 $I->seeInSource('Sponsor_Funding');
 $I->click('Elimina');
@@ -125,7 +134,7 @@ $I->dontSeeInSource('Errore');
 
 /* Create funding correct: only one decimal */
 
-$I->amOnPage('/funding/delete/4,1');
+$I->amOnPage('/funding/delete/2,1');
 $I->seeInSource('Evento_Funding');
 $I->seeInSource('Sponsor_Funding');
 $I->click('Elimina');
@@ -152,7 +161,7 @@ $I->dontSeeInSource('Errore');
 
 /* Edit funding: correct */
 
-$I->amOnPage('/funding/edit/4,1');
+$I->amOnPage('/funding/edit/2,1');
 $I->fillField('importo', '20.0');
 $I->click('Modifica', 'form');
 
@@ -160,7 +169,7 @@ $I->dontSeeInSource('Errore');
 
 /* Edit funding: correct import with comma */
 
-$I->amOnPage('/funding/edit/4,1');
+$I->amOnPage('/funding/edit/2,1');
 $I->fillField('importo', '25,0');
 $I->click('Modifica', 'form');
 

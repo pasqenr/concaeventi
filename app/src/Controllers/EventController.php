@@ -7,6 +7,7 @@ use \App\Helpers\SessionHelper;
 use \App\Helpers\ErrorHelper;
 use \App\Models\EventModel;
 use \App\Models\AssociationModel;
+use DateTime;
 use http\Exception\InvalidArgumentException;
 use Slim\Http\Response;
 use Slim\Http\Request;
@@ -471,7 +472,7 @@ class EventController extends Controller
     {
         $associationNames = explode(', ', $ass);
         $associations = [];
-        $assCount = count($associationNames);
+        $assCount = \count($associationNames);
 
         /** @noinspection ForeachInvariantsInspection */
         for ($i = 0; $i < $assCount; $i++) {
@@ -510,7 +511,7 @@ class EventController extends Controller
         $associationNames = explode(', ', $event['nomeAssociazione']);
         $associationLogos = explode(', ', $event['logo']);
         $associations = [];
-        $assCount = count($associationNames);
+        $assCount = \count($associationNames);
 
         /** @noinspection ForeachInvariantsInspection */
         for ($i = 0; $i < $assCount; $i++) {
@@ -604,38 +605,42 @@ class EventController extends Controller
     {
         $titolo = $data['titolo'];
         $descrizione = $data['descrizione'];
-        $istanteInizio = $data['istanteInizio'];
-        $istanteFine = $data['istanteFine'];
         $associazioni = $data['associazioni'];
         $idAssPrimaria = $data['assPrimaria'];
         $approvato = $data['revisionato'] ?? null;
 
-        $date_pattern = '/^\d{4}-\d{2}-\d{2} (\d{2}(:\d{2}(:\d{2})?)?)?$/';
+        $this->adjustDateTimeFormat($data);
+        $istanteInizio = $data['istanteInizio'];
+        $istanteFine = $data['istanteFine'];
 
         if ($titolo === '' || $descrizione === '' || $istanteInizio === '' || $istanteFine === '' ||
             $associazioni === '' || $idAssPrimaria === '') {
-            $this->errorHelper->setErrorMessage('checkEventData(): Empty field.',
+            $this->errorHelper->setErrorMessage('Empty field.',
                 'Un campo obbligatorio non è stato compilato.');
 
             return false;
         }
 
-        if (!preg_match($date_pattern, $istanteInizio) || !preg_match($date_pattern, $istanteFine)) {
-            $this->errorHelper->setErrorMessage('checkEventData(): Wrong date match.',
+        if (!$this->isValidDate($istanteInizio) || !$this->isValidDate($istanteFine)) {
+            $this->errorHelper->setErrorMessage('Wrong date match.',
                 'Formato data errato.');
 
             return false;
         }
 
-        $istanteInizio = $this->addTimeZeros($istanteInizio);
+        /*$istanteInizio = $this->addTimeZeros($istanteInizio);
         $istanteFine = $this->addTimeZeros($istanteFine);
 
-        $initDate = new \DateTime($istanteInizio);
-        $finishDate = new \DateTime($istanteFine);
+        // Fix also the the values in $data
+        $data['istanteInizio'] = $istanteInizio;
+        $data['istanteFine'] = $istanteFine;*/
+
+        $initDate = new \DateTimeImmutable($istanteInizio);
+        $finishDate = new \DateTimeImmutable($istanteFine);
 
         if ($initDate > $finishDate) {
             $this->errorHelper->setErrorMessage(
-                'checkEventData(): Strarting date greater than finish date.',
+                'Strarting date greater than finish date.',
                 'Orario d\'inizio viene dopo quello di fine.');
 
             return false;
@@ -645,7 +650,7 @@ class EventController extends Controller
             $data['revisionato'] = $this->changeApproval($approvato);
         } catch (AuthException $e) {
             $this->errorHelper->setErrorMessage(
-                'checkEventData(): Can\'t change approvation because of user authorization.',
+                'Can\'t change approvation because of user authorization.',
                 'Non disponi dei permessi necessari per cambiare l\'approvazione dell\'evento.'
             );
 
@@ -655,25 +660,6 @@ class EventController extends Controller
         }
 
         return true;
-    }
-
-    /**
-     * Adjust the $datetime format adding leading zeros.
-     *
-     * @param string $datetime A string with the datetime inserted by the user.
-     * @return string A datetime string with the correct format on minutes and seconds.
-     */
-    private function addTimeZeros(&$datetime): string
-    {
-        if (strpos($datetime, ':') === false) {
-            $datetime .= ':00';
-        }
-
-        if (strpos($datetime, ':', 16) === false) {
-            $datetime .= ':00';
-        }
-
-        return $datetime;
     }
 
     /**
@@ -695,5 +681,64 @@ class EventController extends Controller
         }
 
         return $approved;
+    }
+
+    private function isValidDate($date, $format = 'Y-m-d H:i:s'): bool
+    {
+        $d = \DateTimeImmutable::createFromFormat($format, $date);
+
+        return $d && $d->format($format) === $date;
+    }
+
+    /**
+     * Take a reference to $data parameters and modify it adding two new
+     * columns: istanteInizio and istanteFine. The new columns are created
+     * using the data and time parameters given by the user.
+     *
+     * @param $data array A reference to the input data
+     */
+    private function adjustDateTimeFormat(&$data): void
+    {
+        $data['istanteInizio'] = $this->joinDataTimeFormat(
+            $data['giornoInizio'],
+            $data['meseInizio'],
+            $data['annoInizio'],
+            $data['oraInizio'],
+            $data['minutoInizio']
+            );
+
+        $data['istanteFine'] = $this->joinDataTimeFormat(
+            $data['giornoFine'],
+            $data['meseFine'],
+            $data['annoFine'],
+            $data['oraFine'],
+            $data['minutoFine']
+        );
+    }
+
+    /** @noinspection MoreThanThreeArgumentsInspection
+     *
+     * Return a string representation of the date and time in the format
+     * "Y-m-d H:i:s".
+     *
+     * @param $day string The day.
+     * @param $month string The month.
+     * @param $year string The year.
+     * @param $hour string The hour.
+     * @param $minute string The minute.
+     * @return string A string in the format "Y-m-d H:i:s".
+     */
+    private function joinDataTimeFormat($day,
+                                        $month,
+                                        $year,
+                                        $hour,
+                                        $minute): string
+    {
+        return sprintf('%s-%02s-%02s %02s:%02s:00',
+            $year,
+            $month,
+            $day,
+            $hour,
+            $minute);
     }
 }

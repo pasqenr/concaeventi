@@ -42,7 +42,7 @@ $I->amOnPage('/sponsors/');
 $I->seeInSource('Sponsor');
 
 $I->amOnPage('/sponsors/edit/2');
-$I->fillField('nome', 'Sponsor 1');
+$I->fillField('//input[@name="nome"]', 'Sponsor 1');
 $I->click('Modifica', 'form');
 
 $I->seeInCurrentUrl('/sponsors/');
@@ -50,7 +50,7 @@ $I->seeInCurrentUrl('/sponsors/');
 /* Edit sponsor: wrong empty name */
 
 $I->amOnPage('/sponsors/edit/2');
-$I->fillField('nome', '');
+$I->fillField('//input[@name="nome"]', '');
 $I->click('Modifica', 'form');
 
 $I->seeInSource('Errore');
