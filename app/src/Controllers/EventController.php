@@ -7,7 +7,6 @@ use \App\Helpers\SessionHelper;
 use \App\Helpers\ErrorHelper;
 use \App\Models\EventModel;
 use \App\Models\AssociationModel;
-use DateTime;
 use http\Exception\InvalidArgumentException;
 use Slim\Http\Response;
 use Slim\Http\Request;
@@ -27,6 +26,7 @@ class EventController extends Controller
     /**
      * EventController constructor.
      * @param \Slim\Container $container
+     * @throws \InvalidArgumentException
      */
     public function __construct($container)
     {
