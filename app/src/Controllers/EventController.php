@@ -56,7 +56,7 @@ class EventController extends Controller
             return $response->withRedirect($this->router->pathFor('auth-error'));
         }
 
-        $events = $this->getEvents();
+        $events = $this->getEvents($this->user['idUtente']);
 
         /** @noinspection PhpVoidFunctionResultUsedInspection */
         return $this->render($response, 'events/events.twig', [
@@ -396,12 +396,12 @@ class EventController extends Controller
     /**
      * Get all the events that are available before the current timestamp and ordered by timestamp.
      *
-     * @return array
-     * @throws \PDOException
+     * @param $userID int The current user identifier.
+     * @return array The events that belongs
      */
-    private function getEvents(): array
+    private function getEvents($userID): array
     {
-        return $this->eventModel->getEvents();
+        return $this->eventModel->getEvents($userID);
     }
 
     /**

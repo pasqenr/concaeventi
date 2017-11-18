@@ -26,6 +26,7 @@ class FundingController extends Controller
     /**
      * FundingController constructor.
      * @param \Slim\Container $container
+     * @throws \InvalidArgumentException
      */
     public function __construct($container)
     {
@@ -84,7 +85,7 @@ class FundingController extends Controller
             return $response->withRedirect($this->router->pathFor('auth-error'));
         }
 
-        $events = $this->getEvents();
+        $events = $this->getEvents($this->user['idUtente']);
         $sponsors = $this->getSponsors();
 
         /** @noinspection PhpVoidFunctionResultUsedInspection */
@@ -360,12 +361,13 @@ class FundingController extends Controller
     /**
      * Get all the events that are available before the current timestamp and order them by timestamp.
      *
+     * @param $userID int The current user identifier
      * @return array The events.
      * @throws \PDOException
      */
-    private function getEvents(): array
+    private function getEvents($userID): array
     {
-        return $this->eventModel->getEvents();
+        return $this->eventModel->getEvents($userID);
     }
 
     /**

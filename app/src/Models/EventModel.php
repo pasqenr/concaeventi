@@ -15,12 +15,13 @@ class EventModel extends Model
     /**
      * Get all the events that are available before the current timestamp and order them by timestamp.
      *
+     * @param $userID int The current user identifier.
      * @return array The events.
      * @throws \PDOException
      */
-    public function getEvents(): array
+    public function getEvents($userID): array
     {
-        $sth = $this->db->query('
+        $sth = $this->db->prepare('
             SELECT U.idUtente, A.idAssociazione, E.idEvento, E.titolo, E.immagine, E.descrizione, E.istanteCreazione,
                    E.istanteInizio, E.istanteFine, E.pagina, E.revisionato, A2.nomeAssociazione AS nomeAssPrimaria,
                    A.nomeAssociazione, A.logo, U.nome AS nomeUtente, U.cognome AS cognomeUtente, U.email, U.ruolo,
@@ -34,11 +35,22 @@ class EventModel extends Model
             USING (idUtente)
             LEFT JOIN Associazione A2
             ON (E.idAssPrimaria = A2.idAssociazione)
-            WHERE DATEDIFF(E.istanteFine, CURRENT_TIMESTAMP) > 0
-            ORDER BY E.istanteCreazione
+            WHERE E.idEvento = ANY (
+              SELECT Pi.idEvento
+              FROM Proporre Pi
+              WHERE Pi.idAssociazione IN (
+                SELECT APi.idAssociazione
+                FROM Appartiene APi
+                WHERE APi.idUtente = :idUtente
+              )
+            )
+            ORDER BY E.istanteCreazione DESC
+            LIMIT 50
         ');
+        $sth->bindParam(':idUtente', $userID, \PDO::PARAM_INT);
+
         try {
-            $events = $sth->fetchAll();
+            $sth->execute();
         } catch (\PDOException $e) {
             $this->errorHelper->setErrorMessage('getEvents(): PDOException, check errorInfo.',
                 'Recupero eventi: errore nell\'elaborazione dei dati.',
@@ -47,6 +59,7 @@ class EventModel extends Model
             throw $e;
         }
 
+        $events = $sth->fetchAll();
         $events = $this->mergeAssociations($events);
 
         return $events;
