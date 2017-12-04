@@ -40,43 +40,43 @@
         <section class="hero is-primary is-small">
         {% block headerTop %}
             <div class="hero-head">
-                <header class="nav">
+                <header class="navbar">
                     <div class="container">
-                        <div class="nav-left">
-                            <a class="nav-item" href="{{ path_for('home')|e('html_attr') }}">
+                        <div class="navbar-brand">
+                            <a class="navbar-item" href="{{ path_for('home')|e('html_attr') }}">
                                 <i class="fa fa-home"></i>
-                                <span class="nav-item">Home</span>
+                                <span class="navbar-item">Home</span>
                             </a>
                             {% if utente.idUtente is defined %}
-                                <a class="nav-item" href="{{ path_for('panel')|e('html_attr') }}">
+                                <a class="navbar-item" href="{{ path_for('panel')|e('html_attr') }}">
                                     <i class="fa fa-book"></i>
-                                    <span class="nav-item">Pannello</span>
+                                    <span class="navbar-item">Pannello</span>
                                 </a>
                             {% endif %}
-                            <a class="nav-item" href="{{ path_for('history')|e('html_attr') }}">
+                            <a class="navbar-item" href="{{ path_for('history')|e('html_attr') }}">
                                 <i class="fa fa-university"></i>
-                                <span class="nav-item">Storico</span>
+                                <span class="navbar-item">Storico</span>
                             </a>
                         </div>
-                        <div class="nav-right">
+                        <div class="navbar-end">
                             {% if utente.idUtente is defined %}
-                                <a class="nav-item" href="{{ path_for('logout')|e('html_attr') }}">
+                                <a class="navbar-item" href="{{ path_for('logout')|e('html_attr') }}">
                                     <i class="fa fa-sign-out"></i>
-                                    <span class="nav-item">Logout</span>
+                                    <span class="navbar-item">Logout</span>
                                 </a>
                             {% else %}
-                                <a class="nav-item" href="{{ path_for('login')|e('html_attr') }}">
+                                <a class="navbar-item" href="{{ path_for('login')|e('html_attr') }}">
                                     <i class="fa fa-sign-in"></i>
-                                    <span class="nav-item">Login</span>
+                                    <span class="navbar-item">Login</span>
                                 </a>
                             {% endif %}
                         </div>
                     </div>
-                    <span class="nav-toggle">
+                    <!--<span class="nav-toggle">
                         <span></span>
                         <span></span>
                         <span></span>
-                    </span>
+                    </span>-->
                 </header>
             </div>
         {% endblock %}
@@ -94,7 +94,7 @@
         {% block headerBottom %}
             <div class="hero-foot">
                 <div class="container">
-                    <div class="nav-right">
+                    <div class="navbar-end">
                         <span>
                             <p>
                                 {% if utente.idUtente is defined %}
