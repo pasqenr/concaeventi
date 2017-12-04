@@ -15,6 +15,9 @@ function goBack() {
 /* Event listener for page poster selection */
 var inputPoster = document.getElementById('input-locandina');
 var filenamePoster = document.getElementById('locandina-filename');
-inputPoster.addEventListener('change', function () {
-    filenamePoster.textContent = inputPoster.value;
-});
+
+if (inputPoster !== null) {
+    inputPoster.addEventListener('change', function () {
+        filenamePoster.textContent = inputPoster.value;
+    });
+}
