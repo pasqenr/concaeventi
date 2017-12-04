@@ -51,6 +51,7 @@ class EventModel extends Model
 
         try {
             $sth->execute();
+            $events = $sth->fetchAll();
         } catch (\PDOException $e) {
             $this->errorHelper->setErrorMessage('getEvents(): PDOException, check errorInfo.',
                 'Recupero eventi: errore nell\'elaborazione dei dati.',
@@ -59,7 +60,6 @@ class EventModel extends Model
             throw $e;
         }
 
-        $events = $sth->fetchAll();
         $events = $this->mergeAssociations($events);
 
         return $events;
