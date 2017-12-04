@@ -101,6 +101,7 @@ class EventController extends Controller
      * @param Response $response
      * @param $args
      * @return mixed The rendered page.
+     * @throws \PDOException
      * @throws \RuntimeException
      * @throws \InvalidArgumentException
      */
@@ -274,6 +275,7 @@ class EventController extends Controller
      * @param Response $response
      * @param $args
      * @return mixed The rendered page.
+     * @throws \PDOException
      * @throws \RuntimeException
      * @throws \InvalidArgumentException
      */
@@ -410,6 +412,7 @@ class EventController extends Controller
      * @param int $userID The unique user identifier that created the event.
      * @param array $data The event fields.
      * @return bool TRUE if the events was created, FALSE if not. Errors are set internally.
+     * @throws \PDOException
      */
     private function createEvent($userID, $data): bool
     {
@@ -450,6 +453,7 @@ class EventController extends Controller
      *
      * @param array $update The array with the changed fields.
      * @return bool TRUE if the event was updated, FALSE otherwise.
+     * @throws \PDOException
      */
     private function updateEvent($update): bool
     {
@@ -600,6 +604,7 @@ class EventController extends Controller
      *
      * @param $data
      * @return bool TRUE if the tests pass, FALSE otherwise. Error message is also set.
+     * @throws \PDOException
      */
     private function checkEventData(&$data): bool
     {
@@ -628,13 +633,6 @@ class EventController extends Controller
             return false;
         }
 
-        /*$istanteInizio = $this->addTimeZeros($istanteInizio);
-        $istanteFine = $this->addTimeZeros($istanteFine);
-
-        // Fix also the the values in $data
-        $data['istanteInizio'] = $istanteInizio;
-        $data['istanteFine'] = $istanteFine;*/
-
         $initDate = new \DateTimeImmutable($istanteInizio);
         $finishDate = new \DateTimeImmutable($istanteFine);
 
@@ -642,6 +640,14 @@ class EventController extends Controller
             $this->errorHelper->setErrorMessage(
                 'Strarting date greater than finish date.',
                 'Orario d\'inizio viene dopo quello di fine.');
+
+            return false;
+        }
+
+        if (!$this->validSubmittedAssociations($associazioni, $idAssPrimaria)) {
+            $this->errorHelper->setErrorMessage(
+                'Not a valid association for the user.',
+                'L\'associazione non esiste o non è associata all\'utente.');
 
             return false;
         }
@@ -740,5 +746,50 @@ class EventController extends Controller
             $day,
             $hour,
             $minute);
+    }
+
+    /**
+     * @param $associations array The associations selected by the user.
+     * @param $userAssociations array The user associations.
+     * @return bool TRUE if the user has an association of the sent associations.
+     *     FALSE otherwise.
+     */
+    private function almostOneValidUserAssociation(&$associations, &$userAssociations): bool
+    {
+        foreach ($userAssociations as &$ua) {
+            foreach ($associations as &$a) {
+                if ($ua['idAssociazione'] === $a) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * @param $idAssPrimaria string The primary association id sent by the
+     *     user.
+     * @param $userAssociations array The user associations.
+     * @return bool TRUE if $idAssPrimaria is one of the $userAssociations.
+     *     FALSE otherwise.
+     */
+    private function validPrimaryUserAssociation($idAssPrimaria, $userAssociations): bool
+    {
+        foreach ($userAssociations as &$ua) {
+            if ($ua['idAssociazione'] === $idAssPrimaria) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function validSubmittedAssociations(&$associations, $idAssPrimaria)
+    {
+        $userAssociations = $this->associationModel->getUserAssociations($this->user['idUtente']);
+
+        return $this->almostOneValidUserAssociation($associations, $userAssociations) &&
+            $this->validPrimaryUserAssociation($idAssPrimaria, $userAssociations);
     }
 }
