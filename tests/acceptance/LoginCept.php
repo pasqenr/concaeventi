@@ -11,9 +11,9 @@ $I->click('Login', 'form');
 
 $I->dontSeeInSource('Errore');
 $I->seeInCurrentUrl('/');
-$I->see('Logout', '.nav-item');
+$I->see('Logout', '.navbar-item');
 
 $I->click('Logout');
 
 $I->amOnPage('/');
-$I->see('Login', '.nav-item');
+$I->see('Login', '.navbar-item');
