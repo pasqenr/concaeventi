@@ -400,6 +400,7 @@ class EventController extends Controller
      *
      * @param $userID int The current user identifier.
      * @return array The events that belongs
+     * @throws \PDOException
      */
     private function getEvents($userID): array
     {
