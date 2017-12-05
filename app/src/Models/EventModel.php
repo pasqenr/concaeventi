@@ -509,6 +509,58 @@ class EventModel extends Model
     }
 
     /**
+     * Return the events, with merged associations, that contains $query in event title
+     * or in the event description (or both).
+     *
+     * @param $query string The text to search.
+     * @return array The events with $query in title or description.
+     */
+    public function getEventsThatContains($query): array
+    {
+        $query = "%$query%";
+
+        $sth = $this->db->prepare('
+            SELECT U.idUtente, A.idAssociazione, E.idEvento, E.titolo, E.immagine, E.descrizione, E.istanteCreazione,
+                   E.istanteInizio, E.istanteFine, E.pagina, E.revisionato, A2.nomeAssociazione AS nomeAssPrimaria,
+                   A.nomeAssociazione, A.logo, U.nome AS nomeUtente, U.cognome AS cognomeUtente, U.email, U.ruolo,
+                   A2.logo AS logoPrimario
+            FROM Evento E
+            LEFT JOIN Proporre P
+            USING (idEvento)
+            LEFT JOIN Associazione A
+            USING (idAssociazione)
+            LEFT JOIN Utente U
+            USING (idUtente)
+            LEFT JOIN Associazione A2
+            ON (E.idAssPrimaria = A2.idAssociazione)
+            WHERE E.revisionato = TRUE
+            AND (E.titolo LIKE ?
+              OR E.descrizione LIKE ?
+            )
+            ORDER BY E.istanteInizio DESC
+        ');
+
+        $sth->bindParam(1, $query, \PDO::PARAM_STR);
+        $sth->bindParam(2, $query, \PDO::PARAM_STR);
+        try {
+            $sth->execute();
+            $events = $sth->fetchAll();
+        } catch (\PDOException $e) {
+            $this->errorHelper->setErrorMessage('getEventsThatContains(): PDOException, 
+                check errorInfo.',
+                'Recupero eventi: errore nell\'elaborazione dei dati.',
+                $this->db->errorInfo());
+
+            throw $e;
+        }
+
+        $events = $this->mergeAssociations($events);
+
+
+        return $events;
+    }
+
+    /**
      * Merge the Associtations on the rows with the same idEvento. The separator used is comma and space (', ').
      * If there aren't events the function returns an empty array.
      *

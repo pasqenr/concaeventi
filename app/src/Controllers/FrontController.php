@@ -78,6 +78,33 @@ class FrontController extends Controller
     }
 
     /**
+     * Perform a search for events that contains the string searched in title
+     * or description.
+     *
+     * @param Request $request
+     * @param Response $response
+     * @param $args
+     * @throws \RuntimeException
+     */
+    public function doSearchHistory(/** @noinspection PhpUnusedParameterInspection */
+        Request $request, Response $response, $args)
+    {
+        $parsedBody = $request->getParsedBody();
+        $searchQuery = $parsedBody['search_query'];
+
+        $events = $this->getEventsThatContains($searchQuery);
+        $eventsNumber = \count($events);
+
+        /** @noinspection PhpVoidFunctionResultUsedInspection */
+        return $this->render($response, 'front/history.twig', [
+            'utente' => $this->user,
+            'eventi' => $events,
+            'numero_eventi' => $eventsNumber,
+            'pagina_attuale' => 1
+        ]);
+    }
+
+    /**
      * Show the event page identified by $args['id'].
      *
      * @param Request $request
@@ -186,5 +213,10 @@ class FrontController extends Controller
         }
 
         return $associations;
+    }
+
+    private function getEventsThatContains($query)
+    {
+        return $this->eventModel->getEventsThatContains($query);
     }
 }

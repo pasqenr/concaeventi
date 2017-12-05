@@ -1,9 +1,32 @@
 {% extends "layouts/main.twig" %}
 
-{% block bodyId %}home{% endblock %}
-{% block metaTitle %}Home{% endblock %}
+{% block bodyId %}storico{% endblock %}
+{% block metaTitle %}Storico eventi{% endblock %}
 
 {% block content %}
+    <div class="column">&nbsp;</div>
+    <div class="columns">
+        <div class="column"></div>
+        <div class="column is-half">
+            <form action="{{ path_for('history')|e('html_attr') }}" method="post">
+                <div class="field has-addons">
+                    <div class="control is-expanded">
+                        <input class="input" type="text" name="search_query" placeholder="Trova un evento">
+                    </div>
+                    <div class="control">
+                        <button class="button is-info">
+                            Cerca
+                        </button>
+                    </div>
+                </div>
+
+                <input type="hidden" name="_method" value="POST">
+                <input type="hidden" name="{{csrf.keys.name}}" value="{{csrf.name}}">
+                <input type="hidden" name="{{csrf.keys.value}}" value="{{csrf.value}}">
+            </form>
+        </div>
+        <div class="column"></div>
+    </div>
     <section class="section">
         {% if eventi|length > 0 %}
             {% for evento in eventi %}

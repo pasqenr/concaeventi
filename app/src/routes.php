@@ -71,6 +71,10 @@ $app->get('/funding/', 'App\Controllers\FundingController:showAll')
 $app->get('/history/[{page_num}]', 'App\Controllers\FrontController:history')
     ->setName('history');
 
+$app->post('/history/', 'App\Controllers\FrontController:doSearchHistory')
+    ->setName('historyDoSearch')
+    ->add($container->get('csrf'));
+
 /* Associations */
 
 $app->get('/associations/create/', 'App\Controllers\AssociationController:create')
