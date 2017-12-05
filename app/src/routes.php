@@ -2,6 +2,8 @@
 
 use \App\Helpers\SessionHelper;
 
+/** @var Slim\Container $container */
+
 $app->get('/', 'App\Controllers\FrontController:home')
     ->setName('home');
 
@@ -64,7 +66,9 @@ $app->get('/sponsors/', 'App\Controllers\SponsorController:showAll')
 $app->get('/funding/', 'App\Controllers\FundingController:showAll')
     ->setName('fundings');
 
-$app->get('/history/', 'App\Controllers\FrontController:history')
+/* History */
+
+$app->get('/history/[{page_num}]', 'App\Controllers\FrontController:history')
     ->setName('history');
 
 /* Associations */

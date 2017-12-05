@@ -59,12 +59,21 @@ class FrontController extends Controller
     public function history(/** @noinspection PhpUnusedParameterInspection */
         Request $request, Response $response, $args)
     {
-        $events = $this->getEventsHistory();
+        $pageNum = 1;
+
+        if (isset($args['page_num'])) {
+            $pageNum = (int)$args['page_num'];
+        }
+
+        $events = $this->getEventsHistoryPaginated($pageNum);
+        $eventsNumber = \count($this->getEventsHistory());
 
         /** @noinspection PhpVoidFunctionResultUsedInspection */
         return $this->render($response, 'front/history.twig', [
             'utente' => $this->user,
-            'eventi' => $events
+            'eventi' => $events,
+            'numero_eventi' => $eventsNumber,
+            'pagina_attuale' => $pageNum
         ]);
     }
 
@@ -119,6 +128,19 @@ class FrontController extends Controller
     private function getReviewedEvents(): array
     {
         return $this->eventModel->getReviewedEvents();
+    }
+
+    /**
+     * Get all the events that are available and approved, even before the current time-date.
+     * The events are only max PAGINATION_NUMBER per $pageNum.
+     *
+     * @param $pageNum int The page number.
+     * @return array The events.
+     * @throws \PDOException
+     */
+    private function getEventsHistoryPaginated($pageNum): array
+    {
+        return $this->eventModel->getEventsHistoryPaginated($pageNum);
     }
 
     /**

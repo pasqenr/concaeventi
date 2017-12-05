@@ -12,6 +12,8 @@ use \App\Helpers\ErrorHelper;
  */
 class EventModel extends Model
 {
+    private $PAGINATION_NUMBER = 10;
+
     /**
      * Get all the events that are available before the current timestamp and order them by timestamp.
      *
@@ -132,7 +134,6 @@ class EventModel extends Model
             WHERE E.revisionato = TRUE
             ORDER BY E.istanteInizio DESC
         ');
-
         try {
             $events = $sth->fetchAll();
         } catch (\PDOException $e) {
@@ -144,6 +145,23 @@ class EventModel extends Model
         }
 
         $events = $this->mergeAssociations($events);
+
+
+        return $events;
+    }
+
+    /**
+     * Get all the events that are available and approved, even before the current time-date.
+     * The events are only max PAGINATION_NUMBER per $pageNum.
+     *
+     * @param $pageNum int The page number.
+     * @return array The events.
+     * @throws \PDOException
+     */
+    public function getEventsHistoryPaginated($pageNum): array
+    {
+        $events = $this->getEventsHistory();
+        $events = $this->paginateEvents($events, $pageNum);
 
         return $events;
     }
@@ -645,5 +663,13 @@ class EventModel extends Model
         }
 
         return $eventsWithFundings;
+    }
+
+    private function paginateEvents(&$events, $pageNum)
+    {
+        $offset = ($pageNum - 1) * $this->PAGINATION_NUMBER;
+        $length = $this->PAGINATION_NUMBER;
+
+        return \array_slice($events, $offset, $length, true);
     }
 }

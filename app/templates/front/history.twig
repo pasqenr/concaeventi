@@ -62,6 +62,35 @@
                     </article>
                 </div>
             {% endfor %}
+
+            <div class="columns">
+                <div class="column"></div>
+                <nav class="pagination column is-half is-centered" role="navigation" aria-label="pagination">
+                    <ul class="pagination-list">
+                        {% set page_cnt = 0 %}
+                        {% for page_num in 0..numero_eventi %}
+                            {% if (page_num % 10) == 0 or page_num == 0 %}
+                                {% set page_cnt = page_cnt + 1 %}
+                                <li>
+                                {% if page_cnt == pagina_attuale %}
+                                    <a class="pagination-link is-current" aria-label="Page {{ page_cnt }}"
+                                       href="{{ path_for('history')|e('html_attr') }}{{ page_cnt }}">
+                                        {{ page_cnt }}
+                                    </a>
+                                {% else %}
+                                    <a class="pagination-link" aria-label="Goto page {{ page_cnt }}"
+                                        href="{{ path_for('history')|e('html_attr') }}{{ page_cnt }}">
+                                        {{ page_cnt }}
+                                    </a>
+                                {% endif %}
+                                </li>
+                            {% endif %}
+
+                        {% endfor %}
+                    </ul>
+                </nav>
+                <div class="column"></div>
+            </div>
         {% else %}
             <h3><em>Non ci sono eventi.</em></h3>
         {% endif %}
