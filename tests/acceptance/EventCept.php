@@ -261,24 +261,40 @@ $I->seeInSource('Errore');
 $I->amOnPage('/events/edit/1');
 
 $I->submitForm('form', array(
-    'titolo' => 'Titolo evento modificato',
-    'descrizione' => 'Descrizione evento modificato.',
-    'istanteInizio' => $initDateTime->format('Y-m-d H:i:s'),
-    'istanteFine' => $finishDateTime->format('Y-m-d H:i:s'),
+    'titolo'         => 'Titolo evento modificato',
+    'descrizione'    => 'Descrizione evento modificato.',
+    'giornoInizio'   => $initDateTime->format('d'),
+    'meseInizio'     => $initDateTime->format('m'),
+    'annoInizio'     => $initDateTime->format('Y'),
+    'oraInizio'      => $initDateTime->format('H'),
+    'minutoInizio'   => $initDateTime->format('i'),
+    'giornoFine'     => $finishDateTime->format('d'),
+    'meseFine'       => $finishDateTime->format('m'),
+    'annoFine'       => $finishDateTime->format('Y'),
+    'oraFine'        => $finishDateTime->format('H'),
+    'minutoFine'     => $finishDateTime->format('i'),
     'associazioni[]' => '1',
-    'revisionato' => 'off',
+    'revisionato'    => 'off',
 ));
 
 $I->amOnPage('/events/edit/1');
 $I->dontSeeInSource('Approvato');
 
 $I->submitForm('form', array(
-    'titolo' => 'Titolo evento modificato',
-    'descrizione' => 'Descrizione evento modificato.',
-    'istanteInizio' => $initDateTime->format('Y-m-d H:i:s'),
-    'istanteFine' => $finishDateTime->format('Y-m-d H:i:s'),
+    'titolo'         => 'Titolo evento modificato',
+    'descrizione'    => 'Descrizione evento modificato.',
+    'giornoInizio'   => $finishDateTime->format('d'),
+    'meseInizio'     => $finishDateTime->format('m'),
+    'annoInizio'     => $finishDateTime->format('Y'),
+    'oraInizio'      => $finishDateTime->format('H'),
+    'minutoInizio'   => $finishDateTime->format('i'),
+    'giornoFine'     => $initDateTime->format('d'),
+    'meseFine'       => $initDateTime->format('m'),
+    'annoFine'       => $initDateTime->format('Y'),
+    'oraFine'        => $initDateTime->format('H'),
+    'minutoFine'     => $initDateTime->format('i'),
     'associazioni[]' => '1',
-    'revisionato' => 'on',
+    'revisionato'    => 'on',
 ));
 
 $I->seeInSource('Errore');
