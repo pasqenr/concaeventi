@@ -510,14 +510,24 @@ class EventModel extends Model
 
     /**
      * Return the events, with merged associations, that contains $query in event title
-     * or in the event description (or both).
+     * or in the event description (or both). It supports the filters in $data.
      *
-     * @param $query string The text to search.
+     * @param $data array The search data and filters to perform the query.
      * @return array The events with $query in title or description.
+     * @throws \PDOException
      */
-    public function getEventsThatContains($query): array
+    public function getEventsThatContains($data): array
     {
+        $query = $data['search_query'];
+        $state = $data['stato'];
         $query = "%$query%";
+
+        $optionalDataState = '1';
+        if ($state === 'disponibile') {
+            $optionalDataState = 'DATEDIFF(E.istanteInizio, E.istanteFine) > 0';
+        } else if ($state === 'concluso') {
+            $optionalDataState = 'DATEDIFF(E.istanteFine, CURRENT_TIMESTAMP) <= 0';
+        }
 
         $sth = $this->db->prepare('
             SELECT U.idUtente, A.idAssociazione, E.idEvento, E.titolo, E.immagine, E.descrizione, E.istanteCreazione,
@@ -537,6 +547,7 @@ class EventModel extends Model
             AND (E.titolo LIKE ?
               OR E.descrizione LIKE ?
             )
+            AND '.$optionalDataState.'
             ORDER BY E.istanteInizio DESC
         ');
 
@@ -555,7 +566,6 @@ class EventModel extends Model
         }
 
         $events = $this->mergeAssociations($events);
-
 
         return $events;
     }

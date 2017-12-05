@@ -5,10 +5,49 @@
 
 {% block content %}
     <div class="column">&nbsp;</div>
+    <!--<div class="columns">
+        <div class="column"></div>
+        <div class="column is-three-quarters">
+            <div class="dropdown is-active">
+                <div class="dropdown-trigger">
+                    <button class="button" aria-haspopup="true" aria-controls="dropdown-menu">
+                        <span>Stato</span>
+                        <span class="icon is-small">
+                            <i class="fa fa-angle-down" aria-hidden="true"></i>
+                        </span>
+                    </button>
+                </div>
+                <div class="dropdown-menu" id="dropdown-menu" role="menu">
+                    <div class="dropdown-content">
+                        <a href="#" class="dropdown-item is-active">
+                            Disponibile
+                        </a>
+                        <a href="#" class="dropdown-item">
+                            Concluso
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="column"></div>
+    </div>-->
+
     <div class="columns">
         <div class="column"></div>
         <div class="column is-half">
             <form action="{{ path_for('history')|e('html_attr') }}" method="post">
+                <div class="field">
+                    <div class="select">
+                        <label>
+                            <select name="stato">
+                                <option value="default">Stato</option>
+                                <option value="disponibile">Disponibile</option>
+                                <option value="concluso">Concluso</option>
+                            </select>
+                        </label>
+                    </div>
+                </div>
+
                 <div class="field has-addons">
                     <div class="control is-expanded">
                         <input class="input" type="text" name="search_query" placeholder="Trova un evento">

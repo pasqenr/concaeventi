@@ -20,6 +20,7 @@ class FrontController extends Controller
     /**
      * FrontController constructor.
      * @param \Slim\Container $container
+     * @throws \InvalidArgumentException
      */
     public function __construct($container)
     {
@@ -89,10 +90,19 @@ class FrontController extends Controller
     public function doSearchHistory(/** @noinspection PhpUnusedParameterInspection */
         Request $request, Response $response, $args)
     {
-        $parsedBody = $request->getParsedBody();
-        $searchQuery = $parsedBody['search_query'];
+        $data = $request->getParsedBody();
 
-        $events = $this->getEventsThatContains($searchQuery);
+        $validData = $this->checkSearchData($data);
+
+        if ($validData === false) {
+            /** @noinspection PhpVoidFunctionResultUsedInspection */
+            return $this->render($response, 'errors/error.twig', [
+                'utente' => $this->user,
+                'err' => $this->errorHelper->getErrorMessage()
+            ]);
+        }
+
+        $events = $this->getEventsThatContains($data);
         $eventsNumber = \count($events);
 
         /** @noinspection PhpVoidFunctionResultUsedInspection */
@@ -147,7 +157,8 @@ class FrontController extends Controller
     }
 
     /**
-     * Get all the events that are available before the current timestamp and order them by timestamp.
+     * Get all the events that are available before the current timestamp and
+     * order them by timestamp.
      *
      * @return array The events.
      * @throws \PDOException
@@ -204,7 +215,7 @@ class FrontController extends Controller
         $associationNames = explode(', ', $event['nomeAssociazione']);
         $associationLogos = explode(', ', $event['logo']);
         $associations = [];
-        $assCount = count($associationNames);
+        $assCount = \count($associationNames);
 
         /** @noinspection ForeachInvariantsInspection */
         for ($i = 0; $i < $assCount; $i++) {
@@ -215,8 +226,53 @@ class FrontController extends Controller
         return $associations;
     }
 
-    private function getEventsThatContains($query)
+    /**
+     * Return the events, with merged associations, that contains $query in event title
+     * or in the event description (or both). It supports the filters in $data.
+     *
+     * @param $data array The search data and filters to perform the query.
+     * @return array The events with $query in title or description.
+     * @throws \PDOException
+     */
+    private function getEventsThatContains($data): array
     {
-        return $this->eventModel->getEventsThatContains($query);
+        return $this->eventModel->getEventsThatContains($data);
+    }
+
+    /**
+     * Check if $data contains valid data for the search action.
+     *
+     * @param $data array The data submitted by the user.
+     * @return bool TRUE if the search data are valid, FALSE otherwise.
+     */
+    private function checkSearchData(&$data): bool
+    {
+        $data['stato'] = $this->validateState($data['stato']);
+
+        return true;
+    }
+
+    /**
+     * Check if $state is a string of them:
+     * - disponibile
+     * - concluso
+     * - default
+     * If so return the string. If not return the string "default".
+     *
+     * @param $state string The state of an event.
+     * @return string The right string value of the state. If it's not a valid
+     *     state it's returned "default".
+     */
+    private function validateState($state): string
+    {
+        switch (strtolower(trim($state))) {
+            case 'disponibile':
+                return 'disponibile';
+            case 'concluso':
+                return 'concluso';
+
+            default:
+                return 'default';
+        }
     }
 }
