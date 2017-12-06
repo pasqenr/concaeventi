@@ -20,6 +20,7 @@ class LoginController extends Controller
     /**
      * LoginController constructor.
      * @param \Slim\Container $container
+     * @throws \InvalidArgumentException
      */
     public function __construct($container)
     {
@@ -74,6 +75,9 @@ class LoginController extends Controller
         $user = $this->getUserByEmail($email);
 
         if (!$user) {
+            $this->errorHelper->setErrorMessage('User doesn\'t exists.',
+                'Utente non esistente.');
+
             /** @noinspection PhpVoidFunctionResultUsedInspection */
             return $this->render($response, 'errors/error.twig', [
                 'utente' => $this->user,
@@ -84,9 +88,8 @@ class LoginController extends Controller
         $passwordMatch = password_verify($password, $user['password']);
 
         if (!$passwordMatch) {
-            /*return $response->withRedirect($this->router->pathFor('error'));*/
             $this->errorHelper->setErrorMessage('Password don\'t match.',
-                'Email o password errati.');
+                'Password errata.');
 
             /** @noinspection PhpVoidFunctionResultUsedInspection */
             return $this->render($response, 'errors/error.twig', [
