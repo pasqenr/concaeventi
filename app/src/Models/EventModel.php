@@ -90,7 +90,7 @@ class EventModel extends Model
             USING (idUtente)
             LEFT JOIN Associazione A2
             ON (E.idAssPrimaria = A2.idAssociazione)
-            WHERE DATEDIFF(E.istanteFine, CURRENT_TIMESTAMP) > 0
+            WHERE DATEDIFF(E.istanteFine, CURRENT_TIMESTAMP) >= 0
               AND E.revisionato = TRUE
             ORDER BY E.istanteInizio
         ');
