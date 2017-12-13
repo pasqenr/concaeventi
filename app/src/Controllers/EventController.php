@@ -541,13 +541,12 @@ class EventController extends Controller
         $id = (int)$eventID;
         $page = $update['pagina'];
         $imageFilename = '';
+        $image = $files['locandina'];
 
         /**
          * @var $image \Slim\Http\UploadedFile
          */
-        if (!empty($files)) {
-            $image = $files['locandina'];
-
+        if ($image->getClientFilename() !== '') {
             if ($image->getError() === UPLOAD_ERR_OK) {
                 $imageFilename = $image->getClientFilename();
             }
