@@ -27,9 +27,11 @@
                     {% if evento.pagina != '' %}
                         <div class="is-small">&nbsp;</div>
                         <div class="container">
-                            <p>
-                                {{ evento.pagina|replace({'\n': '<br>'})|raw }}
-                            </p>
+                            <div class="content">
+                                <p>
+                                    {{ evento.pagina|replace({'\n': '<br>'})|raw }}
+                                </p>
+                            </div>
                         </div>
                     {% endif %}
 
@@ -39,7 +41,8 @@
                         <div class="container">
                             <figure class="image">
                                 <!-- TODO: Better CSS in stylesheet -->
-                                <img src="/assets/img/events/{{ evento.immagine|e('html_attr') }}" style="max-width: 70%;">
+                                <img src="/assets/img/events/{{ evento.immagine|e('html_attr') }}"
+                                     style="max-width: 70%;">
                             </figure>
                         </div>
                     {% endif %}
