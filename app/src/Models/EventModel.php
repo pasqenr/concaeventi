@@ -338,6 +338,7 @@ class EventModel extends Model
         $istanteInizio = $update['istanteInizio'];
         $istanteFine = $update['istanteFine'];
         $revisionato = $update['revisionato'];
+        $idAssPrimaria = $update['assPrimaria'];
 
         if ($revisionato === 'on') {
             $revisionato = 1;
@@ -351,7 +352,7 @@ class EventModel extends Model
             UPDATE Evento E 
             SET E.titolo = :titolo, E.descrizione = :descrizione, 
                 E.istanteCreazione = :istanteCreazione, E.istanteInizio = :istanteInizio, E.istanteFine = :istanteFine,
-                E.revisionato = :revisionato
+                E.revisionato = :revisionato, E.idAssPrimaria = :idAssPrimaria
             WHERE E.idEvento = :idEvento
         ');
         $sth->bindParam(':idEvento', $eventID, \PDO::PARAM_INT);
@@ -361,6 +362,7 @@ class EventModel extends Model
         $sth->bindParam(':istanteInizio', $istanteInizio, \PDO::PARAM_STR);
         $sth->bindParam(':istanteFine', $istanteFine, \PDO::PARAM_STR);
         $sth->bindParam(':revisionato', $revisionato, \PDO::PARAM_INT);
+        $sth->bindParam(':idAssPrimaria', $idAssPrimaria, \PDO::PARAM_INT);
 
         try {
             $sth->execute();
