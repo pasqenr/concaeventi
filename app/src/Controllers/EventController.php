@@ -18,7 +18,7 @@ use Slim\Router;
  */
 class EventController extends Controller
 {
-    private $IMAGE_PATH = WWW_PATH.'/img/events/';
+    private $IMAGE_PATH = WWW_PATH.'/assets/img/events/';
     private $eventModel;
     private $associationModel;
     private $errorHelper;
@@ -570,16 +570,19 @@ class EventController extends Controller
             return false;
         }
 
-        /**
-         * TODO: Make folder writable
-         */
         if ($imageFilename !== '') {
             try {
                 $image->moveTo($this->IMAGE_PATH.$imageFilename);
             } catch (InvalidArgumentException $e) {
-
+                $this->errorHelper->setErrorMessage(
+                    'Invalid argument in moveTo() - ' . $e->getMessage(),
+                    'Errore nel caricamento dell\'immagine');
+                return false;
             } catch (\Exception $e) {
-
+                $this->errorHelper->setErrorMessage(
+                    'Error writing the file - ' . $e->getMessage(),
+                    'Errore nel caricamento dell\'immagine');
+                return false;
             }
         }
 

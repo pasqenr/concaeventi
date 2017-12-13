@@ -41,8 +41,9 @@
                         <div class="container">
                             <figure class="image">
                                 <!-- TODO: Better CSS in stylesheet -->
-                                <img src="/assets/img/events/{{ evento.immagine|e('html_attr') }}"
-                                     style="max-width: 70%;">
+                                <img src="{{ baseUrl }}/assets/img/events/{{ evento.immagine|e('html_attr') }}"
+                                     style="max-width: 70%;"
+                                    alt="Immagine evento">
                             </figure>
                         </div>
                     {% endif %}

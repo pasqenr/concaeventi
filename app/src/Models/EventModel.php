@@ -456,15 +456,23 @@ class EventModel extends Model
      */
     public function updatePage($eventID, $data): bool
     {
-        $sth = $this->db->prepare('
+        $imageField = '';
+
+        if ($data['immagine'] !== '') {
+            $imageField = ', E.immagine = :immagine';
+        }
+
+        $sth = $this->db->prepare("
             UPDATE Evento E
-            SET E.pagina = :pagina,
-              E.immagine = :immagine
+            SET E.pagina = :pagina
+              $imageField
             WHERE E.idEvento = :eventID
-        ');
+        ");
         $sth->bindParam(':pagina', $data['pagina'], \PDO::PARAM_STR);
         $sth->bindParam(':eventID', $eventID, \PDO::PARAM_INT);
-        $sth->bindParam(':immagine', $data['immagine'], \PDO::PARAM_STR);
+        if ($data['immagine'] !== '') {
+            $sth->bindParam(':immagine', $data['immagine'], \PDO::PARAM_STR);
+        }
 
         try {
             $sth->execute();
