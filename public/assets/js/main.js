@@ -21,3 +21,11 @@ if (inputPoster !== null) {
         filenamePoster.textContent = inputPoster.value;
     });
 }
+
+/* Remove free web hosting div */
+var divCount = document.getElementsByTagName('div').length - 1;
+var hostingSpamDiv = document.getElementsByTagName('div')[divCount];
+
+if (hostingSpamDiv.innerHTML.indexOf('000') !== -1) {
+    hostingSpamDiv.remove();
+}
