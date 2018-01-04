@@ -334,7 +334,6 @@ class EventModel extends Model
         $eventID = $update['id'];
         $titolo = $update['titolo'];
         $descrizione = $update['descrizione'];
-        $istanteCreazione = $update['istanteCreazione'];
         $istanteInizio = $update['istanteInizio'];
         $istanteFine = $update['istanteFine'];
         $revisionato = $update['revisionato'];
@@ -351,14 +350,13 @@ class EventModel extends Model
         $sth = $this->db->prepare('
             UPDATE Evento E 
             SET E.titolo = :titolo, E.descrizione = :descrizione, 
-                E.istanteCreazione = :istanteCreazione, E.istanteInizio = :istanteInizio, E.istanteFine = :istanteFine,
+                E.istanteInizio = :istanteInizio, E.istanteFine = :istanteFine,
                 E.revisionato = :revisionato, E.idAssPrimaria = :idAssPrimaria
             WHERE E.idEvento = :idEvento
         ');
         $sth->bindParam(':idEvento', $eventID, \PDO::PARAM_INT);
         $sth->bindParam(':titolo', $titolo, \PDO::PARAM_STR);
         $sth->bindParam(':descrizione', $descrizione, \PDO::PARAM_STR);
-        $sth->bindParam(':istanteCreazione', $istanteCreazione, \PDO::PARAM_STR);
         $sth->bindParam(':istanteInizio', $istanteInizio, \PDO::PARAM_STR);
         $sth->bindParam(':istanteFine', $istanteFine, \PDO::PARAM_STR);
         $sth->bindParam(':revisionato', $revisionato, \PDO::PARAM_INT);
