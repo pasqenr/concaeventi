@@ -31,7 +31,11 @@
                         <div class="media-content">
                             <div class="content">
                                 <p>
-                                    <strong>{{ evento.titolo }}</strong> -
+                                    <strong>
+                                        <a href="{{ path_for('page', {'id': evento.idEvento })|e('html_attr') }}">
+                                            {{ evento.titolo }}
+                                        </a>
+                                    </strong> -
                                     Inizio: <small>{{ evento.istanteInizio|date('d/m/Y H:i') }}</small> -
                                     Fine: <small>{{ evento.istanteFine|date('d/m/Y H:i') }}</small>
                                     <br>
