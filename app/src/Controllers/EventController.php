@@ -696,6 +696,10 @@ class EventController extends Controller
     {
         $d = \DateTimeImmutable::createFromFormat($format, $date);
 
+        if (\preg_match('/^0{4}-0{2}-0{2} \d{2}:\d{2}:\d{2}\z/', $d)) {
+            return false;
+        }
+
         return $d && $d->format($format) === $date;
     }
 
@@ -788,7 +792,7 @@ class EventController extends Controller
         return false;
     }
 
-    private function validSubmittedAssociations(&$associations, $idAssPrimaria)
+    private function validSubmittedAssociations(&$associations, $idAssPrimaria): bool
     {
         $userAssociations = $this->associationModel->getUserAssociations($this->user['idUtente']);
 

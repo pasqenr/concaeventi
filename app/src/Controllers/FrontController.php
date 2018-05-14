@@ -41,11 +41,13 @@ class FrontController extends Controller
         Request $request, Response $response, $args)
     {
         $events = $this->getReviewedEvents();
+        $editableEvents = $this->getEditableEvents();
 
         /** @noinspection PhpVoidFunctionResultUsedInspection */
         return $this->render($response, 'front/home.twig', [
             'utente' => $this->user,
-            'eventi' => $events
+            'eventi' => $events,
+            'eventi_modificabili' => $editableEvents
         ]);
     }
 
@@ -274,5 +276,15 @@ class FrontController extends Controller
             default:
                 return 'default';
         }
+    }
+
+    private function getEditableEvents(): array
+    {
+        if (!$this->session->isLogged()) {
+            return [];
+        }
+
+        $userID = $this->user['idUtente'];
+        return $this->eventModel->getEvents($userID);
     }
 }

@@ -22,6 +22,11 @@ class Model
         $this->errorHelper = $errorHelper;
     }
 
+    /**
+     * @param $name
+     * @return mixed
+     * @throws \RuntimeException
+     */
     public function __get($name)
     {
         if (property_exists($this, $name)) {

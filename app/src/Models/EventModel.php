@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use App\Exceptions\AuthException;
 use \App\Helpers\ErrorHelper;
+use App\Helpers\SessionHelper;
 
 /**
  * Class EventModel
@@ -14,6 +16,8 @@ class EventModel extends Model
 {
     private $PAGINATION_NUMBER = 10;
 
+    private $controller;
+
     /**
      * Get all the events that are available before the current timestamp and order them by timestamp.
      *
@@ -24,19 +28,22 @@ class EventModel extends Model
     public function getEvents($userID): array
     {
         $sth = $this->db->prepare('
-            SELECT U.idUtente, A.idAssociazione, E.idEvento, E.titolo, E.immagine, E.descrizione, E.istanteCreazione,
-                   E.istanteInizio, E.istanteFine, E.pagina, E.revisionato, A2.nomeAssociazione AS nomeAssPrimaria,
-                   A.nomeAssociazione, A.logo, U.nome AS nomeUtente, U.cognome AS cognomeUtente, U.email, U.ruolo,
-                   A2.logo AS logoPrimario
+            SELECT U.idUtente, A.idAssociazione, E.idEvento, E.titolo, E.immagine, E.descrizione, 
+              E.istanteCreazione, E.istanteInizio, E.istanteFine, E.pagina, E.revisionato, 
+              A2.nomeAssociazione AS nomeAssPrimaria, 
+              GROUP_CONCAT(A.nomeAssociazione SEPARATOR \', \') AS nomeAssociazione, 
+              GROUP_CONCAT(A.logo SEPARATOR \', \') AS logo, 
+              U.nome AS nomeUtente, U.cognome AS cognomeUtente, U.email, U.ruolo, 
+              A2.logo AS logoPrimario
             FROM Evento E
-            LEFT JOIN Proporre P
-            USING (idEvento)
-            LEFT JOIN Associazione A
-            USING (idAssociazione)
-            LEFT JOIN Utente U
-            USING (idUtente)
-            LEFT JOIN Associazione A2
-            ON (E.idAssPrimaria = A2.idAssociazione)
+              LEFT JOIN Proporre P
+              USING (idEvento)
+              LEFT JOIN Associazione A
+              USING (idAssociazione)
+              LEFT JOIN Utente U
+              USING (idUtente)
+              LEFT JOIN Associazione A2
+                ON (E.idAssPrimaria = A2.idAssociazione)
             WHERE E.idEvento = ANY (
               SELECT Pi.idEvento
               FROM Proporre Pi
@@ -46,6 +53,7 @@ class EventModel extends Model
                 WHERE APi.idUtente = :idUtente
               )
             )
+            GROUP BY E.idEvento
             ORDER BY E.istanteCreazione DESC
             LIMIT 50
         ');
@@ -62,8 +70,6 @@ class EventModel extends Model
             throw $e;
         }
 
-        $events = $this->mergeAssociations($events);
-
         return $events;
     }
 
@@ -77,10 +83,13 @@ class EventModel extends Model
     public function getReviewedEvents(): array
     {
         $sth = $this->db->query('
-            SELECT U.idUtente, A.idAssociazione, E.idEvento, E.titolo, E.immagine, E.descrizione, E.istanteCreazione,
-                   E.istanteInizio, E.istanteFine, E.pagina, E.revisionato, A2.nomeAssociazione AS nomeAssPrimaria,
-                   A.nomeAssociazione, A.logo, U.nome AS nomeUtente, U.cognome AS cognomeUtente, U.email, U.ruolo,
-                   A2.logo AS logoPrimario
+            SELECT U.idUtente, A.idAssociazione, E.idEvento, E.titolo, E.immagine, E.descrizione, 
+              E.istanteCreazione, E.istanteInizio, E.istanteFine, E.pagina, E.revisionato, 
+              A2.nomeAssociazione AS nomeAssPrimaria, 
+              GROUP_CONCAT(A.nomeAssociazione SEPARATOR \', \') AS nomeAssociazione,
+              GROUP_CONCAT(A.logo SEPARATOR \', \') AS logo, 
+              U.nome AS nomeUtente, U.cognome AS cognomeUtente, U.email, U.ruolo, 
+              A2.logo AS logoPrimario
             FROM Evento E
             LEFT JOIN Proporre P
             USING (idEvento)
@@ -92,6 +101,7 @@ class EventModel extends Model
             ON (E.idAssPrimaria = A2.idAssociazione)
             WHERE DATEDIFF(E.istanteFine, CURRENT_TIMESTAMP) >= 0
               AND E.revisionato = TRUE
+            GROUP BY E.idEvento
             ORDER BY E.istanteInizio
         ');
         try {
@@ -103,8 +113,6 @@ class EventModel extends Model
 
             throw $e;
         }
-
-        $events = $this->mergeAssociations($events);
 
         return $events;
     }
@@ -118,10 +126,13 @@ class EventModel extends Model
     public function getEventsHistory(): array
     {
         $sth = $this->db->query('
-            SELECT U.idUtente, A.idAssociazione, E.idEvento, E.titolo, E.immagine, E.descrizione, E.istanteCreazione,
-                   E.istanteInizio, E.istanteFine, E.pagina, E.revisionato, A2.nomeAssociazione AS nomeAssPrimaria,
-                   A.nomeAssociazione, A.logo, U.nome AS nomeUtente, U.cognome AS cognomeUtente, U.email, U.ruolo,
-                   A2.logo AS logoPrimario
+            SELECT U.idUtente, A.idAssociazione, E.idEvento, E.titolo, E.immagine, E.descrizione, 
+                E.istanteCreazione, E.istanteInizio, E.istanteFine, E.pagina, E.revisionato, 
+                A2.nomeAssociazione AS nomeAssPrimaria, 
+                GROUP_CONCAT(A.nomeAssociazione SEPARATOR \', \') AS nomeAssociazione,
+                GROUP_CONCAT(A.logo SEPARATOR \', \') AS logo, 
+                U.nome AS nomeUtente, U.cognome AS cognomeUtente, U.email, U.ruolo, 
+                A2.logo AS logoPrimario
             FROM Evento E
             LEFT JOIN Proporre P
             USING (idEvento)
@@ -132,6 +143,7 @@ class EventModel extends Model
             LEFT JOIN Associazione A2
             ON (E.idAssPrimaria = A2.idAssociazione)
             WHERE E.revisionato = TRUE
+            GROUP BY E.idEvento
             ORDER BY E.istanteInizio DESC
         ');
         try {
@@ -143,9 +155,6 @@ class EventModel extends Model
 
             throw $e;
         }
-
-        $events = $this->mergeAssociations($events);
-
 
         return $events;
     }
@@ -179,10 +188,14 @@ class EventModel extends Model
         $id = (int)$eventID;
 
         $sth = $this->db->prepare('
-            SELECT U.idUtente, A.idAssociazione, E.idEvento, E.titolo, E.immagine, E.descrizione, E.istanteCreazione,
-                   E.istanteInizio, E.istanteFine, E.pagina, E.revisionato, A2.nomeAssociazione AS nomeAssPrimaria, 
-                   A2.idAssociazione AS idAssPrimaria, A2.stile, A2.telefono, A.nomeAssociazione, A.logo, 
-                   U.nome AS nomeUtente, U.cognome AS cognomeUtente, U.email, U.ruolo, A2.logo AS logoPrimario
+            SELECT U.idUtente, A.idAssociazione, E.idEvento, E.titolo, E.immagine, E.descrizione, 
+              E.istanteCreazione, E.istanteInizio, E.istanteFine, E.pagina, E.revisionato, 
+              A2.nomeAssociazione AS nomeAssPrimaria, A2.idAssociazione AS idAssPrimaria, 
+              A2.stile, A2.telefono, 
+              GROUP_CONCAT(A.nomeAssociazione SEPARATOR \', \') AS nomeAssociazione, 
+              GROUP_CONCAT(A.logo SEPARATOR \', \') AS logo, 
+              U.nome AS nomeUtente, U.cognome AS cognomeUtente, U.email, U.ruolo, 
+              A2.logo AS logoPrimario
             FROM Evento E
             LEFT JOIN Proporre P
             USING (idEvento)
@@ -193,6 +206,7 @@ class EventModel extends Model
             LEFT JOIN Associazione A2
             ON (E.idAssPrimaria = A2.idAssociazione)
             WHERE E.idEvento = :eventID
+            GROUP BY E.idEvento
         ');
         $sth->bindParam(':eventID', $id, \PDO::PARAM_INT);
 
@@ -207,8 +221,6 @@ class EventModel extends Model
         if (empty($events)) {
             return [];
         }
-
-        $events = $this->mergeAssociations($events);
 
         return $events[0];
     }
@@ -244,6 +256,7 @@ class EventModel extends Model
      * @param int $userID The unique user identifier that created the event.
      * @param array $data The event fields.
      * @return bool TRUE if the events was created, FALSE if not. Errors are set internally.
+     * @throws \PDOException
      */
     public function createEvent($userID, $data): bool
     {
@@ -328,6 +341,7 @@ class EventModel extends Model
      *
      * @param array $update The array with the changed fields.
      * @return bool TRUE if the event was updated, FALSE otherwise.
+     * @throws \PDOException
      */
     public function updateEvent($update): bool
     {
@@ -470,6 +484,7 @@ class EventModel extends Model
         ");
         $sth->bindParam(':pagina', $data['pagina'], \PDO::PARAM_STR);
         $sth->bindParam(':eventID', $eventID, \PDO::PARAM_INT);
+
         if ($data['immagine'] !== '') {
             $sth->bindParam(':immagine', $data['immagine'], \PDO::PARAM_STR);
         }
@@ -538,10 +553,12 @@ class EventModel extends Model
         }
 
         $sth = $this->db->prepare('
-            SELECT U.idUtente, A.idAssociazione, E.idEvento, E.titolo, E.immagine, E.descrizione, E.istanteCreazione,
-                   E.istanteInizio, E.istanteFine, E.pagina, E.revisionato, A2.nomeAssociazione AS nomeAssPrimaria,
-                   A.nomeAssociazione, A.logo, U.nome AS nomeUtente, U.cognome AS cognomeUtente, U.email, U.ruolo,
-                   A2.logo AS logoPrimario
+            SELECT U.idUtente, A.idAssociazione, E.idEvento, E.titolo, E.immagine, E.descrizione, 
+              E.istanteCreazione, E.istanteInizio, E.istanteFine, E.pagina, E.revisionato, 
+              A2.nomeAssociazione AS nomeAssPrimaria, 
+              GROUP_CONCAT(A.nomeAssociazione SEPARATOR \', \') AS nomeAssociazione, A.logo, 
+              U.nome AS nomeUtente, U.cognome AS cognomeUtente, U.email, U.ruolo, 
+              A2.logo AS logoPrimario
             FROM Evento E
             LEFT JOIN Proporre P
             USING (idEvento)
@@ -552,10 +569,11 @@ class EventModel extends Model
             LEFT JOIN Associazione A2
             ON (E.idAssPrimaria = A2.idAssociazione)
             WHERE E.revisionato = TRUE
-            AND (E.titolo LIKE ?
-              OR E.descrizione LIKE ?
-            )
-            AND '.$optionalDataState.'
+                AND (E.titolo LIKE ?
+                  OR E.descrizione LIKE ?
+                )
+                AND '.$optionalDataState.'
+            GROUP BY E.idEvento
             ORDER BY E.istanteInizio DESC
         ');
 
@@ -573,47 +591,7 @@ class EventModel extends Model
             throw $e;
         }
 
-        $events = $this->mergeAssociations($events);
-
         return $events;
-    }
-
-    /**
-     * Merge the Associtations on the rows with the same idEvento. The separator used is comma and space (', ').
-     * If there aren't events the function returns an empty array.
-     *
-     * @param $events array The events fetched from the database.
-     * @return array  The events merged with the Associtations in the same Event. If the array is empty the function
-     *                return an empty array.
-     */
-    private function mergeAssociations($events): array
-    {
-        if (empty($events)) {
-            return [];
-        }
-
-        $eventsWithAssociations = [];
-        $old = $events[0];
-        $eventsCount = \count($events);
-
-        /** @noinspection ForeachInvariantsInspection */
-        for ($i = 0, $j = 0; $i < $eventsCount; $i++, $j++) {
-            if ($old['idEvento'] === $events[$i]['idEvento'] &&
-                $old['nomeAssociazione'] !== $events[$i]['nomeAssociazione']) {
-                $events[$i]['nomeAssociazione'] .= ', ' . $old['nomeAssociazione'];
-                $events[$i]['logo'] .= ', ' . $old['logo'];
-
-                if ($j !== 0) {
-                    $j--;
-                }
-            }
-
-            $eventsWithAssociations[$j] = $events[$i];
-
-            $old = $events[$i];
-        }
-
-        return $eventsWithAssociations;
     }
 
     /**
@@ -735,11 +713,218 @@ class EventModel extends Model
         return $eventsWithFundings;
     }
 
-    private function paginateEvents(&$events, $pageNum)
+    private function paginateEvents(&$events, $pageNum): array
     {
+        if ($pageNum < 1) {
+            $pageNum = 1;
+        }
+
         $offset = ($pageNum - 1) * $this->PAGINATION_NUMBER;
         $length = $this->PAGINATION_NUMBER;
 
         return \array_slice($events, $offset, $length, true);
+    }
+
+    /**
+     * Check the parameters of create or edit event.
+     *
+     * @param $data
+     * @return bool TRUE if the tests pass, FALSE otherwise. Error message is also set.
+     * @throws \PDOException
+     */
+    private function checkEventData(&$data): bool
+    {
+        $titolo = $data['titolo'];
+        $descrizione = $data['descrizione'];
+        $associazioni = $data['associazioni'];
+        $idAssPrimaria = $data['assPrimaria'];
+        $approvato = $data['revisionato'] ?? null;
+
+        $this->adjustDateTimeFormat($data);
+        $istanteInizio = $data['istanteInizio'];
+        $istanteFine = $data['istanteFine'];
+
+        if ($titolo === '' || $descrizione === '' || $istanteInizio === '' || $istanteFine === '' ||
+            $associazioni === '' || $idAssPrimaria === '') {
+            $this->errorHelper->setErrorMessage('Empty field.',
+                'Un campo obbligatorio non è stato compilato.');
+
+            return false;
+        }
+
+        if (!$this->isValidDate($istanteInizio) || !$this->isValidDate($istanteFine)) {
+            $this->errorHelper->setErrorMessage('Wrong date match.',
+                'Formato data errato.');
+
+            return false;
+        }
+
+        $initDate = new \DateTimeImmutable($istanteInizio);
+        $finishDate = new \DateTimeImmutable($istanteFine);
+
+        if ($initDate > $finishDate) {
+            $this->errorHelper->setErrorMessage(
+                'Strarting date greater than finish date.',
+                'Orario d\'inizio viene dopo quello di fine.');
+
+            return false;
+        }
+
+        if (!$this->validSubmittedAssociations($associazioni, $idAssPrimaria)) {
+            $this->errorHelper->setErrorMessage(
+                'Not a valid association for the user.',
+                'L\'associazione non esiste o non è associata all\'utente.');
+
+            return false;
+        }
+
+        try {
+            $data['revisionato'] = $this->changeApproval($approvato);
+        } catch (AuthException $e) {
+            $this->errorHelper->setErrorMessage(
+                'Can\'t change approvation because of user authorization.',
+                'Non disponi dei permessi necessari per cambiare l\'approvazione dell\'evento.'
+            );
+
+            $data['revisionato'] = 'off';
+
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Change the approve of an event. If the user is not a PUBLISHER then a exception is throw.
+     *
+     * @param string $approved If the parameter is null or empty then the approve is set to 'off'.
+     *               Otherwise the parameter is returned unchanged.
+     * @return string 'off' if the parameter was null or an empty string, otherwise unchanged.
+     * @throws \App\Exceptions\AuthException If the user is not a PUBLISHER the exception is thrown.
+     */
+    private function changeApproval($approved): string
+    {
+        if ($approved === null || $approved === '') {
+            return 'off';
+        }
+
+        if ($this->session->auth(SessionHelper::PUBLISHER) === false) {
+            throw new AuthException('The user doesn\'t have the permission level to do the action.');
+        }
+
+        return $approved;
+    }
+
+    private function isValidDate($date, $format = 'Y-m-d H:i:s'): bool
+    {
+        $d = \DateTimeImmutable::createFromFormat($format, $date);
+
+        if (\preg_match('/^0{4}-0{2}-0{2} \d{2}:\d{2}:\d{2}\z/', $d)) {
+            return false;
+        }
+
+        return $d && $d->format($format) === $date;
+    }
+
+    /**
+     * Take a reference to $data parameters and modify it adding two new
+     * columns: istanteInizio and istanteFine. The new columns are created
+     * using the data and time parameters given by the user.
+     *
+     * @param $data array A reference to the input data
+     */
+    private function adjustDateTimeFormat(&$data): void
+    {
+        $data['istanteInizio'] = $this->joinDataTimeFormat(
+            $data['giornoInizio'],
+            $data['meseInizio'],
+            $data['annoInizio'],
+            $data['oraInizio'],
+            $data['minutoInizio']
+        );
+
+        $data['istanteFine'] = $this->joinDataTimeFormat(
+            $data['giornoFine'],
+            $data['meseFine'],
+            $data['annoFine'],
+            $data['oraFine'],
+            $data['minutoFine']
+        );
+    }
+
+    /** @noinspection MoreThanThreeArgumentsInspection
+     *
+     * Return a string representation of the date and time in the format
+     * "Y-m-d H:i:s".
+     *
+     * @param $day string The day.
+     * @param $month string The month.
+     * @param $year string The year.
+     * @param $hour string The hour.
+     * @param $minute string The minute.
+     * @return string A string in the format "Y-m-d H:i:s".
+     */
+    private function joinDataTimeFormat($day,
+                                        $month,
+                                        $year,
+                                        $hour,
+                                        $minute): string
+    {
+        return sprintf('%s-%02s-%02s %02s:%02s:00',
+            $year,
+            $month,
+            $day,
+            $hour,
+            $minute);
+    }
+
+    /**
+     * @param $idAssPrimaria string The primary association id sent by the
+     *     user.
+     * @param $userAssociations array The user associations.
+     * @return bool TRUE if $idAssPrimaria is one of the $userAssociations.
+     *     FALSE otherwise.
+     */
+    private function validPrimaryUserAssociation($idAssPrimaria, $userAssociations): bool
+    {
+        foreach ($userAssociations as &$ua) {
+            if ($ua['idAssociazione'] === $idAssPrimaria) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function validSubmittedAssociations(&$associations, $idAssPrimaria): bool
+    {
+        $userAssociations = $this->associationModel->getUserAssociations($this->user['idUtente']);
+
+        return $this->almostOneValidUserAssociation($associations, $userAssociations) &&
+            $this->validPrimaryUserAssociation($idAssPrimaria, $userAssociations);
+    }
+
+    /**
+     * @param $associations array The associations selected by the user.
+     * @param $userAssociations array The user associations.
+     * @return bool TRUE if the user has an association of the sent associations.
+     *     FALSE otherwise.
+     */
+    private function almostOneValidUserAssociation(&$associations, &$userAssociations): bool
+    {
+        foreach ($userAssociations as &$ua) {
+            foreach ($associations as &$a) {
+                if ($ua['idAssociazione'] === $a) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    public function addController($controller)
+    {
+        $this->controller = $controller;
     }
 }

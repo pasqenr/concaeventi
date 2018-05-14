@@ -39,23 +39,27 @@
                                                 al&nbsp;&nbsp;<small>{{ evento.istanteFine|date('d/m/Y H:i') }}</small>
                                             </div>
                                         </div>
-                                        <div class="level-right">
-                                            <div class="level-item">
-                                                <a href="{{ path_for('eventsEdit', {'id': evento.idEvento })|e('html_attr') }}">
-                                                    <i class="fa fa-edit"></i>
-                                                </a>
-                                            </div>
-                                            <div class="level-item">
-                                                <a href="{{ path_for('eventsPage', {'id': evento.idEvento })|e('html_attr') }}">
-                                                    <i class="fa fa-align-left"></i>
-                                                </a>
-                                            </div>
-                                            <div class="level-item">
-                                                <a href="{{ path_for('eventsDelete', {'id': evento.idEvento })|e('html_attr') }}">
-                                                    <i class="fa fa-trash is-danger"></i>
-                                                </a>
-                                            </div>
-                                        </div>
+                                        {% for event in eventi %}
+                                            {% if event in eventi_modificabili %}
+                                                <div class="level-right">
+                                                    <div class="level-item">
+                                                        <a href="{{ path_for('eventsEdit', {'id': evento.idEvento })|e('html_attr') }}">
+                                                            <i class="fa fa-edit"></i>
+                                                        </a>
+                                                    </div>
+                                                    <div class="level-item">
+                                                        <a href="{{ path_for('eventsPage', {'id': evento.idEvento })|e('html_attr') }}">
+                                                            <i class="fa fa-align-left"></i>
+                                                        </a>
+                                                    </div>
+                                                    <div class="level-item">
+                                                        <a href="{{ path_for('eventsDelete', {'id': evento.idEvento })|e('html_attr') }}">
+                                                            <i class="fa fa-trash is-danger"></i>
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            {% endif %}
+                                        {% endfor %}
                                     </div>
                                     {{ evento.descrizione }}
                                 </div>
